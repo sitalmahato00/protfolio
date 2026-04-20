@@ -159,7 +159,7 @@ const Hero = () => (
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent z-10" />
         <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
-          src="dist/profile.png"
+          src="public\image.png"
           alt="Sital Mahato"
           className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
           onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('bg-dark-800') }}
@@ -181,42 +181,42 @@ const projs = [
     title: "E-Commerce Platform",
     desc: "A fully functional e-commerce platform with a user-friendly interface and secure payment gateway integration.",
     tags: ["React", "Node.js", "MongoDB", "Express"],
-    img: "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&q=80&w=800",
+    img: "public/ecommerce.png",
     link: "#"
   },
   {
     title: "IT Department Management System",
     desc: "Comprehensive role-based system for IT operations. Manages attendance, examinations, and academic records.",
     tags: ["Laravel", "PHP", "Tailwind", "MySQL"],
-    img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
+    img: "public/dit.png",
     link: "https://github.com/sitalmahato00/IT-DMS"
   },
   {
     title: "Task Management App",
     desc: "A productivity tool allowing users to create, organize, and track tasks efficiently with real-time state updates.",
     tags: ["React", "Node.js", "MySQL"],
-    img: "https://images.unsplash.com/photo-1540350394557-8d14678e7f91?auto=format&fit=crop&q=80&w=800",
+    img: "public/task.png",
     link: "#"
   },
   {
     title: "Weather Dashboard",
     desc: "Real-time weather application fetching dynamic data from an external API, providing a 7-day extended forecast.",
     tags: ["JavaScript", "HTML/CSS", "API"],
-    img: "https://images.unsplash.com/photo-1592210454359-9043f067919b?auto=format&fit=crop&q=80&w=800",
+    img: "public/weather.png",
     link: "#"
   },
   {
     title: "DIT Result Web Application",
     desc: "Responsive result display system for DIT students. Deployed on GitHub Pages for zero-cost hosting.",
     tags: ["HTML", "JS", "CSS"],
-    img: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800",
+    img: "public/resultit.png",
     link: "https://sitalmahato00.github.io/DIT_result/"
   },
   {
     title: "MMP College Management System",
     desc: "Production-ready college management platform with multi-role access. Features Redis caching and rate limiting.",
     tags: ["Laravel", "Redis", "PHP"],
-    img: "https://images.unsplash.com/photo-15230503530c0-1c4d98ed0248?auto=format&fit=crop&q=80&w=800",
+    img: "public/mmp.png",
     link: "#"
   }
 ];
