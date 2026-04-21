@@ -151,7 +151,7 @@ const DynamicText = ({ words }) => {
 const Hero = () => (
   <section className="pt-40 pb-20 px-6 min-h-[90vh] flex items-center relative overflow-hidden z-10">
     <div className="max-w-6xl mx-auto w-full relative grid lg:grid-cols-2 gap-12 items-center">
-      <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="max-w-xl">
+      <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="max-w-3xl">
         <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 mb-8 backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <span className="text-primary text-xs font-semibold tracking-wider uppercase">Available for work</span>
