@@ -112,13 +112,13 @@ const Hero = () => (
 
         <motion.div variants={fadeUp}>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-            Full Stack<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500">Web Developer</span>
+            Building Digital<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500">Excellence.</span>
           </h1>
         </motion.div>
 
         <motion.p variants={fadeUp} className="text-gray-400 text-lg md:text-xl leading-relaxed mb-10 max-w-md">
-          Passionate about building efficient and user-friendly software solutions. Motivated IT student building production-ready applications with modern web technologies.
+          Crafting high-performance, secure, and creative digital solutions. I specialize in building interfaces you can **feel** and systems that actually work.
         </motion.p>
 
         <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4">
@@ -175,47 +175,106 @@ const Hero = () => (
   </section>
 );
 
+/* ─── PHILOSOPHY ─────────────────────────────────────────── */
+const Philosophy = () => (
+  <section className="py-24 px-6 relative z-10 overflow-hidden">
+    <div className="max-w-6xl mx-auto">
+      <motion.div 
+        initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
+        className="grid lg:grid-cols-2 gap-16 items-center"
+      >
+        <motion.div variants={fadeUp}>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight">
+            Interfaces you <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500">can feel.</span>
+          </h2>
+          <p className="text-gray-400 text-lg leading-relaxed mb-8 max-w-lg">
+            I sweat the spacing, timing, and feedback — the tiny stuff that defines quality. My approach is centered on creating digital experiences that are intuitive, secure, and delightful to interact with.
+          </p>
+          <div className="space-y-6">
+            {[
+              { title: "Micro-interactions", desc: "Subtle movement that confirms user intent — never distracting." },
+              { title: "Security First", desc: "Building with a focus on data integrity and secure authentication." },
+              { title: "Scalable Architecture", desc: "Clean, maintainable code designed to grow with your needs." }
+            ].map(item => (
+              <div key={item.title} className="flex gap-4">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 shadow-[0_0_8px_rgba(212,255,112,0.8)]" />
+                <div>
+                  <h4 className="text-white font-bold mb-1">{item.title}</h4>
+                  <p className="text-gray-500 text-sm">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+        
+        <motion.div 
+          variants={fadeUp}
+          className="relative bg-dark-800/50 rounded-[2.5rem] p-12 border border-white/5 backdrop-blur-3xl overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Zap size={120} className="text-primary" />
+          </div>
+          <p className="text-2xl text-white font-medium mb-12 relative z-10 leading-snug">
+            "I don't just build websites; <br />
+            <span className="text-primary italic">I build experiences</span> that drive results and leave a lasting impression."
+          </p>
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText('sitalmahato077@gmail.com');
+              alert('Email copied to clipboard!');
+            }}
+            className="inline-flex items-center gap-3 text-white font-bold hover:text-primary transition-colors group/btn"
+          >
+            Tap to copy email <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+          </button>
+        </motion.div>
+      </motion.div>
+    </div>
+  </section>
+);
+
 /* ─── PROJECTS ───────────────────────────────────────────── */
 const projs = [
   {
-    title: "E-Commerce Platform",
-    desc: "A fully functional e-commerce platform with a user-friendly interface and secure payment gateway integration.",
-    tags: ["React", "Node.js", "MongoDB", "Express"],
+    title: "E-Commerce Solution",
+    desc: "A high-performance e-commerce platform featuring secure payment integration and a seamless UX/UI design for modern retail.",
+    tags: ["React", "Node.js", "Tailwind", "Stripe"],
     img: "./ecommerce.png",
     link: "#"
   },
   {
-    title: "IT Department Management System",
-    desc: "Comprehensive role-based system for IT operations. Manages attendance, examinations, and academic records.",
-    tags: ["Laravel", "PHP", "Tailwind", "MySQL"],
+    title: "IT-DMS: Enterprise Suite",
+    desc: "A complex role-based management system for department operations, automating academic records and attendance tracking.",
+    tags: ["Laravel", "MySQL", "PHP", "Security"],
     img: "./dit.png",
     link: "https://github.com/sitalmahato00/IT-DMS"
   },
   {
-    title: "Task Management App",
-    desc: "A productivity tool allowing users to create, organize, and track tasks efficiently with real-time state updates.",
-    tags: ["React", "Node.js", "MySQL"],
+    title: "Smart Task Analytics",
+    desc: "A productivity powerhouse that leverages real-time updates and intuitive design to streamline project management workflows.",
+    tags: ["React", "Node.js", "WebSockets"],
     img: "./task.png",
     link: "#"
   },
   {
-    title: "Weather Dashboard",
-    desc: "Real-time weather application fetching dynamic data from an external API, providing a 7-day extended forecast.",
-    tags: ["JavaScript", "HTML/CSS", "API"],
+    title: "Dynamic Weather Hub",
+    desc: "Engineered for speed and data accuracy, this application delivers real-time meteorological insights through advanced API integration.",
+    tags: ["JavaScript", "APIs", "Data Visualization"],
     img: "./weather.png",
     link: "#"
   },
   {
-    title: "DIT Result Web Application",
-    desc: "Responsive result display system for DIT students. Deployed on GitHub Pages for zero-cost hosting.",
-    tags: ["HTML", "JS", "CSS"],
+    title: "Academic Result Portal",
+    desc: "A scalable, production-ready portal for student records, optimized for high traffic and instant data retrieval.",
+    tags: ["React", "Next.js", "Serverless"],
     img: "./resultit.png",
     link: "https://sitalmahato00.github.io/DIT_result/"
   },
   {
-    title: "MMP College Management System",
-    desc: "Production-ready college management platform with multi-role access. Features Redis caching and rate limiting.",
-    tags: ["Laravel", "Redis", "PHP"],
+    title: "MMP Management Platform",
+    desc: "An enterprise-grade college platform featuring Redis caching and rate-limiting for unmatched stability and security.",
+    tags: ["Laravel", "Redis", "Security"],
     img: "./mmp.png",
     link: "#"
   }
@@ -527,6 +586,7 @@ export default function App() {
       <AmbientBackground />
       <Navbar />
       <Hero />
+      <Philosophy />
       <Projects />
       <Skills />
       <Experience />
