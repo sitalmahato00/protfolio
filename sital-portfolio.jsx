@@ -172,10 +172,6 @@ const Hero = () => (
           <button onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} className="bg-primary hover:bg-[#bceb54] text-black px-8 py-4 rounded-full font-bold transition-transform hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(212,255,112,0.3)]">
             View Projects <ArrowRight size={18} />
           </button>
-          <a href="./Sital_Mahato_CV.pdf" target="_blank" className="border border-white/20 hover:border-white/40 hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold transition-all relative overflow-hidden group">
-            <span className="relative z-10">Download CV</span>
-            <div className="absolute inset-0 bg-white/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300" />
-          </a>
         </motion.div>
 
         <motion.div variants={fadeUp} className="mt-16 pt-8 border-t border-white/10 flex gap-10 md:gap-12">
