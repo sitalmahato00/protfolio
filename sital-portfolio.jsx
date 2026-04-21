@@ -125,7 +125,7 @@ const Hero = () => (
           <button onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} className="bg-primary hover:bg-[#bceb54] text-black px-8 py-4 rounded-full font-bold transition-transform hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(212,255,112,0.3)]">
             View Projects <ArrowRight size={18} />
           </button>
-          <a href="/assets/Sital_Mahato_CV.pdf" target="_blank" className="border border-white/20 hover:border-white/40 hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold transition-all relative overflow-hidden group">
+          <a href="./Sital_Mahato_CV.pdf" target="_blank" className="border border-white/20 hover:border-white/40 hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold transition-all relative overflow-hidden group">
             <span className="relative z-10">Download CV</span>
             <div className="absolute inset-0 bg-white/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300" />
           </a>
@@ -159,7 +159,7 @@ const Hero = () => (
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent z-10" />
         <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
-          src="public\image.png"
+          src="./image.png"
           alt="Sital Mahato"
           className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
           onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('bg-dark-800') }}
@@ -181,42 +181,42 @@ const projs = [
     title: "E-Commerce Platform",
     desc: "A fully functional e-commerce platform with a user-friendly interface and secure payment gateway integration.",
     tags: ["React", "Node.js", "MongoDB", "Express"],
-    img: "public/ecommerce.png",
+    img: "./ecommerce.png",
     link: "#"
   },
   {
     title: "IT Department Management System",
     desc: "Comprehensive role-based system for IT operations. Manages attendance, examinations, and academic records.",
     tags: ["Laravel", "PHP", "Tailwind", "MySQL"],
-    img: "public/dit.png",
+    img: "./dit.png",
     link: "https://github.com/sitalmahato00/IT-DMS"
   },
   {
     title: "Task Management App",
     desc: "A productivity tool allowing users to create, organize, and track tasks efficiently with real-time state updates.",
     tags: ["React", "Node.js", "MySQL"],
-    img: "public/task.png",
+    img: "./task.png",
     link: "#"
   },
   {
     title: "Weather Dashboard",
     desc: "Real-time weather application fetching dynamic data from an external API, providing a 7-day extended forecast.",
     tags: ["JavaScript", "HTML/CSS", "API"],
-    img: "public/weather.png",
+    img: "./weather.png",
     link: "#"
   },
   {
     title: "DIT Result Web Application",
     desc: "Responsive result display system for DIT students. Deployed on GitHub Pages for zero-cost hosting.",
     tags: ["HTML", "JS", "CSS"],
-    img: "public/resultit.png",
+    img: "./resultit.png",
     link: "https://sitalmahato00.github.io/DIT_result/"
   },
   {
     title: "MMP College Management System",
     desc: "Production-ready college management platform with multi-role access. Features Redis caching and rate limiting.",
     tags: ["Laravel", "Redis", "PHP"],
-    img: "public/mmp.png",
+    img: "./mmp.png",
     link: "#"
   }
 ];
@@ -400,7 +400,7 @@ const About = () => (
             <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden mb-8 border border-white/10 relative group">
               <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
-                src="/about.jpg"
+                src="./about.jpg"
                 alt="Sital Working"
                 className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-700"
                 onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('hidden') }}
