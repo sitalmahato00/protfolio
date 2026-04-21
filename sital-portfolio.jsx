@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, ExternalLink, Menu, X, ArrowRight, Code, Server, Database, Monitor, Globe, Shield, Terminal, Zap, Layout, Briefcase, ChevronRight } from 'lucide-react';
 
 const Github = ({ size = 24, ...props }) => (
@@ -100,6 +100,35 @@ const Navbar = () => {
   );
 };
 
+/* ─── DYNAMIC TEXT ───────────────────────────────────────── */
+const DynamicText = ({ words }) => {
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % words.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [words.length]);
+
+  return (
+    <div className="h-[1.2em] relative overflow-hidden inline-block align-bottom min-w-[200px]">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={words[index]}
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -40, opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="absolute left-0 text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500"
+        >
+          {words[index]}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+};
+
 /* ─── HERO ───────────────────────────────────────────────── */
 const Hero = () => (
   <section className="pt-40 pb-20 px-6 min-h-[90vh] flex items-center relative overflow-hidden z-10">
@@ -113,7 +142,7 @@ const Hero = () => (
         <motion.div variants={fadeUp}>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6">
             Building Digital<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500">Excellence.</span>
+            <DynamicText words={["Excellence.", "Experiences.", "Interfaces.", "Solutions."]} />
           </h1>
         </motion.div>
 
