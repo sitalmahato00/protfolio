@@ -103,28 +103,46 @@ const Navbar = () => {
 /* ─── DYNAMIC TEXT ───────────────────────────────────────── */
 const DynamicText = ({ words }) => {
   const [index, setIndex] = React.useState(0);
+  const [subIndex, setSubIndex] = React.useState(0);
+  const [reverse, setReverse] = React.useState(false);
+  const [blink, setBlink] = React.useState(true);
 
+  // Typewriter effect
   React.useEffect(() => {
-    const timer = setInterval(() => {
+    if (index >= words.length) return;
+
+    if (subIndex === words[index].length + 1 && !reverse) {
+      setTimeout(() => setReverse(true), 2000);
+      return;
+    }
+
+    if (subIndex === 0 && reverse) {
+      setReverse(false);
       setIndex((prev) => (prev + 1) % words.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [words.length]);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSubIndex((prev) => prev + (reverse ? -1 : 1));
+    }, Math.max(reverse ? 50 : 150, parseInt(Math.random() * 200)));
+
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse, words]);
+
+  // Cursor blink
+  React.useEffect(() => {
+    const timeout2 = setTimeout(() => {
+      setBlink((prev) => !prev);
+    }, 500);
+    return () => clearTimeout(timeout2);
+  }, [blink]);
 
   return (
-    <div className="h-[1.2em] relative overflow-hidden inline-block align-bottom min-w-[200px]">
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={words[index]}
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -40, opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="absolute left-0 text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500"
-        >
-          {words[index]}
-        </motion.span>
-      </AnimatePresence>
+    <div className="inline-block min-h-[1.2em]">
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500">
+        {words[index].substring(0, subIndex)}
+      </span>
+      <span className={`inline-block w-1 h-[0.8em] ml-1 bg-primary align-middle ${blink ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
     </div>
   );
 };
