@@ -1,13 +1,16 @@
 {
   "name": "portfolio",
   "version": "1.0.0",
+  "homepage": "https://sitalmahato00.github.io/protfolio/",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.3",
@@ -19,6 +22,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.5.0",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.2",
     "vite": "^5.0.0"
