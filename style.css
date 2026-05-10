@@ -1754,6 +1754,17 @@ body.light-mode .btn--ghost {
   gap: 1.5rem;
 }
 
+/* Cards always visible — CSS entrance animation, no AOS dependency */
+@keyframes svcFadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.svc-animate {
+  animation: svcFadeUp 0.55s ease both;
+  animation-delay: var(--d, 0ms);
+}
+
 .service-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
