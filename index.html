@@ -55,7 +55,6 @@
       <li><a href="#skills" class="nav__link" data-text="Skills">Skills</a></li>
       <li><a href="#projects" class="nav__link" data-text="Projects">Projects</a></li>
       <li><a href="#experience" class="nav__link" data-text="Journey">Journey</a></li>
-      <li><a href="#services" class="nav__link" data-text="Services">Services</a></li>
       <li><a href="#contact" class="nav__link" data-text="Contact">Contact</a></li>
     </ul>
 
@@ -84,8 +83,7 @@
       <li><a href="#skills" onclick="closeMobileMenu()"><span>03</span> Skills</a></li>
       <li><a href="#projects" onclick="closeMobileMenu()"><span>04</span> Projects</a></li>
       <li><a href="#experience" onclick="closeMobileMenu()"><span>05</span> Journey</a></li>
-      <li><a href="#services" onclick="closeMobileMenu()"><span>06</span> Services</a></li>
-      <li><a href="#contact" onclick="closeMobileMenu()"><span>07</span> Contact</a></li>
+      <li><a href="#contact" onclick="closeMobileMenu()"><span>06</span> Contact</a></li>
     </ul>
   </div>
 
@@ -578,64 +576,104 @@
   <section id="services" class="section services">
     <div class="container">
       <div class="section__header" data-aos="fade-up">
-        <span class="section__label">// 06. OFFERINGS</span>
+        <span class="section__label">// 06. WHAT I DO</span>
         <h2 class="section__title">My <span class="highlight">Services</span></h2>
         <div class="section__line"></div>
       </div>
 
       <div class="services__grid">
-        <div class="service-card" data-aos="fade-up" data-aos-delay="0">
+
+        <!-- Full Stack Web Development -->
+        <div class="service-card" data-aos="fade-up" data-aos-offset="0" data-aos-delay="0">
           <div class="service-card__glow"></div>
           <div class="service-card__icon"><i class="fas fa-laptop-code"></i></div>
-          <h3 class="service-card__title">Web Development</h3>
-          <p class="service-card__desc">Full-stack web applications with cutting-edge technology. Fast, secure, and scalable solutions tailored to your business.</p>
+          <h3 class="service-card__title">Full Stack Development</h3>
+          <p class="service-card__desc">End-to-end web applications built with React, Node.js, and Laravel. Secure, scalable, and production-ready systems that handle real traffic.</p>
           <ul class="service-card__list">
-            <li>Custom Web Apps</li>
-            <li>React / Next.js</li>
-            <li>Node.js Backends</li>
+            <li>React / Next.js Frontend</li>
+            <li>Node.js / Laravel Backend</li>
+            <li>REST API Development</li>
+            <li>Role-based Access Systems</li>
           </ul>
           <a href="#contact" class="service-card__cta">Get Quote →</a>
         </div>
 
-        <div class="service-card featured" data-aos="fade-up" data-aos-delay="100">
+        <!-- UI/UX Design -->
+        <div class="service-card featured" data-aos="fade-up" data-aos-offset="0" data-aos-delay="100">
           <div class="service-card__glow"></div>
           <div class="service-card__badge">Popular</div>
           <div class="service-card__icon"><i class="fas fa-paint-brush"></i></div>
           <h3 class="service-card__title">UI/UX Design</h3>
-          <p class="service-card__desc">Visually stunning interfaces that convert. User-centered design that blends aesthetics with functionality.</p>
+          <p class="service-card__desc">Responsive, intuitive, and visually appealing interfaces designed in Figma with a focus on premium modern aesthetics and smooth user flows.</p>
           <ul class="service-card__list">
-            <li>Figma Prototypes</li>
-            <li>Design Systems</li>
-            <li>Branding</li>
+            <li>Figma Prototypes & Wireframes</li>
+            <li>Responsive Web Design</li>
+            <li>Design Systems & Branding</li>
+            <li>Pixel-perfect Implementation</li>
           </ul>
           <a href="#contact" class="service-card__cta">Get Quote →</a>
         </div>
 
-        <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+        <!-- Laravel & PHP Systems -->
+        <div class="service-card" data-aos="fade-up" data-aos-offset="0" data-aos-delay="200">
           <div class="service-card__glow"></div>
-          <div class="service-card__icon"><i class="fas fa-mobile-alt"></i></div>
-          <h3 class="service-card__title">Mobile Apps</h3>
-          <p class="service-card__desc">Cross-platform mobile apps that feel native. Smooth animations, offline support, and intuitive UX.</p>
+          <div class="service-card__icon"><i class="fas fa-shield-alt"></i></div>
+          <h3 class="service-card__title">Laravel & PHP Systems</h3>
+          <p class="service-card__desc">Robust backend systems with Laravel featuring role-based management, Redis caching, rate-limiting, and enterprise-grade security.</p>
           <ul class="service-card__list">
-            <li>React Native</li>
-            <li>iOS & Android</li>
-            <li>PWA Development</li>
+            <li>Enterprise Management Platforms</li>
+            <li>MySQL / Redis Integration</li>
+            <li>Authentication & Security</li>
+            <li>Academic & ERP Systems</li>
           </ul>
           <a href="#contact" class="service-card__cta">Get Quote →</a>
         </div>
 
-        <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+        <!-- Database & API Integration -->
+        <div class="service-card" data-aos="fade-up" data-aos-offset="0" data-aos-delay="300">
           <div class="service-card__glow"></div>
-          <div class="service-card__icon"><i class="fas fa-search"></i></div>
-          <h3 class="service-card__title">SEO & Performance</h3>
-          <p class="service-card__desc">Optimize your site for speed, search rankings, and conversions. Technical SEO and Core Web Vitals mastery.</p>
+          <div class="service-card__icon"><i class="fas fa-database"></i></div>
+          <h3 class="service-card__title">Database & API Integration</h3>
+          <p class="service-card__desc">Optimized database design and third-party API integration for real-time data, payment gateways, and external services.</p>
           <ul class="service-card__list">
-            <li>Technical SEO</li>
-            <li>Page Speed</li>
-            <li>Analytics Setup</li>
+            <li>MySQL & MongoDB Design</li>
+            <li>Payment Gateway Integration</li>
+            <li>Real-time Data (WebSockets)</li>
+            <li>Third-party API Integration</li>
           </ul>
           <a href="#contact" class="service-card__cta">Get Quote →</a>
         </div>
+
+        <!-- Academic & Result Portals -->
+        <div class="service-card" data-aos="fade-up" data-aos-offset="0" data-aos-delay="400">
+          <div class="service-card__glow"></div>
+          <div class="service-card__icon"><i class="fas fa-graduation-cap"></i></div>
+          <h3 class="service-card__title">Academic Portals</h3>
+          <p class="service-card__desc">Scalable student record and result portals optimized for high traffic and instant data retrieval, built for institutions like MMP.</p>
+          <ul class="service-card__list">
+            <li>Student Result Systems</li>
+            <li>Attendance Tracking</li>
+            <li>Department Management</li>
+            <li>Serverless / Next.js Deploy</li>
+          </ul>
+          <a href="#contact" class="service-card__cta">Get Quote →</a>
+        </div>
+
+        <!-- Freelance Consultation -->
+        <div class="service-card" data-aos="fade-up" data-aos-offset="0" data-aos-delay="500">
+          <div class="service-card__glow"></div>
+          <div class="service-card__icon"><i class="fas fa-comments"></i></div>
+          <h3 class="service-card__title">Freelance Consultation</h3>
+          <p class="service-card__desc">Technical consultation for your web project — from architecture decisions and code reviews to debugging and performance optimization.</p>
+          <ul class="service-card__list">
+            <li>Project Architecture Review</li>
+            <li>Code Review & Debugging</li>
+            <li>Tech Stack Advice</li>
+            <li>Performance Optimization</li>
+          </ul>
+          <a href="#contact" class="service-card__cta">Get Quote →</a>
+        </div>
+
       </div>
     </div>
   </section>
