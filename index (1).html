@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sital Mahato – Full Stack Developer & UI/UX Designer. Anime-inspired futuristic portfolio." />
+  <meta name="keywords" content="Sital Mahato, Full Stack Developer, Portfolio, Web Developer, UI/UX" />
+  <title>Sital Mahato — Developer Portfolio</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- AOS Animation Library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dark-mode" id="body">
+
+  <!-- ═══════════════════════════════════════ LOADING SCREEN ═══════════════════════════════════════ -->
+  <div id="loader" class="loader">
+    <div class="loader__inner">
+      <div class="loader__glitch" data-text="INITIALIZING">INITIALIZING</div>
+      <div class="loader__bar-wrap"><div class="loader__bar"></div></div>
+      <div class="loader__percent">0%</div>
+      <div class="loader__jp">起動中...</div>
+    </div>
+    <canvas id="loaderCanvas"></canvas>
+  </div>
+
+  <!-- ═══════════════════════════════════════ CUSTOM CURSOR ═══════════════════════════════════════ -->
+  <div id="cursor" class="cursor"></div>
+  <div id="cursor-trail" class="cursor-trail"></div>
+
+  <!-- ═══════════════════════════════════════ SCROLL PROGRESS ═══════════════════════════════════════ -->
+  <div id="scroll-progress" class="scroll-progress"></div>
+
+  <!-- ═══════════════════════════════════════ NAVIGATION ═══════════════════════════════════════ -->
+  <nav id="navbar" class="navbar">
+    <div class="nav__logo">
+      <span class="nav__logo-bracket">[</span>
+      <span class="nav__logo-text">SM</span>
+      <span class="nav__logo-bracket">]</span>
+    </div>
+
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#hero" class="nav__link" data-text="Home">Home</a></li>
+      <li><a href="#about" class="nav__link" data-text="About">About</a></li>
+      <li><a href="#skills" class="nav__link" data-text="Skills">Skills</a></li>
+      <li><a href="#projects" class="nav__link" data-text="Projects">Projects</a></li>
+      <li><a href="#experience" class="nav__link" data-text="Journey">Journey</a></li>
+      <li><a href="#services" class="nav__link" data-text="Services">Services</a></li>
+      <li><a href="#contact" class="nav__link" data-text="Contact">Contact</a></li>
+    </ul>
+
+    <div class="nav__actions">
+      <!-- Dark/Light Toggle -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+      <!-- Music Toggle -->
+      <button class="music-toggle" id="musicToggle" aria-label="Toggle ambient music">
+        <i class="fas fa-music"></i>
+        <span class="music-wave"><span></span><span></span><span></span></span>
+      </button>
+      <!-- Mobile Hamburger -->
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu" id="mobileMenu">
+    <ul>
+      <li><a href="#hero" onclick="closeMobileMenu()"><span>01</span> Home</a></li>
+      <li><a href="#about" onclick="closeMobileMenu()"><span>02</span> About</a></li>
+      <li><a href="#skills" onclick="closeMobileMenu()"><span>03</span> Skills</a></li>
+      <li><a href="#projects" onclick="closeMobileMenu()"><span>04</span> Projects</a></li>
+      <li><a href="#experience" onclick="closeMobileMenu()"><span>05</span> Journey</a></li>
+      <li><a href="#services" onclick="closeMobileMenu()"><span>06</span> Services</a></li>
+      <li><a href="#contact" onclick="closeMobileMenu()"><span>07</span> Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════ HERO SECTION ═══════════════════════════════════════ -->
+  <section id="hero" class="hero">
+    <!-- Animated Background Canvas -->
+    <canvas id="heroCanvas" class="hero__canvas"></canvas>
+
+    <!-- Gradient Orbs -->
+    <div class="hero__orb hero__orb--1"></div>
+    <div class="hero__orb hero__orb--2"></div>
+    <div class="hero__orb hero__orb--3"></div>
+
+    <!-- Scan Lines Overlay -->
+    <div class="hero__scanlines"></div>
+
+    <!-- Grid Overlay -->
+    <div class="hero__grid"></div>
+
+    <div class="hero__container">
+      <!-- Left: Text Content -->
+      <div class="hero__content" id="heroContent">
+        <div class="hero__status">
+          <span class="hero__status-dot"></span>
+          <span>Available for Work</span>
+        </div>
+
+        <p class="hero__greeting">こんにちは — Hello, I'm</p>
+
+        <h1 class="hero__name">
+          <span class="hero__name-first">Sital</span>
+          <span class="hero__name-last glitch" data-text="Mahato">Mahato</span>
+        </h1>
+
+        <div class="hero__role">
+          <span class="hero__role-prefix">&gt;_</span>
+          <span class="hero__typed" id="typedText"></span>
+          <span class="hero__cursor">█</span>
+        </div>
+
+        <p class="hero__bio">
+          Crafting high-performance, secure, and creative digital solutions.
+          I specialize in building interfaces you can feel and systems that actually work.
+        </p>
+
+        <div class="hero__cta">
+          <a href="#contact" class="btn btn--primary magnetic">
+            <span class="btn__text">Hire Me</span>
+            <span class="btn__glow"></span>
+          </a>
+          <a href="https://sitalmahato00.github.io/protfolio/Sital_Mahato_CV.pdf" class="btn btn--secondary magnetic" download target="_blank">
+            <i class="fas fa-download"></i>
+            <span class="btn__text">Download CV</span>
+          </a>
+          <a href="#contact" class="btn btn--ghost magnetic">
+            <span class="btn__text">Contact Me</span>
+          </a>
+        </div>
+
+        <div class="hero__socials">
+          <a href="https://github.com/sitalmahato00" target="_blank" class="social-icon magnetic" aria-label="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
+          <a href="https://linkedin.com/in/sitalmahato" target="_blank" class="social-icon magnetic" aria-label="LinkedIn">
+            <i class="fab fa-linkedin-in"></i>
+          </a>
+          <a href="mailto:sitalmahato077@gmail.com" class="social-icon magnetic" aria-label="Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+          <a href="tel:+9779704191610" class="social-icon magnetic" aria-label="Phone">
+            <i class="fas fa-phone"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Photo -->
+      <div class="hero__photo-wrap" id="heroPhoto">
+        <div class="hero__photo-ring hero__photo-ring--outer"></div>
+        <div class="hero__photo-ring hero__photo-ring--mid"></div>
+        <div class="hero__photo-ring hero__photo-ring--inner"></div>
+
+        <!-- Floating particles around image -->
+        <div class="hero__float-particles" id="floatParticles"></div>
+
+        <div class="hero__photo-frame">
+          <!-- Replace src with your actual photo path -->
+          <img
+            src="https://sitalmahato00.github.io/protfolio/image.png"
+            alt="Sital Mahato"
+            class="hero__photo"
+            id="heroImg"
+            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22><rect fill=%22%230a0a0f%22 width=%22400%22 height=%22400%22/><text x=%22200%22 y=%22210%22 text-anchor=%22middle%22 fill=%22%2300f0ff%22 font-size=%2280%22 font-family=%22Arial%22>SM</text></svg>'"
+          />
+          <!-- Anime filter overlay -->
+          <div class="hero__photo-overlay"></div>
+          <!-- Corner decorations -->
+          <div class="hero__photo-corner hero__photo-corner--tl"></div>
+          <div class="hero__photo-corner hero__photo-corner--tr"></div>
+          <div class="hero__photo-corner hero__photo-corner--bl"></div>
+          <div class="hero__photo-corner hero__photo-corner--br"></div>
+        </div>
+
+        <div class="hero__photo-badge">
+          <i class="fas fa-code"></i>
+          <span>Full Stack Dev</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="hero__scroll">
+      <span>Scroll</span>
+      <div class="hero__scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ ABOUT SECTION ═══════════════════════════════════════ -->
+  <section id="about" class="section about">
+    <div class="container">
+      <div class="section__header" data-aos="fade-up">
+        <span class="section__label">// 02. WHO AM I</span>
+        <h2 class="section__title">About <span class="highlight">Me</span></h2>
+        <div class="section__line"></div>
+      </div>
+
+      <div class="about__grid">
+        <div class="about__visual" data-aos="fade-right">
+          <div class="about__img-wrap">
+            <img src="https://sitalmahato00.github.io/protfolio/image.png" alt="About Sital" class="about__img"
+              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22500%22><rect fill=%22%230a0a0f%22 width=%22400%22 height=%22500%22/><text x=%22200%22 y=%22260%22 text-anchor=%22middle%22 fill=%22%2300f0ff%22 font-size=%2280%22 font-family=%22Arial%22>SM</text></svg>'" />
+            <div class="about__img-decor"></div>
+          </div>
+
+          <div class="about__stats">
+            <div class="about__stat" data-aos="zoom-in" data-aos-delay="100">
+              <span class="about__stat-num" data-count="6">0</span>
+              <span class="about__stat-label">Projects Built</span>
+            </div>
+            <div class="about__stat" data-aos="zoom-in" data-aos-delay="200">
+              <span class="about__stat-num" data-count="10">0</span>
+              <span class="about__stat-label">Technologies</span>
+            </div>
+            <div class="about__stat" data-aos="zoom-in" data-aos-delay="300">
+              <span class="about__stat-num" data-count="2">0</span>
+              <span class="about__stat-label">Years Exp.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about__content" data-aos="fade-left">
+          <div class="about__tag-row">
+            <span class="tag">Developer</span>
+            <span class="tag">Designer</span>
+            <span class="tag">Problem Solver</span>
+          </div>
+
+          <h3 class="about__heading">
+            Building efficient, robust, and <span class="highlight">user-friendly</span> software solutions.
+          </h3>
+
+          <p class="about__text">
+            I'm <strong>Sital Mahato</strong>, a motivated IT student from Golbazar, Siraha, deeply passionate
+            about building efficient, robust, and user-friendly software solutions. I'm currently pursuing a
+            Diploma in Information Technology at Manmohan Memorial Polytechnic.
+          </p>
+          <p class="about__text">
+            My expertise spans Java, C++, React, Laravel, and Node.js. Whether designing precise layouts in
+            Figma or building complex rate-limited APIs, my focus remains constant: delivering an outstanding
+            user experience.
+          </p>
+
+          <div class="about__info-grid">
+            <div class="about__info-item">
+              <span class="about__info-label">Name</span>
+              <span class="about__info-value">Sital Mahato</span>
+            </div>
+            <div class="about__info-item">
+              <span class="about__info-label">Email</span>
+              <a href="mailto:sitalmahato077@gmail.com" class="about__info-value">sitalmahato077@gmail.com</a>
+            </div>
+            <div class="about__info-item">
+              <span class="about__info-label">Phone</span>
+              <a href="tel:+9779704191610" class="about__info-value">+977 9704191610</a>
+            </div>
+            <div class="about__info-item">
+              <span class="about__info-label">Location</span>
+              <span class="about__info-value">Golbazar, Siraha, Nepal 🇳🇵</span>
+            </div>
+            <div class="about__info-item">
+              <span class="about__info-label">Status</span>
+              <span class="about__info-value available">Available</span>
+            </div>
+          </div>
+
+          <a href="#contact" class="btn btn--primary magnetic">
+            <span class="btn__text">Let's Connect</span>
+            <span class="btn__glow"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ SKILLS SECTION ═══════════════════════════════════════ -->
+  <section id="skills" class="section skills">
+    <div class="container">
+      <div class="section__header" data-aos="fade-up">
+        <span class="section__label">// 03. ARSENAL</span>
+        <h2 class="section__title">My <span class="highlight">Skills</span></h2>
+        <div class="section__line"></div>
+      </div>
+
+      <div class="skills__grid">
+        <!-- Skill Card: Frontend -->
+        <div class="skill-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="skill-card__icon"><i class="fab fa-react"></i></div>
+          <h3 class="skill-card__title">Frontend</h3>
+          <div class="skill-card__bars">
+            <div class="skill-bar" data-skill="HTML/CSS" data-level="90"></div>
+            <div class="skill-bar" data-skill="JavaScript" data-level="85"></div>
+            <div class="skill-bar" data-skill="React.js" data-level="85"></div>
+            <div class="skill-bar" data-skill="Next.js" data-level="75"></div>
+          </div>
+        </div>
+
+        <!-- Skill Card: Backend -->
+        <div class="skill-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="skill-card__icon"><i class="fas fa-server"></i></div>
+          <h3 class="skill-card__title">Backend</h3>
+          <div class="skill-card__bars">
+            <div class="skill-bar" data-skill="Node.js" data-level="80"></div>
+            <div class="skill-bar" data-skill="PHP & Laravel" data-level="80"></div>
+            <div class="skill-bar" data-skill="Java" data-level="75"></div>
+            <div class="skill-bar" data-skill="C / C++" data-level="70"></div>
+          </div>
+        </div>
+
+        <!-- Skill Card: Database -->
+        <div class="skill-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="skill-card__icon"><i class="fas fa-database"></i></div>
+          <h3 class="skill-card__title">Database</h3>
+          <div class="skill-card__bars">
+            <div class="skill-bar" data-skill="MySQL" data-level="85"></div>
+            <div class="skill-bar" data-skill="MongoDB" data-level="75"></div>
+            <div class="skill-bar" data-skill="Redis" data-level="70"></div>
+            <div class="skill-bar" data-skill="Git" data-level="80"></div>
+          </div>
+        </div>
+
+        <!-- Skill Card: Design -->
+        <div class="skill-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="skill-card__icon"><i class="fas fa-palette"></i></div>
+          <h3 class="skill-card__title">Design</h3>
+          <div class="skill-card__bars">
+            <div class="skill-bar" data-skill="Figma" data-level="85"></div>
+            <div class="skill-bar" data-skill="VS Code" data-level="90"></div>
+            <div class="skill-bar" data-skill="Adobe XD" data-level="72"></div>
+            <div class="skill-bar" data-skill="Photoshop" data-level="65"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tech Icon Grid -->
+      <div class="tech-icons" data-aos="fade-up">
+        <div class="tech-icon" title="HTML5"><i class="fab fa-html5"></i><span>HTML5</span></div>
+        <div class="tech-icon" title="CSS3"><i class="fab fa-css3-alt"></i><span>CSS3</span></div>
+        <div class="tech-icon" title="JavaScript"><i class="fab fa-js-square"></i><span>JS</span></div>
+        <div class="tech-icon" title="React"><i class="fab fa-react"></i><span>React</span></div>
+        <div class="tech-icon" title="Node.js"><i class="fab fa-node-js"></i><span>Node</span></div>
+        <div class="tech-icon" title="PHP & Laravel"><i class="fab fa-php"></i><span>Laravel</span></div>
+        <div class="tech-icon" title="Java"><i class="fab fa-java"></i><span>Java</span></div>
+        <div class="tech-icon" title="Git"><i class="fab fa-git-alt"></i><span>Git</span></div>
+        <div class="tech-icon" title="MySQL"><i class="fas fa-database"></i><span>MySQL</span></div>
+        <div class="tech-icon" title="Figma"><i class="fab fa-figma"></i><span>Figma</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ PROJECTS SECTION ═══════════════════════════════════════ -->
+  <section id="projects" class="section projects">
+    <div class="container">
+      <div class="section__header" data-aos="fade-up">
+        <span class="section__label">// 04. CREATIONS</span>
+        <h2 class="section__title">Featured <span class="highlight">Projects</span></h2>
+        <div class="section__line"></div>
+      </div>
+
+      <div class="project-filters" data-aos="fade-up">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="web">Full Stack</button>
+        <button class="filter-btn" data-filter="backend">Backend</button>
+        <button class="filter-btn" data-filter="frontend">Frontend</button>
+      </div>
+
+      <div class="projects__grid" id="projectsGrid">
+
+        <!-- E-Commerce Solution -->
+        <div class="project-card" data-category="web" data-aos="fade-up" data-aos-delay="0">
+          <div class="project-card__img-wrap">
+            <div class="project-card__img" style="background-image: url('https://sitalmahato00.github.io/protfolio/ecommerce.png'); background-size: cover; background-position: center top;"></div>
+            <div class="project-card__overlay">
+              <a href="#" class="project-card__link" target="_blank"><i class="fas fa-external-link-alt"></i> Live</a>
+              <a href="#" class="project-card__link" target="_blank"><i class="fab fa-github"></i> Code</a>
+            </div>
+          </div>
+          <div class="project-card__content">
+            <div class="project-card__tags">
+              <span>React</span><span>Node.js</span><span>Tailwind</span><span>Stripe</span>
+            </div>
+            <h3 class="project-card__title">E-Commerce Solution</h3>
+            <p class="project-card__desc">A high-performance e-commerce platform featuring secure payment integration and a seamless UX/UI design for modern retail.</p>
+          </div>
+        </div>
+
+        <!-- IT-DMS Enterprise Suite -->
+        <div class="project-card" data-category="backend" data-aos="fade-up" data-aos-delay="100">
+          <div class="project-card__img-wrap">
+            <div class="project-card__img" style="background-image: url('https://sitalmahato00.github.io/protfolio/dit.png'); background-size: cover; background-position: center top;"></div>
+            <div class="project-card__overlay">
+              <a href="https://github.com/sitalmahato00/IT-DMS" class="project-card__link" target="_blank"><i class="fab fa-github"></i> Code</a>
+            </div>
+          </div>
+          <div class="project-card__content">
+            <div class="project-card__tags">
+              <span>Laravel</span><span>MySQL</span><span>PHP</span><span>Security</span>
+            </div>
+            <h3 class="project-card__title">IT-DMS: Enterprise Suite</h3>
+            <p class="project-card__desc">A complex role-based management system for department operations, automating academic records and attendance tracking.</p>
+          </div>
+        </div>
+
+        <!-- Smart Task Analytics -->
+        <div class="project-card" data-category="web" data-aos="fade-up" data-aos-delay="200">
+          <div class="project-card__img-wrap">
+            <div class="project-card__img" style="background-image: url('https://sitalmahato00.github.io/protfolio/task.png'); background-size: cover; background-position: center top;"></div>
+            <div class="project-card__overlay">
+              <a href="#" class="project-card__link" target="_blank"><i class="fas fa-external-link-alt"></i> Live</a>
+              <a href="#" class="project-card__link" target="_blank"><i class="fab fa-github"></i> Code</a>
+            </div>
+          </div>
+          <div class="project-card__content">
+            <div class="project-card__tags">
+              <span>React</span><span>Node.js</span><span>WebSockets</span>
+            </div>
+            <h3 class="project-card__title">Smart Task Analytics</h3>
+            <p class="project-card__desc">A productivity powerhouse leveraging real-time updates and intuitive design to streamline project management workflows.</p>
+          </div>
+        </div>
+
+        <!-- Dynamic Weather Hub -->
+        <div class="project-card" data-category="frontend" data-aos="fade-up" data-aos-delay="0">
+          <div class="project-card__img-wrap">
+            <div class="project-card__img" style="background-image: url('https://sitalmahato00.github.io/protfolio/weather.png'); background-size: cover; background-position: center top;"></div>
+            <div class="project-card__overlay">
+              <a href="#" class="project-card__link" target="_blank"><i class="fas fa-external-link-alt"></i> Live</a>
+              <a href="#" class="project-card__link" target="_blank"><i class="fab fa-github"></i> Code</a>
+            </div>
+          </div>
+          <div class="project-card__content">
+            <div class="project-card__tags">
+              <span>JavaScript</span><span>APIs</span><span>Data Viz</span>
+            </div>
+            <h3 class="project-card__title">Dynamic Weather Hub</h3>
+            <p class="project-card__desc">Engineered for speed and data accuracy, this app delivers real-time meteorological insights through advanced API integration.</p>
+          </div>
+        </div>
+
+        <!-- Academic Result Portal -->
+        <div class="project-card" data-category="web" data-aos="fade-up" data-aos-delay="100">
+          <div class="project-card__img-wrap">
+            <div class="project-card__img" style="background-image: url('https://sitalmahato00.github.io/protfolio/resultit.png'); background-size: cover; background-position: center top;"></div>
+            <div class="project-card__overlay">
+              <a href="https://sitalmahato00.github.io/DIT_result/" class="project-card__link" target="_blank"><i class="fas fa-external-link-alt"></i> Live</a>
+              <a href="#" class="project-card__link" target="_blank"><i class="fab fa-github"></i> Code</a>
+            </div>
+          </div>
+          <div class="project-card__content">
+            <div class="project-card__tags">
+              <span>React</span><span>Next.js</span><span>Serverless</span>
+            </div>
+            <h3 class="project-card__title">Academic Result Portal</h3>
+            <p class="project-card__desc">A scalable, production-ready portal for student records, optimized for high traffic and instant data retrieval.</p>
+          </div>
+        </div>
+
+        <!-- MMP Management Platform -->
+        <div class="project-card" data-category="backend" data-aos="fade-up" data-aos-delay="200">
+          <div class="project-card__img-wrap">
+            <div class="project-card__img" style="background-image: url('https://sitalmahato00.github.io/protfolio/mmp.png'); background-size: cover; background-position: center top;"></div>
+            <div class="project-card__overlay">
+              <a href="#" class="project-card__link" target="_blank"><i class="fas fa-external-link-alt"></i> Live</a>
+              <a href="#" class="project-card__link" target="_blank"><i class="fab fa-github"></i> Code</a>
+            </div>
+          </div>
+          <div class="project-card__content">
+            <div class="project-card__tags">
+              <span>Laravel</span><span>Redis</span><span>Security</span>
+            </div>
+            <h3 class="project-card__title">MMP Management Platform</h3>
+            <p class="project-card__desc">An enterprise-grade college platform featuring Redis caching and rate-limiting for unmatched stability and security.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ EXPERIENCE SECTION ═══════════════════════════════════════ -->
+  <section id="experience" class="section experience">
+    <div class="container">
+      <div class="section__header" data-aos="fade-up">
+        <span class="section__label">// 05. STORY ARC</span>
+        <h2 class="section__title">My <span class="highlight">Journey</span></h2>
+        <div class="section__line"></div>
+      </div>
+
+      <div class="timeline-tabs" data-aos="fade-up">
+        <button class="tab-btn active" data-tab="experience">Experience</button>
+        <button class="tab-btn" data-tab="education">Education</button>
+      </div>
+
+      <!-- Experience Timeline -->
+      <div class="timeline" id="experienceTab">
+        <div class="timeline__item" data-aos="fade-right" data-aos-delay="0">
+          <div class="timeline__dot"></div>
+          <div class="timeline__card">
+            <span class="timeline__date">Aug 2023 — Present</span>
+            <h3 class="timeline__title">Web Developer</h3>
+            <p class="timeline__company"><i class="fas fa-briefcase"></i> Freelancer</p>
+            <p class="timeline__desc">Developing custom web applications, integrating APIs, and ensuring optimal performance and user experience across complex systems.</p>
+            <div class="timeline__tags">
+              <span>React</span><span>Node.js</span><span>Laravel</span><span>APIs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline__item" data-aos="fade-left" data-aos-delay="100">
+          <div class="timeline__dot"></div>
+          <div class="timeline__card">
+            <span class="timeline__date">May 2023 — Present</span>
+            <h3 class="timeline__title">Web Designer</h3>
+            <p class="timeline__company"><i class="fas fa-building"></i> Creative Agency</p>
+            <p class="timeline__desc">Designing responsive, intuitive, and visually appealing user interfaces with a focus on premium modern aesthetics and user experience.</p>
+            <div class="timeline__tags">
+              <span>Figma</span><span>UI/UX</span><span>CSS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Education Timeline -->
+      <div class="timeline hidden" id="educationTab">
+        <div class="timeline__item" data-aos="fade-right">
+          <div class="timeline__dot"></div>
+          <div class="timeline__card">
+            <span class="timeline__date">2023 — 2026</span>
+            <h3 class="timeline__title">Diploma in Information Technology</h3>
+            <p class="timeline__company"><i class="fas fa-university"></i> Manmohan Memorial Polytechnic</p>
+            <p class="timeline__desc">Pursuing Diploma in IT with focus on full-stack development, database management, system security, and software engineering principles.</p>
+            <div class="timeline__tags"><span>IT Diploma</span><span>In Progress</span></div>
+          </div>
+        </div>
+
+        <div class="timeline__item" data-aos="fade-left">
+          <div class="timeline__dot"></div>
+          <div class="timeline__card">
+            <span class="timeline__date">2024</span>
+            <h3 class="timeline__title">Full Stack Mastery</h3>
+            <p class="timeline__company"><i class="fas fa-code"></i> Self-directed Learning</p>
+            <p class="timeline__desc">Advanced Laravel, React, and API integration. Built production-grade full-stack role-based systems deployed for real users.</p>
+            <div class="timeline__tags"><span>Laravel</span><span>React</span><span>APIs</span></div>
+          </div>
+        </div>
+
+        <div class="timeline__item" data-aos="fade-right">
+          <div class="timeline__dot"></div>
+          <div class="timeline__card">
+            <span class="timeline__date">Present</span>
+            <h3 class="timeline__title">Production Projects</h3>
+            <p class="timeline__company"><i class="fas fa-rocket"></i> Open Source & Freelance</p>
+            <p class="timeline__desc">Building full-stack role-based systems including enterprise management platforms, academic portals, and real-time applications.</p>
+            <div class="timeline__tags"><span>Full Stack</span><span>Laravel</span><span>React</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ SERVICES SECTION ═══════════════════════════════════════ -->
+  <section id="services" class="section services">
+    <div class="container">
+      <div class="section__header" data-aos="fade-up">
+        <span class="section__label">// 06. OFFERINGS</span>
+        <h2 class="section__title">My <span class="highlight">Services</span></h2>
+        <div class="section__line"></div>
+      </div>
+
+      <div class="services__grid">
+        <div class="service-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="service-card__glow"></div>
+          <div class="service-card__icon"><i class="fas fa-laptop-code"></i></div>
+          <h3 class="service-card__title">Web Development</h3>
+          <p class="service-card__desc">Full-stack web applications with cutting-edge technology. Fast, secure, and scalable solutions tailored to your business.</p>
+          <ul class="service-card__list">
+            <li>Custom Web Apps</li>
+            <li>React / Next.js</li>
+            <li>Node.js Backends</li>
+          </ul>
+          <a href="#contact" class="service-card__cta">Get Quote →</a>
+        </div>
+
+        <div class="service-card featured" data-aos="fade-up" data-aos-delay="100">
+          <div class="service-card__glow"></div>
+          <div class="service-card__badge">Popular</div>
+          <div class="service-card__icon"><i class="fas fa-paint-brush"></i></div>
+          <h3 class="service-card__title">UI/UX Design</h3>
+          <p class="service-card__desc">Visually stunning interfaces that convert. User-centered design that blends aesthetics with functionality.</p>
+          <ul class="service-card__list">
+            <li>Figma Prototypes</li>
+            <li>Design Systems</li>
+            <li>Branding</li>
+          </ul>
+          <a href="#contact" class="service-card__cta">Get Quote →</a>
+        </div>
+
+        <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="service-card__glow"></div>
+          <div class="service-card__icon"><i class="fas fa-mobile-alt"></i></div>
+          <h3 class="service-card__title">Mobile Apps</h3>
+          <p class="service-card__desc">Cross-platform mobile apps that feel native. Smooth animations, offline support, and intuitive UX.</p>
+          <ul class="service-card__list">
+            <li>React Native</li>
+            <li>iOS & Android</li>
+            <li>PWA Development</li>
+          </ul>
+          <a href="#contact" class="service-card__cta">Get Quote →</a>
+        </div>
+
+        <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="service-card__glow"></div>
+          <div class="service-card__icon"><i class="fas fa-search"></i></div>
+          <h3 class="service-card__title">SEO & Performance</h3>
+          <p class="service-card__desc">Optimize your site for speed, search rankings, and conversions. Technical SEO and Core Web Vitals mastery.</p>
+          <ul class="service-card__list">
+            <li>Technical SEO</li>
+            <li>Page Speed</li>
+            <li>Analytics Setup</li>
+          </ul>
+          <a href="#contact" class="service-card__cta">Get Quote →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════ CONTACT SECTION ═══════════════════════════════════════ -->
+  <section id="contact" class="section contact">
+    <div class="container">
+      <div class="section__header" data-aos="fade-up">
+        <span class="section__label">// 07. TRANSMISSION</span>
+        <h2 class="section__title">Get In <span class="highlight">Touch</span></h2>
+        <div class="section__line"></div>
+      </div>
+
+      <div class="contact__grid">
+        <div class="contact__info" data-aos="fade-right">
+          <h3 class="contact__heading">Let's build something<br /><span class="highlight">extraordinary</span> together.</h3>
+          <p class="contact__text">Have a project in mind? A collaboration idea? Or just want to say hi? My inbox is always open.</p>
+
+          <div class="contact__items">
+            <div class="contact__item">
+              <div class="contact__item-icon"><i class="fas fa-envelope"></i></div>
+              <div>
+                <span class="contact__item-label">Email</span>
+                <a href="mailto:sitalmahato077@gmail.com" class="contact__item-value">sitalmahato077@gmail.com</a>
+              </div>
+            </div>
+            <div class="contact__item">
+              <div class="contact__item-icon"><i class="fas fa-phone"></i></div>
+              <div>
+                <span class="contact__item-label">Phone</span>
+                <a href="tel:+9779704191610" class="contact__item-value">+977 9704191610</a>
+              </div>
+            </div>
+            <div class="contact__item">
+              <div class="contact__item-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <span class="contact__item-label">Location</span>
+                <span class="contact__item-value">Golbazar, Siraha, Nepal | Remote worldwide</span>
+              </div>
+            </div>
+            <div class="contact__item">
+              <div class="contact__item-icon"><i class="fas fa-clock"></i></div>
+              <div>
+                <span class="contact__item-label">Availability</span>
+                <span class="contact__item-value">Mon–Sat, 9AM–6PM NPT</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact__socials">
+            <a href="https://github.com/sitalmahato00" target="_blank" class="social-icon magnetic"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/in/sitalmahato" target="_blank" class="social-icon magnetic"><i class="fab fa-linkedin-in"></i></a>
+            <a href="mailto:sitalmahato077@gmail.com" class="social-icon magnetic"><i class="fas fa-envelope"></i></a>
+            <a href="tel:+9779704191610" class="social-icon magnetic"><i class="fas fa-phone"></i></a>
+          </div>
+        </div>
+
+        <div class="contact__form-wrap" data-aos="fade-left">
+          <div style="display:flex; flex-direction:column; gap:1.5rem; justify-content:center; height:100%; padding: 2rem;">
+            <h4 style="font-family:var(--font-display); color:var(--accent); font-size:1.4rem; margin:0;">Ready to connect?</h4>
+            <p style="color:var(--text-muted); margin:0;">Choose your preferred way to reach out — I'll respond within 24 hours.</p>
+            <a href="mailto:sitalmahato077@gmail.com" class="btn btn--primary magnetic" style="display:inline-flex; width:fit-content;">
+              <i class="fas fa-envelope"></i>
+              <span class="btn__text">Send Email</span>
+              <span class="btn__glow"></span>
+            </a>
+            <a href="tel:+9779704191610" class="btn btn--secondary magnetic" style="display:inline-flex; width:fit-content;">
+              <i class="fas fa-phone"></i>
+              <span class="btn__text">+977 9704191610</span>
+            </a>
+            <a href="https://github.com/sitalmahato00" target="_blank" class="btn btn--ghost magnetic" style="display:inline-flex; width:fit-content;">
+              <i class="fab fa-github"></i>
+              <span class="btn__text">View GitHub</span>
+            </a>
+            <a href="https://linkedin.com/in/sitalmahato" target="_blank" class="btn btn--ghost magnetic" style="display:inline-flex; width:fit-content;">
+              <i class="fab fa-linkedin-in"></i>
+              <span class="btn__text">LinkedIn Profile</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ FOOTER ═══════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__top">
+      <div class="footer__logo">
+        <span class="nav__logo-bracket">[</span>
+        <span>Sital Mahato</span>
+        <span class="nav__logo-bracket">]</span>
+      </div>
+      <p class="footer__tagline">Crafting digital experiences. Building the future.</p>
+      <div class="footer__socials">
+        <a href="https://github.com/sitalmahato00" target="_blank" class="social-icon"><i class="fab fa-github"></i></a>
+        <a href="https://linkedin.com/in/sitalmahato" target="_blank" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        <a href="mailto:sitalmahato077@gmail.com" class="social-icon"><i class="fas fa-envelope"></i></a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>© 2025 Sital Mahato. Crafted with <span class="heart">♥</span> &amp; ☕ in Nepal.</p>
+      <p class="footer__jp">未来を構築中 — Building the future</p>
+    </div>
+    <!-- Back to top -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+  </footer>
+
+  <!-- ═══════════════════════════════════════ SCRIPTS ═══════════════════════════════════════ -->
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- AOS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <!-- Custom Script -->
+  <script src="script.js"></script>
+</body>
+</html>
