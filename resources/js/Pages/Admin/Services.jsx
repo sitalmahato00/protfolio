@@ -4,13 +4,14 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useCachedData } from '@/hooks/useCachedData';
 
-function ServiceModal({ form, setForm, editing, onSave, onCancel, t }) {
+function ServiceModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
+    const bg = dark ? '#1E293B' : '#FFFFFF';
     return (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div style={{ background: t.cardSolid, border: `1px solid ${t.border}`, borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '540px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-                    <div style={{ fontSize: '16px', fontWeight: '800', color: t.text }}>{editing ? 'Edit Service' : 'New Service'}</div>
-                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: '20px' }}>×</button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div style={{ background: bg, border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : '#E5E7EB'}`, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '540px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '17px', fontWeight: '700', color: dark ? '#F1F5F9' : '#111827' }}>{editing ? 'Edit Service' : 'New Service'}</div>
+                    <button onClick={onCancel} style={{ width: '30px', height: '30px', borderRadius: '8px', background: dark ? 'rgba(255,255,255,0.06)' : '#F3F4F6', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '10px' }}>
@@ -31,10 +32,10 @@ function ServiceModal({ form, setForm, editing, onSave, onCancel, t }) {
                         <label className="adm-label">Features (one per line)</label>
                         <textarea className="adm-input" rows={5} style={{ resize: 'vertical', fontFamily: 'inherit' }} placeholder={"Responsive design\nSEO optimization\nFast delivery"} value={form.features} onChange={e => setForm({ ...form, features: e.target.value })} />
                     </div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 14px', borderRadius: '10px', background: t.navHover, border: `1px solid ${t.border}` }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 14px', borderRadius: '10px', background: dark ? 'rgba(255,255,255,0.04)' : '#F9FAFB', border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : '#E5E7EB'}` }}>
                         <input type="checkbox" checked={form.is_popular} onChange={e => setForm({ ...form, is_popular: e.target.checked })} style={{ accentColor: '#6366F1', width: '16px', height: '16px' }} />
                         <div>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: t.text }}>Mark as Popular</div>
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: dark ? '#F1F5F9' : '#111827' }}>Mark as Popular</div>
                             <div style={{ fontSize: '11px', color: t.textMuted }}>Shows a Popular badge on the portfolio</div>
                         </div>
                     </label>
@@ -49,12 +50,13 @@ function ServiceModal({ form, setForm, editing, onSave, onCancel, t }) {
 }
 
 export default function AdminServices() {
-    const { t } = useTheme();
+    const { t, dark } = useTheme();
     const blank = { title: '', description: '', icon: '', features: '', is_popular: false };
     const { data: services = [], refresh } = useCachedData('services', () => axios.get('/api/services').then(r => r.data));
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(blank);
     const [showModal, setShowModal] = useState(false);
+
     function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
     function openEdit(s) { setEditing(s.id); setForm({ ...s, features: s.features?.join('\n') || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
@@ -65,58 +67,76 @@ export default function AdminServices() {
     }
     function remove(id) { if (confirm('Delete this service?')) axios.delete(`/api/services/${id}`).then(refresh); }
 
-    return (
-        <AdminLayout title="Services">
-            <Head title="Admin – Services" />
-            {showModal && <ServiceModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} />}
+    const cardBg     = dark ? '#1E293B' : '#FFFFFF';
+    const cardBorder = dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid #E8ECF0';
+    const cardShadow = dark ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.04)';
+    const divider    = dark ? 'rgba(255,255,255,0.07)' : '#EEF0F5';
 
+    return (
+        <>
+            <Head title="Admin – Services" />
+            {showModal && <ServiceModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
+
+            {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <div>
-                    <span style={{ fontSize: '13px', color: t.textMuted }}>{services.length} services configured</span>
-                </div>
+                <span style={{ fontSize: '13px', color: t.textMuted, fontWeight: '500' }}>{services.length} service{services.length !== 1 ? 's' : ''} configured</span>
                 <button className="adm-btn-primary" onClick={openCreate}>+ New Service</button>
             </div>
 
             {services.length === 0 && (
-                <div className="adm-card" style={{ padding: '60px', textAlign: 'center' }}>
+                <div style={{ background: cardBg, border: cardBorder, borderRadius: '14px', padding: '60px', textAlign: 'center', boxShadow: cardShadow }}>
                     <div style={{ fontSize: '40px', marginBottom: '12px' }}>🛠️</div>
-                    <div style={{ color: t.textMuted, marginBottom: '16px' }}>No services yet. Add what you offer.</div>
+                    <div style={{ fontSize: '15px', fontWeight: '600', color: dark ? '#F1F5F9' : '#111827', marginBottom: '8px' }}>No services yet</div>
+                    <div style={{ color: t.textMuted, fontSize: '13px', marginBottom: '20px' }}>Add what you offer to showcase your expertise</div>
                     <button className="adm-btn-primary" onClick={openCreate}>Add First Service</button>
                 </div>
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                 {services.map(s => (
-                    <div key={s.id} className="adm-card" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}
-                        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
-                        onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                    <div key={s.id}
+                        style={{ background: cardBg, border: cardBorder, borderRadius: '14px', padding: '24px', position: 'relative', overflow: 'hidden', boxShadow: cardShadow, transition: 'transform .18s ease, box-shadow .18s ease' }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = dark ? '0 8px 24px rgba(0,0,0,0.5)' : '0 8px 24px rgba(0,0,0,0.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = cardShadow; }}>
+
                         {s.is_popular && (
-                            <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
-                                <span className="adm-badge adm-badge-orange">⭐ Popular</span>
+                            <div style={{ position: 'absolute', top: '14px', right: '14px' }}>
+                                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '20px', background: dark ? 'rgba(245,158,11,0.18)' : 'rgba(245,158,11,0.1)', color: '#D97706' }}>⭐ Popular</span>
                             </div>
                         )}
-                        <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', marginBottom: '14px' }}>
+
+                        {/* Icon */}
+                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: dark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', marginBottom: '14px' }}>
                             {s.icon || '🛠️'}
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, marginBottom: '6px' }}>{s.title}</div>
-                        <div style={{ fontSize: '13px', color: t.textMuted, marginBottom: '14px', lineHeight: 1.5 }}>{s.description}</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '18px' }}>
+
+                        {/* Title & description */}
+                        <div style={{ fontSize: '16px', fontWeight: '700', color: dark ? '#F1F5F9' : '#111827', marginBottom: '6px', lineHeight: 1.3 }}>{s.title}</div>
+                        <div style={{ fontSize: '13px', color: dark ? '#CBD5E1' : '#475569', marginBottom: '14px', lineHeight: 1.6 }}>{s.description}</div>
+
+                        {/* Features */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '18px' }}>
                             {(s.features || []).slice(0, 4).map((f, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: t.textMuted }}>
-                                    <span style={{ color: '#10B981', fontWeight: '700' }}>✓</span> {f}
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: dark ? '#CBD5E1' : '#475569' }}>
+                                    <span style={{ color: '#10B981', fontWeight: '700', fontSize: '14px', lineHeight: 1 }}>✓</span>
+                                    {f}
                                 </div>
                             ))}
                             {(s.features || []).length > 4 && (
-                                <div style={{ fontSize: '11px', color: t.accent }}>+{s.features.length - 4} more features</div>
+                                <div style={{ fontSize: '12px', color: t.accent, fontWeight: '500' }}>+{s.features.length - 4} more features</div>
                             )}
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', paddingTop: '14px', borderTop: `1px solid ${t.border}` }}>
-                            <button onClick={() => openEdit(s)} className="adm-btn-ghost" style={{ flex: 1, padding: '8px', fontSize: '12px' }}>Edit</button>
-                            <button onClick={() => remove(s.id)} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>Delete</button>
+
+                        {/* Actions */}
+                        <div style={{ display: 'flex', gap: '8px', paddingTop: '14px', borderTop: `1px solid ${divider}` }}>
+                            <button onClick={() => openEdit(s)} className="adm-btn-ghost" style={{ flex: 1, padding: '8px', fontSize: '13px' }}>Edit</button>
+                            <button onClick={() => remove(s.id)} style={{ padding: '8px 16px', borderRadius: '9px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>Delete</button>
                         </div>
                     </div>
                 ))}
             </div>
-        </AdminLayout>
+        </>
     );
 }
+
+AdminServices.layout = page => <AdminLayout title="Services">{page}</AdminLayout>;

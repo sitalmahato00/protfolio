@@ -87,7 +87,7 @@ export default function AdminProfileSettings() {
     const avatarUrl = form.avatar ? (form.avatar.startsWith('http') ? form.avatar : '/' + form.avatar) : null;
 
     return (
-        <AdminLayout title="Profile Settings">
+        <>
             <Head title="Admin – Profile" />
 
             {saved && (
@@ -214,6 +214,8 @@ export default function AdminProfileSettings() {
                 </button>
                 <span style={{ fontSize: '12px', color: t.textMuted }}>Changes will reflect immediately on your live portfolio.</span>
             </div>
-        </AdminLayout>
+        </>
     );
 }
+
+AdminProfileSettings.layout = page => <AdminLayout title="Profile Settings">{page}</AdminLayout>;

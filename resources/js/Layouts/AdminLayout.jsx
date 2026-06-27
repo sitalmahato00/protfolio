@@ -4,31 +4,33 @@ import { useState, createContext, useContext, useRef, useEffect } from 'react';
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const tokens = {
     dark: {
-        bg: '#0D1117', card: '#161B27', cardSolid: '#161B27',
-        border: 'rgba(255,255,255,0.09)', borderHover: 'rgba(99,102,241,0.55)',
-        text: '#E2E8F0', textMuted: '#94A3B8', textDim: '#64748B',
+        // Dark: deep navy bg, elevated slate cards — never pure black
+        bg: '#0F172A', card: '#1E293B', cardSolid: '#1E293B',
+        border: 'rgba(255,255,255,0.07)', borderHover: 'rgba(99,102,241,0.5)',
+        text: '#F1F5F9', textMuted: '#CBD5E1', textDim: '#94A3B8',
         accent: '#6366F1', accentEnd: '#8B5CF6', accentRgb: '99,102,241',
-        sidebar: '#0A0F1A', sidebarBorder: 'rgba(255,255,255,0.07)',
-        sidebarText: '#CBD5E1', sidebarGroupLabel: '#475569',
-        topbar: 'rgba(13,17,23,0.97)',
-        input: '#1C2333', inputBorder: 'rgba(255,255,255,0.12)',
+        sidebar: '#0F172A', sidebarBorder: 'rgba(255,255,255,0.07)',
+        sidebarText: '#CBD5E1', sidebarGroupLabel: '#64748B',
+        topbar: 'rgba(15,23,42,0.97)',
+        input: '#1E293B', inputBorder: 'rgba(255,255,255,0.1)',
         navHover: 'rgba(99,102,241,0.1)',
-        cardShadow: '0 1px 4px rgba(0,0,0,0.45)',
+        cardShadow: '0 2px 8px rgba(0,0,0,0.4)',
         rowHover: 'rgba(99,102,241,0.06)',
         success: '#10B981', warning: '#F59E0B', danger: '#EF4444', info: '#06B6D4',
     },
     light: {
-        bg: '#EEF2F7', card: '#FFFFFF', cardSolid: '#FFFFFF',
-        border: '#C8D3E0', borderHover: 'rgba(79,70,229,0.45)',
-        text: '#0F172A', textMuted: '#4B5563', textDim: '#9CA3AF',
-        accent: '#4F46E5', accentEnd: '#7C3AED', accentRgb: '79,70,229',
-        sidebar: '#0F172A', sidebarBorder: 'rgba(255,255,255,0.07)',
-        sidebarText: '#CBD5E1', sidebarGroupLabel: '#475569',
-        topbar: 'rgba(238,242,247,0.98)',
-        input: '#FFFFFF', inputBorder: '#B8C4D0',
-        navHover: 'rgba(79,70,229,0.07)',
-        cardShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.07)',
-        rowHover: 'rgba(79,70,229,0.04)',
+        // Screenshot-accurate light mode: subtle off-white bg, pure white cards
+        bg: '#F5F7FA', card: '#FFFFFF', cardSolid: '#FFFFFF',
+        border: '#E8ECF0', borderHover: 'rgba(99,102,241,0.35)',
+        text: '#1A1A2E', textMuted: '#64748B', textDim: '#9CA3AF',
+        accent: '#6366F1', accentEnd: '#8B5CF6', accentRgb: '99,102,241',
+        sidebar: '#1E293B', sidebarBorder: 'rgba(255,255,255,0.07)',
+        sidebarText: '#CBD5E1', sidebarGroupLabel: '#94A3B8',
+        topbar: '#FFFFFF',
+        input: '#F8F9FC', inputBorder: '#E2E6ED',
+        navHover: 'rgba(99,102,241,0.06)',
+        cardShadow: '0 1px 4px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.04)',
+        rowHover: 'rgba(99,102,241,0.04)',
         success: '#059669', warning: '#D97706', danger: '#DC2626', info: '#0891B2',
     },
 };
@@ -65,83 +67,103 @@ const NAV = [
 
 // ─── Global Styles ─────────────────────────────────────────────────────────────
 function GlobalStyles({ t, dark }) {
-    return (
-        <style id="adm-styles">{`
+    useEffect(() => {
+        let el = document.getElementById('adm-styles');
+        if (!el) { el = document.createElement('style'); el.id = 'adm-styles'; document.head.appendChild(el); }
+        el.textContent = `
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
             *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
             html,body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;}
             body{background:${t.bg}!important;color:${t.text}!important;}
             ::-webkit-scrollbar{width:5px;height:5px;}
             ::-webkit-scrollbar-track{background:transparent;}
-            ::-webkit-scrollbar-thumb{background:${dark?'#2D3748':'#B8C4D0'};border-radius:4px;}
+            ::-webkit-scrollbar-thumb{background:${dark?'#334155':'#D1D5DB'};border-radius:4px;}
 
+            /* ── Cards ── */
             .adm-card{
                 background:${t.card}!important;
-                border:1.5px solid ${t.border}!important;
-                border-radius:14px;
+                color:${t.text}!important;
+                border:1px solid ${t.border}!important;
+                border-radius:12px;
                 box-shadow:${t.cardShadow};
-                transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+                transition:border-color .15s ease, box-shadow .15s ease;
             }
             .adm-card:hover{
                 border-color:${t.borderHover}!important;
-                box-shadow:0 8px 28px rgba(${t.accentRgb},.1);
+                box-shadow:${dark
+                    ? '0 8px 28px rgba(99,102,241,.12)'
+                    : '0 4px 16px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.04)'}!important;
             }
 
+            /* ── Buttons ── */
             .adm-btn-primary{
                 background:linear-gradient(135deg,${t.accent} 0%,${t.accentEnd} 100%)!important;
-                color:#fff!important;border:none;border-radius:9px;
-                padding:9px 20px;font-size:13px;font-weight:600;
-                cursor:pointer;transition:all .18s;
-                box-shadow:0 3px 10px rgba(${t.accentRgb},.28);
-                font-family:inherit;display:inline-flex;align-items:center;justify-content:center;
+                color:#fff!important;border:none;border-radius:8px;padding:8px 18px;
+                font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;
+                box-shadow:0 2px 8px rgba(${t.accentRgb},.25);
+                font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;
             }
-            .adm-btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(${t.accentRgb},.42);}
-
+            .adm-btn-primary:hover{opacity:.92;box-shadow:0 4px 14px rgba(${t.accentRgb},.35);}
             .adm-btn-ghost{
-                background:transparent!important;color:${t.textMuted}!important;
-                border:1.5px solid ${t.border}!important;border-radius:9px;
-                padding:9px 20px;font-size:13px;font-weight:600;
-                cursor:pointer;transition:all .18s;font-family:inherit;
-                display:inline-flex;align-items:center;justify-content:center;
+                background:${dark?'transparent':'#FFFFFF'}!important;
+                color:${dark?'#CBD5E1':'#374151'}!important;
+                border:1px solid ${t.border}!important;
+                border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;
+                cursor:pointer;transition:all .15s;font-family:inherit;
+                display:inline-flex;align-items:center;justify-content:center;gap:6px;
             }
-            .adm-btn-ghost:hover{background:${t.navHover}!important;color:${t.text}!important;border-color:${t.borderHover}!important;}
+            .adm-btn-ghost:hover{background:${dark?'rgba(255,255,255,.05)':'#F8F9FC'}!important;border-color:${t.borderHover}!important;}
 
+            /* ── Inputs ── */
             .adm-input{
-                width:100%;background:${t.input}!important;color:${t.text}!important;
-                border:1.5px solid ${t.inputBorder}!important;border-radius:9px;
-                padding:9px 13px;font-size:13px;outline:none;
-                font-family:inherit;transition:border-color .18s,box-shadow .18s;box-sizing:border-box;
+                width:100%;
+                background:${dark?t.input:'#FFFFFF'}!important;
+                color:${t.text}!important;
+                border:1px solid ${t.inputBorder}!important;
+                border-radius:8px;padding:8px 12px;font-size:13px;
+                outline:none;font-family:inherit;
+                transition:border-color .15s,box-shadow .15s;box-sizing:border-box;
+                line-height:1.6;
             }
-            .adm-input:focus{border-color:${t.accent}!important;box-shadow:0 0 0 3px rgba(${t.accentRgb},.14)!important;}
+            .adm-input:focus{border-color:${t.accent}!important;box-shadow:0 0 0 3px rgba(${t.accentRgb},.12)!important;}
             .adm-input::placeholder{color:${t.textDim}!important;}
             textarea.adm-input{resize:vertical;line-height:1.6;}
             select.adm-input{cursor:pointer;}
             select.adm-input option{background:${t.card};color:${t.text};}
 
-            .adm-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${t.textMuted};margin-bottom:5px;}
+            /* ── Labels ── */
+            .adm-label{
+                display:block;font-size:11px;font-weight:700;
+                text-transform:uppercase;letter-spacing:.06em;
+                color:${dark?'#94A3B8':'#6B7280'};margin-bottom:6px;
+            }
 
+            /* ── Badges ── */
             .adm-badge{display:inline-flex;align-items:center;gap:4px;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;}
-            .adm-badge-green {background:rgba(16,185,129,.14);color:${dark?'#34D399':'#059669'};}
-            .adm-badge-blue  {background:rgba(${t.accentRgb},.14);color:${t.accent};}
-            .adm-badge-orange{background:rgba(245,158,11,.14);color:${dark?'#FCD34D':'#D97706'};}
-            .adm-badge-red   {background:rgba(239,68,68,.14);color:${dark?'#FCA5A5':'#DC2626'};}
-            .adm-badge-cyan  {background:rgba(6,182,212,.14);color:${dark?'#67E8F9':'#0891B2'};}
+            .adm-badge-green{background:${dark?'rgba(16,185,129,.18)':'rgba(5,150,105,.09)'};color:${dark?'#6EE7B7':'#065f46'};}
+            .adm-badge-blue{background:rgba(${t.accentRgb},.12);color:${dark?'#A5B4FC':'#4338CA'};}
+            .adm-badge-orange{background:${dark?'rgba(245,158,11,.18)':'rgba(217,119,6,.09)'};color:${dark?'#FCD34D':'#92400e'};}
+            .adm-badge-red{background:${dark?'rgba(239,68,68,.18)':'rgba(220,38,38,.08)'};color:${dark?'#FCA5A5':'#991b1b'};}
+            .adm-badge-cyan{background:${dark?'rgba(6,182,212,.18)':'rgba(8,145,178,.09)'};color:${dark?'#67E8F9':'#0c4a6e'};}
 
+            /* ── Sidebar (always dark) ── */
             .adm-sidebar-link{text-decoration:none!important;display:block;}
             .adm-nav-item{transition:all .14s ease;}
-            .adm-sidebar-link:hover .adm-nav-item:not(.adm-nav-active){background:rgba(99,102,241,.1)!important;color:#CBD5E1!important;}
-            .adm-nav-active{background:linear-gradient(135deg,${t.accent} 0%,${t.accentEnd} 100%)!important;color:#fff!important;box-shadow:0 3px 10px rgba(${t.accentRgb},.3)!important;}
+            .adm-sidebar-link:hover .adm-nav-item:not(.adm-nav-active){background:rgba(99,102,241,.12)!important;color:#E2E8F0!important;}
+            .adm-nav-active{background:linear-gradient(135deg,${t.accent} 0%,${t.accentEnd} 100%)!important;color:#fff!important;box-shadow:0 2px 8px rgba(${t.accentRgb},.28)!important;}
+            .adm-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${dark?t.sidebarGroupLabel:'#64748B'};padding:10px 10px 4px;}
+            .adm-divider{height:1px;background:${dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.06)'};margin:6px 4px;}
 
-            .adm-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${t.sidebarGroupLabel};padding:10px 10px 4px;}
-            .adm-divider{height:1px;background:${dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)'};margin:6px 4px;}
+            /* ── Table ── */
+            .adm-table-header{background:${dark?'rgba(255,255,255,0.04)':'#F8F9FB'}!important;}
+            .adm-table-row:hover{background:${dark?'rgba(99,102,241,.07)':'rgba(99,102,241,.04)'}!important;}
 
-            .adm-table-header{background:${dark?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.03)'}!important;}
-            .adm-table-row:hover{background:${t.rowHover}!important;}
-
-            @keyframes adm-fade-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-            .adm-page{animation:adm-fade-in .22s ease;}
-        `}</style>
-    );
+            /* ── Animation ── */
+            @keyframes adm-fade-in{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+            .adm-page{animation:adm-fade-in .2s ease;}
+        `;
+    }, [t, dark]);
+    return null;
 }
 
 
@@ -203,7 +225,7 @@ function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
 
 const NAV_FLAT = NAV.flatMap(g => g.items);
 
-function TopBar({ title, sidebarWidth, profile, unreadCount, t }) {
+function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark }) {
     const { auth } = usePage().props;
     const { dark: isDark, toggle: toggleTheme } = useTheme();
     const [search, setSearch] = useState('');
@@ -223,9 +245,9 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t }) {
     const avatarUrl = profile?.avatar ? (profile.avatar.startsWith('http') ? profile.avatar : '/' + profile.avatar) : null;
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: t.topbar, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.sidebarBorder}`, display: 'flex', alignItems: 'center', padding: '0 22px', gap: '14px', transition: 'left .22s ease' }}>
+        <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: dark ? t.topbar : '#FFFFFF', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', padding: '0 22px', gap: '14px', transition: 'left .22s ease' }}>
             <div style={{ flexShrink: 0 }}>
-                <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, lineHeight: 1.2 }}>{title}</div>
+            <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, lineHeight: 1.2 }}>{title}</div>
                 <div style={{ fontSize: '11px', color: t.textMuted, marginTop: '1px' }}>Home <span style={{ opacity: .4, margin: '0 3px' }}>›</span><span style={{ color: t.accent }}>{title}</span></div>
             </div>
             <div ref={searchRef} style={{ flex: 1, maxWidth: '320px', margin: '0 auto', position: 'relative' }}>
@@ -273,7 +295,7 @@ export default function AdminLayout({ children, title = 'Dashboard' }) {
     const [collapsed, setCollapsed] = useState(false);
     const sw = collapsed ? '60px' : '210px';
     const { auth, profile, unreadCount } = usePage().props;
-    const [dark, setDark] = useState(() => localStorage.getItem('admin-theme') !== 'light');
+    const [dark, setDark] = useState(() => localStorage.getItem('admin-theme') === 'dark');
     const t = dark ? tokens.dark : tokens.light;
 
     useEffect(() => {
@@ -288,7 +310,7 @@ export default function AdminLayout({ children, title = 'Dashboard' }) {
             <div style={{ display: 'flex', minHeight: '100vh', background: t.bg }}>
                 <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} unreadCount={unreadCount || 0} t={t} />
                 <div style={{ marginLeft: sw, flex: 1, display: 'flex', flexDirection: 'column', transition: 'margin-left .22s ease', minWidth: 0 }}>
-                    <TopBar title={title} sidebarWidth={sw} profile={profile} unreadCount={unreadCount || 0} t={t} />
+                    <TopBar title={title} sidebarWidth={sw} profile={profile} unreadCount={unreadCount || 0} t={t} dark={dark} />
                     <main style={{ marginTop: '60px', flex: 1, padding: '22px 26px', background: t.bg }}>
                         <div className="adm-page">{children}</div>
                     </main>

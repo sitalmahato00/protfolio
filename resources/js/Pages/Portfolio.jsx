@@ -185,7 +185,7 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                     <div className="hero-btns" style={{display:'flex',gap:'12px',flexWrap:'wrap',marginBottom:'36px'}}>
                         <a href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`} style={{background:'var(--gradient2)',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem',boxShadow:'0 4px 20px rgba(249,115,22,.3)'}}>Hire Me</a>
                         {resumeUrl && <a href={resumeUrl} target="_blank" rel="noreferrer" style={{background:'#fff',color:'var(--primary)',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem',border:'2px solid var(--primary)'}}>Download CV</a>}
-                        <a href={`https://wa.me/${(profile?.phone||'+9779704191610').replace(/\D/g,'')}`} target="_blank" rel="noreferrer" style={{background:'#1da958',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem'}}>💬 WhatsApp</a>
+                        <a href={`https://wa.me/${(profile?.phone||'+9779704191610').replace(/\D/g,'')}`} target="_blank" rel="noreferrer" style={{background:'#14793f',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem'}}>💬 WhatsApp</a>
                     </div>
                     <div className="hero-socials" style={{display:'flex',gap:'12px'}}>
                         {[{url:profile?.github||'https://github.com/sitalmahato00',icon:GH,title:'GitHub'},{url:profile?.linkedin||'https://linkedin.com/in/sitalmahato',icon:LI,title:'LinkedIn'},{url:`mailto:${profile?.email||'sitalmahato077@gmail.com'}`,icon:EM,title:'Email'},{url:`tel:${(profile?.phone||'+9779704191610').replace(/\s/g,'')}`,icon:PH,title:'Phone'}].map(s=>(
@@ -273,7 +273,7 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                         <div style={{marginTop:'20px',background:'#f0f4ff',borderRadius:'16px',padding:'20px'}}>
                             <div style={{fontWeight:'700',color:'var(--dark)',marginBottom:'10px'}}>Quick Features</div>
                             {['Websites from NPR 7,999','Delivery in 3–5 Days','Free Consultation','Founded 2082 BS · Nepal-based & Global'].map(f=>(
-                                <div key={f} style={{display:'flex',gap:'8px',alignItems:'center',fontSize:'.88rem',color:'var(--muted)',marginBottom:'6px'}}>
+                                <div key={f} style={{display:'flex',gap:'8px',alignItems:'center',fontSize:'.88rem',color:'#5e6d82',marginBottom:'6px'}}>
                                     <span style={{color:'var(--accent2)',fontWeight:'700'}}>✓</span> {f}
                                 </div>
                             ))}
