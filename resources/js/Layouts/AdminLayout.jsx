@@ -4,7 +4,6 @@ import { useState, createContext, useContext, useRef, useEffect } from 'react';
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const tokens = {
     dark: {
-        // Dark: deep navy bg, elevated slate cards — never pure black
         bg: '#0F172A', card: '#1E293B', cardSolid: '#1E293B',
         border: 'rgba(255,255,255,0.07)', borderHover: 'rgba(99,102,241,0.5)',
         text: '#F1F5F9', textMuted: '#CBD5E1', textDim: '#94A3B8',
@@ -19,7 +18,6 @@ const tokens = {
         success: '#10B981', warning: '#F59E0B', danger: '#EF4444', info: '#06B6D4',
     },
     light: {
-        // Screenshot-accurate light mode: subtle off-white bg, pure white cards
         bg: '#F5F7FA', card: '#FFFFFF', cardSolid: '#FFFFFF',
         border: '#E8ECF0', borderHover: 'rgba(99,102,241,0.35)',
         text: '#1A1A2E', textMuted: '#64748B', textDim: '#9CA3AF',
@@ -64,6 +62,21 @@ const NAV = [
           icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
     ]},
 ];
+
+// ─── useBreakpoint hook ────────────────────────────────────────────────────────
+function useBreakpoint() {
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+    const [isTablet, setIsTablet] = useState(() => window.innerWidth < 1024);
+    useEffect(() => {
+        const handler = () => {
+            setIsMobile(window.innerWidth < 768);
+            setIsTablet(window.innerWidth < 1024);
+        };
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    return { isMobile, isTablet };
+}
 
 // ─── Global Styles ─────────────────────────────────────────────────────────────
 function GlobalStyles({ t, dark }) {
@@ -161,18 +174,72 @@ function GlobalStyles({ t, dark }) {
             /* ── Animation ── */
             @keyframes adm-fade-in{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
             .adm-page{animation:adm-fade-in .2s ease;}
+
+            /* ── Responsive grids ── */
+            .adm-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+            .adm-grid-3{display:grid;grid-template-columns:1fr 1fr 260px;gap:14px;}
+            .adm-grid-3-equal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+            @media(max-width:1100px){
+                .adm-grid-4{grid-template-columns:repeat(2,1fr);}
+                .adm-grid-3{grid-template-columns:1fr 1fr;}
+                .adm-grid-3-equal{grid-template-columns:repeat(2,1fr);}
+            }
+            @media(max-width:640px){
+                .adm-grid-4{grid-template-columns:1fr 1fr;}
+                .adm-grid-3{grid-template-columns:1fr;}
+                .adm-grid-3-equal{grid-template-columns:1fr;}
+                .adm-btn-primary,.adm-btn-ghost{padding:7px 14px;font-size:12px;}
+            }
+            @media(max-width:420px){
+                .adm-grid-4{grid-template-columns:1fr;}
+            }
+
+            /* ── Sidebar overlay ── */
+            .adm-sidebar-overlay{
+                display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:190;
+                backdrop-filter:blur(2px);
+            }
+            .adm-sidebar-overlay.open{display:block;}
+
+            /* ── Mobile sidebar drawer ── */
+            @media(max-width:767px){
+                .adm-sidebar-desktop{display:none!important;}
+                .adm-sidebar-mobile{
+                    position:fixed;left:0;top:0;bottom:0;z-index:200;
+                    transform:translateX(-100%);transition:transform .25s ease;
+                    width:220px!important;
+                }
+                .adm-sidebar-mobile.open{transform:translateX(0);}
+            }
+            @media(min-width:768px){
+                .adm-sidebar-mobile{display:none!important;}
+                .adm-hamburger{display:none!important;}
+            }
+
+            /* ── Topbar responsive ── */
+            .adm-topbar-search{flex:1;max-width:320px;margin:0 auto;position:relative;}
+            @media(max-width:640px){
+                .adm-topbar-search{display:none;}
+                .adm-topbar-title-sub{display:none;}
+                .adm-topbar-user-name{display:none;}
+            }
+
+            /* ── Main content padding ── */
+            @media(max-width:640px){
+                .adm-main-content{padding:14px 12px!important;}
+            }
         `;
     }, [t, dark]);
     return null;
 }
 
-
-
-// ─── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
+// ─── Sidebar (shared inner content) ───────────────────────────────────────────
+function SidebarContent({ collapsed, setCollapsed, onClose, unreadCount, t }) {
     const { url } = usePage();
     return (
-        <aside style={{ width: collapsed ? '60px' : '210px', minHeight: '100vh', background: t.sidebar, position: 'fixed', left: 0, top: 0, bottom: 0, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${t.sidebarBorder}`, zIndex: 200, transition: 'width .22s ease', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '100%', background: t.sidebar, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${t.sidebarBorder}`, overflow: 'hidden' }}>
+            {/* Logo */}
             <div style={{ padding: '16px 12px', borderBottom: `1px solid ${t.sidebarBorder}`, flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                     <div style={{ width: '34px', height: '34px', flexShrink: 0, background: `linear-gradient(135deg,${t.accent},${t.accentEnd})`, borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '800', fontSize: '13px' }}>SM</div>
@@ -181,17 +248,28 @@ function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
                             <div style={{ color: '#F1F5F9', fontWeight: '700', fontSize: '13px', whiteSpace: 'nowrap' }}>Portfolio CMS</div>
                             <div style={{ color: t.sidebarGroupLabel, fontSize: '10px', marginTop: '1px', whiteSpace: 'nowrap' }}>Admin Dashboard</div>
                         </div>
-                        <button onClick={() => setCollapsed(true)} style={{ background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', padding: '3px', lineHeight: 0, flexShrink: 0 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+                        {/* Close button: only visible on desktop collapsed toggle; on mobile it's controlled by overlay */}
+                        {setCollapsed && <button onClick={() => setCollapsed(true)} style={{ background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', padding: '3px', lineHeight: 0, flexShrink: 0 }}>
+                            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>}
+                        {/* Mobile close X */}
+                        {onClose && <button onClick={onClose} style={{ background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', padding: '3px', lineHeight: 0, flexShrink: 0 }}>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        </button>}
                     </>}
                 </div>
-                {collapsed && <button onClick={() => setCollapsed(false)} style={{ marginTop: '10px', background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', lineHeight: 0 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>}
+                {collapsed && setCollapsed && <button onClick={() => setCollapsed(false)} style={{ marginTop: '10px', background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', lineHeight: 0 }}>
+                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </button>}
             </div>
+
+            {/* Nav */}
             <nav style={{ flex: 1, padding: '8px 6px', overflowY: 'auto', overflowX: 'hidden' }}>
                 {NAV.map(group => <div key={group.group} style={{ marginBottom: '4px' }}>
                     {!collapsed && <div style={{ padding: '8px 10px 3px', fontSize: '10px', fontWeight: '700', letterSpacing: '.1em', color: t.sidebarGroupLabel }}>{group.group}</div>}
                     {group.items.map(item => {
                         const active = url.startsWith(item.href);
-                        return <Link key={item.routeName} href={route(item.routeName)} className="adm-sidebar-link" title={collapsed ? item.label : undefined}>
+                        return <Link key={item.routeName} href={route(item.routeName)} className="adm-sidebar-link" title={collapsed ? item.label : undefined} onClick={onClose}>
                             <div className={active ? '' : 'adm-nav-item'} style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '9px 0' : '8px 10px', borderRadius: '9px', marginBottom: '1px', color: active ? '#fff' : t.sidebarText, fontWeight: active ? '600' : '400', fontSize: '13px', background: active ? `linear-gradient(135deg,${t.accent},${t.accentEnd})` : 'transparent', boxShadow: active ? `0 3px 10px rgba(${t.accentRgb},.28)` : 'none', transition: 'all .14s ease', position: 'relative' }}>
                                 <span style={{ flexShrink: 0, opacity: active ? 1 : 0.6, lineHeight: 0 }}>{item.icon}</span>
                                 {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
@@ -201,8 +279,10 @@ function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
                     })}
                 </div>)}
             </nav>
+
+            {/* Footer links */}
             <div style={{ padding: '8px 6px', borderTop: `1px solid ${t.sidebarBorder}`, flexShrink: 0 }}>
-                <Link href={route('home')} style={{ textDecoration: 'none', display: 'block' }}>
+                <Link href={route('home')} style={{ textDecoration: 'none', display: 'block' }} onClick={onClose}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '7px', padding: '7px 10px', borderRadius: '8px', color: t.textDim, fontSize: '12px', fontWeight: '500', marginBottom: '4px', cursor: 'pointer', transition: 'all .14s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#CBD5E1'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = t.textDim; }}>
@@ -219,13 +299,14 @@ function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
                     </div>
                 </Link>
             </div>
-        </aside>
+        </div>
     );
 }
 
 const NAV_FLAT = NAV.flatMap(g => g.items);
 
-function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark }) {
+// ─── TopBar ────────────────────────────────────────────────────────────────────
+function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark, onHamburger }) {
     const { auth } = usePage().props;
     const { dark: isDark, toggle: toggleTheme } = useTheme();
     const [search, setSearch] = useState('');
@@ -245,12 +326,21 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark }) {
     const avatarUrl = profile?.avatar ? (profile.avatar.startsWith('http') ? profile.avatar : '/' + profile.avatar) : null;
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: dark ? t.topbar : '#FFFFFF', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', padding: '0 22px', gap: '14px', transition: 'left .22s ease' }}>
+        <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: dark ? t.topbar : '#FFFFFF', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: '10px', transition: 'left .22s ease' }}>
+
+            {/* Hamburger (mobile only) */}
+            <button className="adm-hamburger" onClick={onHamburger} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', padding: '6px', lineHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', flexShrink: 0 }}>
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+
+            {/* Title */}
             <div style={{ flexShrink: 0 }}>
-            <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, lineHeight: 1.2 }}>{title}</div>
-                <div style={{ fontSize: '11px', color: t.textMuted, marginTop: '1px' }}>Home <span style={{ opacity: .4, margin: '0 3px' }}>›</span><span style={{ color: t.accent }}>{title}</span></div>
+                <div style={{ fontSize: '15px', fontWeight: '700', color: t.text, lineHeight: 1.2 }}>{title}</div>
+                <div className="adm-topbar-title-sub" style={{ fontSize: '11px', color: t.textMuted, marginTop: '1px' }}>Home <span style={{ opacity: .4, margin: '0 3px' }}>›</span><span style={{ color: t.accent }}>{title}</span></div>
             </div>
-            <div ref={searchRef} style={{ flex: 1, maxWidth: '320px', margin: '0 auto', position: 'relative' }}>
+
+            {/* Search */}
+            <div ref={searchRef} className="adm-topbar-search">
                 <span style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: t.textDim, lineHeight: 0 }}>
                     <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 </span>
@@ -269,7 +359,9 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark }) {
                     </div>
                 )}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+
+            {/* Right actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
                 <button onClick={toggleTheme} title={isDark ? 'Switch to Light' : 'Switch to Dark'} style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
                     {isDark ? <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
                 </button>
@@ -279,11 +371,11 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark }) {
                     </Link>
                     {unreadCount > 0 && <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#EF4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '9px', fontWeight: '700', lineHeight: '16px', border: `2px solid ${t.topbar}` }}>{unreadCount}</span>}
                 </div>
-                <Link href={route('admin.profile')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
+                <Link href={route('admin.profile')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
                     <div style={{ width: '28px', height: '28px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid rgba(${t.accentRgb},.4)` }}>
                         {avatarUrl ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg,${t.accent},${t.accentEnd})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: '700' }}>{auth?.user?.name?.[0]?.toUpperCase() || 'A'}</div>}
                     </div>
-                    {auth?.user && <div style={{ lineHeight: 1.2 }}><div style={{ fontSize: '12px', fontWeight: '600', color: t.text, whiteSpace: 'nowrap' }}>{auth.user.name}</div><div style={{ fontSize: '10px', color: t.accent }}>Admin</div></div>}
+                    <span className="adm-topbar-user-name" style={{ fontSize: '12px', fontWeight: '600', color: t.text, whiteSpace: 'nowrap' }}>{auth?.user?.name}</span>
                 </Link>
             </div>
         </div>
@@ -293,14 +385,21 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark }) {
 // ─── Root Layout ────────────────────────────────────────────────────────────────
 export default function AdminLayout({ children, title = 'Dashboard' }) {
     const [collapsed, setCollapsed] = useState(false);
-    const sw = collapsed ? '60px' : '210px';
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const { isMobile } = useBreakpoint();
+    const sw = isMobile ? '0px' : (collapsed ? '60px' : '210px');
     const { auth, profile, unreadCount } = usePage().props;
     const [dark, setDark] = useState(() => localStorage.getItem('admin-theme') === 'dark');
     const t = dark ? tokens.dark : tokens.light;
 
+    // Close mobile sidebar on resize to desktop
+    useEffect(() => { if (!isMobile) setMobileOpen(false); }, [isMobile]);
+
+    // Prevent body scroll when drawer open
     useEffect(() => {
-        localStorage.setItem('admin-theme', dark ? 'dark' : 'light');
-    }, [dark]);
+        document.body.style.overflow = mobileOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [mobileOpen]);
 
     function toggleTheme() { setDark(d => !d); }
 
@@ -308,10 +407,24 @@ export default function AdminLayout({ children, title = 'Dashboard' }) {
         <ThemeContext.Provider value={{ dark, toggle: toggleTheme, t }}>
             <GlobalStyles t={t} dark={dark} />
             <div style={{ display: 'flex', minHeight: '100vh', background: t.bg }}>
-                <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} unreadCount={unreadCount || 0} t={t} />
+
+                {/* ── Desktop sidebar ── */}
+                <aside className="adm-sidebar-desktop" style={{ width: collapsed ? '60px' : '210px', minHeight: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 200, transition: 'width .22s ease' }}>
+                    <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} onClose={null} unreadCount={unreadCount || 0} t={t} />
+                </aside>
+
+                {/* ── Mobile sidebar overlay ── */}
+                <div className={`adm-sidebar-overlay${mobileOpen ? ' open' : ''}`} onClick={() => setMobileOpen(false)} />
+
+                {/* ── Mobile sidebar drawer ── */}
+                <aside className={`adm-sidebar-mobile${mobileOpen ? ' open' : ''}`}>
+                    <SidebarContent collapsed={false} setCollapsed={null} onClose={() => setMobileOpen(false)} unreadCount={unreadCount || 0} t={t} />
+                </aside>
+
+                {/* ── Main area ── */}
                 <div style={{ marginLeft: sw, flex: 1, display: 'flex', flexDirection: 'column', transition: 'margin-left .22s ease', minWidth: 0 }}>
-                    <TopBar title={title} sidebarWidth={sw} profile={profile} unreadCount={unreadCount || 0} t={t} dark={dark} />
-                    <main style={{ marginTop: '60px', flex: 1, padding: '22px 26px', background: t.bg }}>
+                    <TopBar title={title} sidebarWidth={sw} profile={profile} unreadCount={unreadCount || 0} t={t} dark={dark} onHamburger={() => setMobileOpen(true)} />
+                    <main className="adm-main-content" style={{ marginTop: '60px', flex: 1, padding: '22px 26px', background: t.bg }}>
                         <div className="adm-page">{children}</div>
                     </main>
                 </div>

@@ -401,12 +401,11 @@ export default function AdminDashboard() {
             <Head title="Admin Dashboard" />
 
             {/* ── KPI Row ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '18px' }}>
+            <div className="adm-grid-4" style={{ marginBottom: '18px' }}>
                 {kpis.map(k => <KpiCard key={k.label} {...k} t={t} dark={dark} />)}
             </div>
 
-            {/* ── Charts Row ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 260px', gap: '14px', marginBottom: '14px' }}>
+            <div className="adm-grid-3" style={{ marginBottom: '14px' }}>
 
                 {/* Messages chart */}
                 <Card
@@ -445,8 +444,7 @@ export default function AdminDashboard() {
                 </Card>
             </div>
 
-            {/* ── Bottom Row ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+            <div className="adm-grid-3-equal">
 
                 {/* Skills donut */}
                 <Card title="Skills by Category" t={t} dark={dark}>
