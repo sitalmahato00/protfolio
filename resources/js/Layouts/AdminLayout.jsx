@@ -325,7 +325,11 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark, onHamburge
         ? NAV_FLAT.filter(item => item.label.toLowerCase().includes(search.toLowerCase()))
         : [];
 
-    const avatarUrl = profile?.avatar ? (profile.avatar.startsWith('http') ? profile.avatar : '/' + profile.avatar) : null;
+    const avatarUrl = profile?.avatar
+        ? (profile.avatar.startsWith('http')
+            ? profile.avatar
+            : '/' + profile.avatar + (profile.updated_at ? '?v=' + new Date(profile.updated_at).getTime() : ''))
+        : null;
 
     return (
         <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: dark ? t.topbar : '#FFFFFF', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: '10px', transition: 'left .22s ease' }}>
@@ -374,8 +378,13 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark, onHamburge
                     {unreadCount > 0 && <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#EF4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '9px', fontWeight: '700', lineHeight: '16px', border: `2px solid ${t.topbar}` }}>{unreadCount}</span>}
                 </div>
                 <Link href={route('admin.profile')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid rgba(${t.accentRgb},.4)` }}>
-                        {avatarUrl ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg,${t.accent},${t.accentEnd})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: '700' }}>{auth?.user?.name?.[0]?.toUpperCase() || 'A'}</div>}
+                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid rgba(${t.accentRgb},.4)`, background: `linear-gradient(135deg,${t.accent},${t.accentEnd})` }}>
+                        {avatarUrl
+                            ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                onError={e => { e.currentTarget.style.display = 'none'; e.currentTarget.parentNode.style.display = 'flex'; e.currentTarget.parentNode.style.alignItems = 'center'; e.currentTarget.parentNode.style.justifyContent = 'center'; }}
+                              />
+                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: '700' }}>{auth?.user?.name?.[0]?.toUpperCase() || 'A'}</div>
+                        }
                     </div>
                     <span className="adm-topbar-user-name" style={{ fontSize: '12px', fontWeight: '600', color: t.text, whiteSpace: 'nowrap' }}>{auth?.user?.name}</span>
                 </Link>
