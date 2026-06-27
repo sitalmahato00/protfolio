@@ -176,6 +176,7 @@ function GlobalStyles({ t, dark }) {
             .adm-page{animation:adm-fade-in .2s ease;}
 
             /* ── Responsive grids ── */
+            .adm-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
             .adm-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
             .adm-grid-3{display:grid;grid-template-columns:1fr 1fr 260px;gap:14px;}
             .adm-grid-3-equal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -186,6 +187,7 @@ function GlobalStyles({ t, dark }) {
                 .adm-grid-3-equal{grid-template-columns:repeat(2,1fr);}
             }
             @media(max-width:640px){
+                .adm-grid-2{grid-template-columns:1fr;}
                 .adm-grid-4{grid-template-columns:1fr 1fr;}
                 .adm-grid-3{grid-template-columns:1fr;}
                 .adm-grid-3-equal{grid-template-columns:1fr;}

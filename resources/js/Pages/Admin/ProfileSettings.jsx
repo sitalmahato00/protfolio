@@ -8,13 +8,15 @@ const TABS = ['Personal', 'About & Typewriter', 'Media', 'Social Links'];
 
 function TabBar({ active, setActive, t }) {
     return (
-        <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', background: t.navHover, borderRadius: '12px', padding: '4px', width: 'fit-content' }}>
-            {TABS.map(tab => (
-                <button key={tab} onClick={() => setActive(tab)}
-                    style={{ padding: '8px 18px', borderRadius: '9px', border: 'none', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', background: active === tab ? t.cardSolid : 'transparent', color: active === tab ? t.text : t.textMuted, boxShadow: active === tab ? `0 1px 6px rgba(0,0,0,0.1)` : 'none' }}>
-                    {tab}
-                </button>
-            ))}
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: '24px', paddingBottom: '2px' }}>
+            <div style={{ display: 'flex', gap: '4px', background: t.navHover, borderRadius: '12px', padding: '4px', width: 'max-content', minWidth: '100%' }}>
+                {TABS.map(tab => (
+                    <button key={tab} onClick={() => setActive(tab)}
+                        style={{ padding: '8px 16px', borderRadius: '9px', border: 'none', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', background: active === tab ? t.cardSolid : 'transparent', color: active === tab ? t.text : t.textMuted, boxShadow: active === tab ? `0 1px 6px rgba(0,0,0,0.1)` : 'none', whiteSpace: 'nowrap' }}>
+                        {tab}
+                    </button>
+                ))}
+            </div>
         </div>
     );
 }
@@ -107,7 +109,7 @@ export default function AdminProfileSettings() {
             {tab === 'Personal' && (
                 <div className="adm-card" style={{ padding: '28px' }}>
                     <div style={{ fontSize: '14px', fontWeight: '700', color: t.text, marginBottom: '20px' }}>Personal Information</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="adm-grid-2" style={{ gap: '16px' }}>
                         <Field label="Full Name"><input className="adm-input" value={form.name || ''} onChange={e => setF('name', e.target.value)} placeholder="Sital Mahato" /></Field>
                         <Field label="Professional Title"><input className="adm-input" value={form.title || ''} onChange={e => setF('title', e.target.value)} placeholder="Full Stack Developer" /></Field>
                         <Field label="Email Address"><input className="adm-input" type="email" value={form.email || ''} onChange={e => setF('email', e.target.value)} placeholder="you@example.com" /></Field>
@@ -141,7 +143,7 @@ export default function AdminProfileSettings() {
             )}
 
             {tab === 'Media' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="adm-grid-2" style={{ gap: '16px' }}>
                     {/* Avatar */}
                     <div className="adm-card" style={{ padding: '28px' }}>
                         <div style={{ fontSize: '14px', fontWeight: '700', color: t.text, marginBottom: '20px' }}>Profile Photo</div>
@@ -192,7 +194,7 @@ export default function AdminProfileSettings() {
             {tab === 'Social Links' && (
                 <div className="adm-card" style={{ padding: '28px' }}>
                     <div style={{ fontSize: '14px', fontWeight: '700', color: t.text, marginBottom: '20px' }}>Social Profiles</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="adm-grid-2" style={{ gap: '16px' }}>
                         {[
                             { key: 'github', label: 'GitHub URL', icon: '🐙', ph: 'https://github.com/username' },
                             { key: 'linkedin', label: 'LinkedIn URL', icon: '💼', ph: 'https://linkedin.com/in/username' },

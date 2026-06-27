@@ -1,10 +1,20 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCachedData } from '@/hooks/useCachedData';
 
 const MODULE_COLOR = '#7C3AED';
+
+function useIsMobile(bp = 640) {
+    const [mobile, setMobile] = useState(window.innerWidth <= bp);
+    useEffect(() => {
+        const fn = () => setMobile(window.innerWidth <= bp);
+        window.addEventListener('resize', fn);
+        return () => window.removeEventListener('resize', fn);
+    }, [bp]);
+    return mobile;
+}
 
 function tagColor(tag) {
     const t = (tag || '').toLowerCase();
@@ -20,63 +30,49 @@ function tagColor(tag) {
     return { bg: 'rgba(100,116,139,0.12)', color: '#64748B' };
 }
 
-const statusConfig = {
-    published: { label: 'Published', color: '#10B981', bg: 'rgba(16,185,129,0.12)' },
-    draft:     { label: 'Draft',     color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-    archived:  { label: 'Archived',  color: '#EF4444', bg: 'rgba(239,68,68,0.12)' },
-};
-
-function StatusPill({ status = 'published' }) {
-    const s = statusConfig[status] || statusConfig.published;
-    return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: s.bg, color: s.color }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: s.color, boxShadow: `0 0 5px ${s.color}` }} />
-            {s.label}
-        </span>
-    );
-}
-
 function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
     const cardBg = dark ? '#1E293B' : '#FFFFFF';
     return (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div style={{ background: cardBg, border: `1px solid ${t.border}`, borderLeft: `5px solid ${MODULE_COLOR}`, borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.55)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 500, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '0' }}>
+            <div style={{ background: cardBg, border: `1px solid ${t.border}`, borderLeft: `5px solid ${MODULE_COLOR}`, borderRadius: '20px 20px 0 0', padding: '24px 22px', width: '100%', maxWidth: '640px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 -12px 60px rgba(0,0,0,0.4)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <div>
-                        <div style={{ fontSize: '18px', fontWeight: '800', color: dark ? '#F8FAFC' : '#111827' }}>{editing ? 'Edit Project' : 'New Project'}</div>
-                        <div style={{ fontSize: '13px', color: t.textMuted, marginTop: '2px' }}>{editing ? 'Update project details' : 'Add a new portfolio project'}</div>
+                        <div style={{ fontSize: '17px', fontWeight: '800', color: dark ? '#F8FAFC' : '#111827' }}>{editing ? 'Edit Project' : 'New Project'}</div>
+                        <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>{editing ? 'Update project details' : 'Add a new portfolio project'}</div>
                     </div>
                     <button onClick={onCancel} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(100,116,139,0.12)', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: '18px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                    <div style={{ gridColumn: '1/-1' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div>
                         <label className="adm-label">Project Title *</label>
                         <input className="adm-input" placeholder="e.g. E-Commerce Platform" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
                     </div>
-                    <div style={{ gridColumn: '1/-1' }}>
+                    <div>
                         <label className="adm-label">Description</label>
                         <textarea className="adm-input" rows={3} placeholder="Describe what this project does..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                     </div>
-                    <div style={{ gridColumn: '1/-1' }}>
+                    <div>
                         <label className="adm-label">Image Path</label>
                         <input className="adm-input" placeholder="images/project.png or https://..." value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} />
                         {imgUrl(form.image) && <img src={imgUrl(form.image)} alt="preview" style={{ marginTop: '8px', height: '80px', borderRadius: '10px', objectFit: 'cover', border: `1px solid ${t.border}` }} />}
                     </div>
-                    <div style={{ gridColumn: '1/-1' }}>
+                    <div>
                         <label className="adm-label">Tags (comma separated)</label>
                         <input className="adm-input" placeholder="React, Laravel, Node.js, TailwindCSS" value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} />
                     </div>
-                    <div>
-                        <label className="adm-label">Live URL</label>
-                        <input className="adm-input" placeholder="https://example.com" value={form.live_url} onChange={e => setForm({ ...form, live_url: e.target.value })} />
-                    </div>
-                    <div>
-                        <label className="adm-label">GitHub URL</label>
-                        <input className="adm-input" placeholder="https://github.com/..." value={form.github_url} onChange={e => setForm({ ...form, github_url: e.target.value })} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                            <label className="adm-label">Live URL</label>
+                            <input className="adm-input" placeholder="https://example.com" value={form.live_url} onChange={e => setForm({ ...form, live_url: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="adm-label">GitHub URL</label>
+                            <input className="adm-input" placeholder="https://github.com/..." value={form.github_url} onChange={e => setForm({ ...form, github_url: e.target.value })} />
+                        </div>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '24px', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
                     <button className="adm-btn-ghost" onClick={onCancel}>Cancel</button>
                     <button className="adm-btn-primary" onClick={onSave}>{editing ? 'Update Project' : 'Create Project'}</button>
                 </div>
@@ -85,8 +81,59 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
     );
 }
 
+/* ── Mobile project card ── */
+function ProjectCard({ p, selected, onToggle, onEdit, onRemove, imgUrl, dark, t }) {
+    const cardBg = dark ? '#1E293B' : '#FFFFFF';
+    const cardBorder = dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid #E8ECF2';
+    return (
+        <div style={{ background: cardBg, border: selected ? `1px solid ${MODULE_COLOR}` : cardBorder, borderLeft: `4px solid ${MODULE_COLOR}`, borderRadius: '14px', overflow: 'hidden', boxShadow: dark ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.06)', transition: 'all .2s' }}>
+            {/* Image */}
+            {imgUrl(p.image)
+                ? <img src={imgUrl(p.image)} alt={p.title} style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block' }} />
+                : <div style={{ width: '100%', height: '80px', background: 'rgba(124,58,237,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📁</div>
+            }
+            <div style={{ padding: '14px' }}>
+                {/* Title */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
+                    <input type="checkbox" checked={selected} onChange={onToggle} style={{ accentColor: MODULE_COLOR, width: '15px', height: '15px', marginTop: '3px', flexShrink: 0 }} />
+                    <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: dark ? '#F8FAFC' : '#111827', lineHeight: 1.3 }}>{p.title}</div>
+                        <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '3px', lineHeight: 1.4 }}>{p.description}</div>
+                    </div>
+                </div>
+                {/* Tags */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
+                    {(p.tags || []).slice(0, 4).map(tag => {
+                        const { bg, color } = tagColor(tag);
+                        return <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', background: bg, color }}>{tag}</span>;
+                    })}
+                    {(p.tags || []).length > 4 && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 7px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', background: dark ? 'rgba(51,65,85,0.5)' : 'rgba(148,163,184,0.15)', color: t.textMuted }}>+{p.tags.length - 4}</span>}
+                </div>
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    {p.live_url && p.live_url !== '#' && (
+                        <a href={p.live_url} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '8px', borderRadius: '9px', background: 'rgba(6,182,212,0.12)', border: 'none', color: '#06B6D4', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}>
+                            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            Live
+                        </a>
+                    )}
+                    <button onClick={() => onEdit(p)} style={{ flex: 1, padding: '8px', borderRadius: '9px', background: 'rgba(245,158,11,0.12)', border: 'none', color: '#F59E0B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}>
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Edit
+                    </button>
+                    <button onClick={() => onRemove(p.id)} style={{ flex: 1, padding: '8px', borderRadius: '9px', background: 'rgba(239,68,68,0.12)', border: 'none', color: '#EF4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}>
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function AdminProjects() {
     const { t, dark } = useTheme();
+    const isMobile = useIsMobile(640);
     const blank = { title: '', description: '', image: '', tags: '', live_url: '', github_url: '' };
     const { data: projects = [], refresh } = useCachedData('projects', () => axios.get('/api/projects').then(r => r.data));
     const [editing, setEditing] = useState(null);
@@ -132,95 +179,119 @@ export default function AdminProjects() {
             {showModal && <ProjectModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
 
             {/* Toolbar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: 1, minWidth: '200px', maxWidth: '340px' }}>
-                    <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: t.textDim, lineHeight: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: t.textDim, lineHeight: 0 }}>
                         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     </span>
-                    <input className="adm-input" style={{ paddingLeft: '38px', borderRadius: '50px', fontSize: '13px' }} placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)} />
+                    <input className="adm-input" style={{ paddingLeft: '36px', borderRadius: '50px', fontSize: '13px' }} placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)} />
                 </div>
                 {selected.length > 0 && (
-                    <button className="adm-btn-ghost" onClick={bulkDelete} style={{ borderColor: 'rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '13px' }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ marginRight: '6px' }}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                        Delete {selected.length} selected
+                    <button className="adm-btn-ghost" onClick={bulkDelete} style={{ borderColor: 'rgba(239,68,68,0.35)', color: '#EF4444', fontSize: '12px', padding: '8px 12px' }}>
+                        🗑 Delete {selected.length}
                     </button>
                 )}
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '13px', color: t.textMuted, fontWeight: '500' }}>{filtered.length} projects</span>
-                    <button className="adm-btn-primary" onClick={openCreate}>+ New Project</button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: t.textMuted, fontWeight: '500', whiteSpace: 'nowrap' }}>{filtered.length} projects</span>
+                    <button className="adm-btn-primary" onClick={openCreate} style={{ whiteSpace: 'nowrap' }}>+ New Project</button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div style={{
-                background: cardBg,
-                borderRadius: '10px',
-                border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : '#E8ECF2'}`,
-                borderLeft: `4px solid ${MODULE_COLOR}`,
-                boxShadow: cardShadow,
-                overflow: 'hidden',
-            }}>
-                {/* Sticky Header */}
-                <div style={{ display: 'grid', gridTemplateColumns: '36px 68px 1fr 180px 110px 100px', gap: '14px', padding: '14px 22px', background: headerBg, borderBottom: `1px solid ${dark ? 'rgba(51,65,85,0.6)' : 'rgba(229,231,235,0.8)'}`, position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(12px)' }}>
-                    <div><input type="checkbox" onChange={e => setSelected(e.target.checked ? filtered.map(p => p.id) : [])} checked={selected.length === filtered.length && filtered.length > 0} style={{ accentColor: MODULE_COLOR, width: '15px', height: '15px' }} /></div>
-                    {['Image','Project','Tags','Status','Actions'].map(h => (
-                        <div key={h} style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: dark ? '#94A3B8' : '#64748B' }}>{h}</div>
+            {/* ── MOBILE: card grid ── */}
+            {isMobile ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {filtered.length === 0 && (
+                        <div style={{ background: cardBg, borderRadius: '14px', padding: '60px 24px', textAlign: 'center', color: t.textMuted }}>
+                            <div style={{ fontSize: '32px', marginBottom: '10px' }}>📁</div>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: dark ? '#F8FAFC' : '#111827', marginBottom: '6px' }}>No projects yet</div>
+                            <div style={{ fontSize: '12px' }}>Add your first project to get started</div>
+                        </div>
+                    )}
+                    {filtered.map(p => (
+                        <ProjectCard
+                            key={p.id}
+                            p={p}
+                            selected={selected.includes(p.id)}
+                            onToggle={() => toggleSelect(p.id)}
+                            onEdit={openEdit}
+                            onRemove={remove}
+                            imgUrl={imgUrl}
+                            dark={dark}
+                            t={t}
+                        />
                     ))}
                 </div>
-
-                {filtered.length === 0 && (
-                    <div style={{ padding: '70px', textAlign: 'center', color: t.textMuted }}>
-                        <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>📁</div>
-                        <div style={{ fontSize: '15px', fontWeight: '600', color: dark ? '#F8FAFC' : '#111827', marginBottom: '6px' }}>No projects yet</div>
-                        <div style={{ fontSize: '13px', color: t.textMuted }}>Add your first project to get started</div>
+            ) : (
+                /* ── DESKTOP: table view ── */
+                <div style={{
+                    background: cardBg,
+                    borderRadius: '10px',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : '#E8ECF2'}`,
+                    borderLeft: `4px solid ${MODULE_COLOR}`,
+                    boxShadow: cardShadow,
+                    overflow: 'hidden',
+                }}>
+                    {/* Sticky Header */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '36px 68px 1fr 180px 100px', gap: '14px', padding: '14px 22px', background: headerBg, borderBottom: `1px solid ${dark ? 'rgba(51,65,85,0.6)' : 'rgba(229,231,235,0.8)'}`, position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(12px)' }}>
+                        <div><input type="checkbox" onChange={e => setSelected(e.target.checked ? filtered.map(p => p.id) : [])} checked={selected.length === filtered.length && filtered.length > 0} style={{ accentColor: MODULE_COLOR, width: '15px', height: '15px' }} /></div>
+                        {['Image', 'Project', 'Tags', 'Actions'].map(h => (
+                            <div key={h} style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: dark ? '#94A3B8' : '#64748B' }}>{h}</div>
+                        ))}
                     </div>
-                )}
 
-                {filtered.map((p, i) => (
-                    <div key={p.id}
-                        style={{ display: 'grid', gridTemplateColumns: '36px 68px 1fr 180px 110px 100px', gap: '14px', padding: '0 22px', minHeight: '66px', alignItems: 'center', borderBottom: `1px solid ${dark ? 'rgba(51,65,85,0.4)' : 'rgba(229,231,235,0.6)'}`, background: selected.includes(p.id) ? `rgba(124,58,237,0.06)` : (i % 2 === 1 ? zebraBg : 'transparent'), transition: 'all 0.2s ease' }}
-                        onMouseEnter={e => { if (!selected.includes(p.id)) e.currentTarget.style.background = dark ? 'rgba(124,58,237,0.08)' : 'rgba(124,58,237,0.04)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = selected.includes(p.id) ? 'rgba(124,58,237,0.06)' : (i % 2 === 1 ? zebraBg : 'transparent'); }}>
-                        <div><input type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelect(p.id)} style={{ accentColor: MODULE_COLOR, width: '15px', height: '15px' }} /></div>
-                        <div>
-                            {imgUrl(p.image)
-                                ? <img src={imgUrl(p.image)} alt={p.title} style={{ width: '56px', height: '42px', objectFit: 'cover', borderRadius: '10px', border: `1px solid ${dark ? 'rgba(51,65,85,0.6)' : 'rgba(229,231,235,0.8)'}` }} />
-                                : <div style={{ width: '56px', height: '42px', background: 'rgba(124,58,237,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>📁</div>}
+                    {filtered.length === 0 && (
+                        <div style={{ padding: '70px', textAlign: 'center', color: t.textMuted }}>
+                            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>📁</div>
+                            <div style={{ fontSize: '15px', fontWeight: '600', color: dark ? '#F8FAFC' : '#111827', marginBottom: '6px' }}>No projects yet</div>
+                            <div style={{ fontSize: '13px', color: t.textMuted }}>Add your first project to get started</div>
                         </div>
-                        <div>
-                            <div style={{ fontSize: '14px', fontWeight: '600', color: dark ? '#F8FAFC' : '#111827', lineHeight: 1.3 }}>{p.title}</div>
-                            <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '260px', lineHeight: 1.4 }}>{p.description}</div>
+                    )}
+
+                    {filtered.map((p, i) => (
+                        <div key={p.id}
+                            style={{ display: 'grid', gridTemplateColumns: '36px 68px 1fr 180px 100px', gap: '14px', padding: '0 22px', minHeight: '66px', alignItems: 'center', borderBottom: `1px solid ${dark ? 'rgba(51,65,85,0.4)' : 'rgba(229,231,235,0.6)'}`, background: selected.includes(p.id) ? `rgba(124,58,237,0.06)` : (i % 2 === 1 ? zebraBg : 'transparent'), transition: 'all 0.2s ease' }}
+                            onMouseEnter={e => { if (!selected.includes(p.id)) e.currentTarget.style.background = dark ? 'rgba(124,58,237,0.08)' : 'rgba(124,58,237,0.04)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = selected.includes(p.id) ? 'rgba(124,58,237,0.06)' : (i % 2 === 1 ? zebraBg : 'transparent'); }}>
+                            <div><input type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelect(p.id)} style={{ accentColor: MODULE_COLOR, width: '15px', height: '15px' }} /></div>
+                            <div>
+                                {imgUrl(p.image)
+                                    ? <img src={imgUrl(p.image)} alt={p.title} style={{ width: '56px', height: '42px', objectFit: 'cover', borderRadius: '10px', border: `1px solid ${dark ? 'rgba(51,65,85,0.6)' : 'rgba(229,231,235,0.8)'}` }} />
+                                    : <div style={{ width: '56px', height: '42px', background: 'rgba(124,58,237,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>📁</div>}
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '14px', fontWeight: '600', color: dark ? '#F8FAFC' : '#111827', lineHeight: 1.3 }}>{p.title}</div>
+                                <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '260px', lineHeight: 1.4 }}>{p.description}</div>
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                {(p.tags || []).slice(0, 3).map(tag => {
+                                    const { bg, color } = tagColor(tag);
+                                    return <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '700', background: bg, color }}>{tag}</span>;
+                                })}
+                                {(p.tags || []).length > 3 && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 7px', borderRadius: '6px', fontSize: '10px', fontWeight: '600', background: dark ? 'rgba(51,65,85,0.5)' : 'rgba(148,163,184,0.15)', color: t.textMuted }}>+{p.tags.length - 3}</span>}
+                            </div>
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                                {p.live_url && p.live_url !== '#' && (
+                                    <a href={p.live_url} target="_blank" rel="noreferrer" title="Preview" style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(6,182,212,0.12)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4', textDecoration: 'none', transition: 'all 0.2s' }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(6,182,212,0.2)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(6,182,212,0.12)'}>
+                                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                    </a>
+                                )}
+                                <button onClick={() => openEdit(p)} title="Edit" style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(245,158,11,0.12)', border: 'none', color: '#F59E0B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.22)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(245,158,11,0.12)'}>
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <button onClick={() => remove(p.id)} title="Delete" style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(239,68,68,0.12)', border: 'none', color: '#EF4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.22)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.12)'}>
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                </button>
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                            {(p.tags || []).slice(0, 3).map(tag => {
-                                const { bg, color } = tagColor(tag);
-                                return <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '700', background: bg, color }}>{tag}</span>;
-                            })}
-                            {(p.tags || []).length > 3 && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 7px', borderRadius: '6px', fontSize: '10px', fontWeight: '600', background: dark ? 'rgba(51,65,85,0.5)' : 'rgba(148,163,184,0.15)', color: t.textMuted }}>+{p.tags.length - 3}</span>}
-                        </div>
-                        <div><StatusPill status="published" /></div>
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                            {p.live_url && p.live_url !== '#' && (
-                                <a href={p.live_url} target="_blank" rel="noreferrer" title="Preview" style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(6,182,212,0.12)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4', textDecoration: 'none', transition: 'all 0.2s' }}
-                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(6,182,212,0.2)'}
-                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(6,182,212,0.12)'}>
-                                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                </a>
-                            )}
-                            <button onClick={() => openEdit(p)} title="Edit" style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(245,158,11,0.12)', border: 'none', color: '#F59E0B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.22)'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(245,158,11,0.12)'}>
-                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
-                            <button onClick={() => remove(p.id)} title="Delete" style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(239,68,68,0.12)', border: 'none', color: '#EF4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.22)'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.12)'}>
-                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </>
     );
 }
