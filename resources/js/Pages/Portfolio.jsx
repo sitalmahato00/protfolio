@@ -42,8 +42,8 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
     const imgUrl = s => {
         if (!s) return null;
         if (s.startsWith('http')) return s;
-        const filename = s.replace(/^images\//, '').replace(/\.(png|jpg|jpeg)$/i, '.webp');
-        return assetImgMap[filename] || '/' + s.replace(/\.(png|jpg|jpeg)$/i, '.webp');
+        const filename = s.replace(/^images\//, '');
+        return assetImgMap[filename] || '/' + s;
     };
     const avatarUrl = imgUrl(profile?.avatar);
     const resumeUrl = profile?.resume
