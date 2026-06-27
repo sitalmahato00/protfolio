@@ -1,5 +1,4 @@
-import AdminLayout from '@/Layouts/AdminLayout';
-import { useTheme } from '@/Layouts/AdminLayout';
+import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -112,17 +111,18 @@ export default function AdminExperiences() {
     const [showModal, setShowModal] = useState(false);
     const [tab, setTab] = useState('work');
 
-    useEffect(() => { fetchExp(); }, []);
-    function fetchExp() { axios.get('/api/experiences').then(r => setExperiences(r.data)); }
+    useEffect(() => { axios.get('/api/experiences').then(r => setExperiences(r.data)); }, []);
+
+    function load() { axios.get('/api/experiences').then(r => setExperiences(r.data)); }
     function openCreate() { setEditing(null); setForm({ ...blank, type: tab }); setShowModal(true); }
     function openEdit(e) { setEditing(e.id); setForm({ ...e, tags: e.tags?.join(', ') || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
     function save() {
         const data = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
         const req = editing ? axios.put(`/api/experiences/${editing}`, data) : axios.post('/api/experiences', data);
-        req.then(() => { closeModal(); fetchExp(); });
+        req.then(() => { closeModal(); load(); });
     }
-    function remove(id) { if (confirm('Delete?')) axios.delete(`/api/experiences/${id}`).then(fetchExp); }
+    function remove(id) { if (confirm('Delete?')) axios.delete(`/api/experiences/${id}`).then(load); }
 
     const work = experiences.filter(e => e.type === 'work');
     const education = experiences.filter(e => e.type === 'education');

@@ -143,3 +143,116 @@ function GlobalStyles({ t, dark }) {
         `}</style>
     );
 }
+
+
+
+// ─── Sidebar ────────────────────────────────────────────────────────────────────
+function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
+    const { url } = usePage();
+    return (
+        <aside style={{ width: collapsed ? '60px' : '210px', minHeight: '100vh', background: t.sidebar, position: 'fixed', left: 0, top: 0, bottom: 0, display: 'flex', flexDirection: 'column', borderRight: `1px solid ${t.sidebarBorder}`, zIndex: 200, transition: 'width .22s ease', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 12px', borderBottom: `1px solid ${t.sidebarBorder}`, flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                    <div style={{ width: '34px', height: '34px', flexShrink: 0, background: `linear-gradient(135deg,${t.accent},${t.accentEnd})`, borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '800', fontSize: '13px' }}>SM</div>
+                    {!collapsed && <>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                            <div style={{ color: '#F1F5F9', fontWeight: '700', fontSize: '13px', whiteSpace: 'nowrap' }}>Portfolio CMS</div>
+                            <div style={{ color: t.sidebarGroupLabel, fontSize: '10px', marginTop: '1px', whiteSpace: 'nowrap' }}>Admin Dashboard</div>
+                        </div>
+                        <button onClick={() => setCollapsed(true)} style={{ background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', padding: '3px', lineHeight: 0, flexShrink: 0 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+                    </>}
+                </div>
+                {collapsed && <button onClick={() => setCollapsed(false)} style={{ marginTop: '10px', background: 'none', border: 'none', color: t.sidebarGroupLabel, cursor: 'pointer', width: '100%', display: 'flex', justifyContent: 'center', lineHeight: 0 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>}
+            </div>
+            <nav style={{ flex: 1, padding: '8px 6px', overflowY: 'auto', overflowX: 'hidden' }}>
+                {NAV.map(group => <div key={group.group} style={{ marginBottom: '4px' }}>
+                    {!collapsed && <div style={{ padding: '8px 10px 3px', fontSize: '10px', fontWeight: '700', letterSpacing: '.1em', color: t.sidebarGroupLabel }}>{group.group}</div>}
+                    {group.items.map(item => {
+                        const active = url.startsWith(item.href);
+                        return <Link key={item.routeName} href={route(item.routeName)} className="adm-sidebar-link" title={collapsed ? item.label : undefined}>
+                            <div className={active ? '' : 'adm-nav-item'} style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '9px 0' : '8px 10px', borderRadius: '9px', marginBottom: '1px', color: active ? '#fff' : t.sidebarText, fontWeight: active ? '600' : '400', fontSize: '13px', background: active ? `linear-gradient(135deg,${t.accent},${t.accentEnd})` : 'transparent', boxShadow: active ? `0 3px 10px rgba(${t.accentRgb},.28)` : 'none', transition: 'all .14s ease', position: 'relative' }}>
+                                <span style={{ flexShrink: 0, opacity: active ? 1 : 0.6, lineHeight: 0 }}>{item.icon}</span>
+                                {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
+                                {!collapsed && item.routeName === 'admin.messages' && unreadCount > 0 && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: '700', lineHeight: 1.4 }}>{unreadCount}</span>}
+                            </div>
+                        </Link>;
+                    })}
+                </div>)}
+            </nav>
+            <div style={{ padding: '8px 6px', borderTop: `1px solid ${t.sidebarBorder}`, flexShrink: 0 }}>
+                <Link href={route('home')} style={{ textDecoration: 'none', display: 'block' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '7px', padding: '7px 10px', borderRadius: '8px', color: t.textDim, fontSize: '12px', fontWeight: '500', marginBottom: '4px', cursor: 'pointer', transition: 'all .14s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#CBD5E1'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = t.textDim; }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        {!collapsed && 'View Portfolio'}
+                    </div>
+                </Link>
+                <Link href={route('logout')} method="post" as="button" style={{ width: '100%', background: 'none', border: 'none', padding: 0, display: 'block', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '7px', padding: '7px 10px', borderRadius: '8px', color: '#EF4444', fontSize: '12px', fontWeight: '600', cursor: 'pointer', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.1)', transition: 'all .14s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.14)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        {!collapsed && 'Sign Out'}
+                    </div>
+                </Link>
+            </div>
+        </aside>
+    );
+}
+
+function TopBar({ title, sidebarWidth, profile, unreadCount, t }) {
+    const { auth } = usePage().props;
+    const avatarUrl = profile?.avatar ? (profile.avatar.startsWith('http') ? profile.avatar : '/' + profile.avatar) : null;
+    return (
+        <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: t.topbar, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.sidebarBorder}`, display: 'flex', alignItems: 'center', padding: '0 22px', gap: '14px', transition: 'left .22s ease' }}>
+            <div style={{ flexShrink: 0 }}>
+                <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, lineHeight: 1.2 }}>{title}</div>
+                <div style={{ fontSize: '11px', color: t.textMuted, marginTop: '1px' }}>Home <span style={{ opacity: .4, margin: '0 3px' }}>›</span><span style={{ color: t.accent }}>{title}</span></div>
+            </div>
+            <div style={{ flex: 1, maxWidth: '320px', margin: '0 auto', position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: t.textDim, lineHeight: 0 }}>
+                    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                </span>
+                <input placeholder="Search anything…" style={{ width: '100%', background: t.input, border: `1.5px solid ${t.inputBorder}`, borderRadius: '50px', padding: '7px 40px 7px 30px', fontSize: '12px', color: t.text, outline: 'none', fontFamily: 'inherit' }} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+                <div style={{ position: 'relative' }}>
+                    <button style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    </button>
+                    {unreadCount > 0 && <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#EF4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '9px', fontWeight: '700', lineHeight: '16px', border: `2px solid ${t.topbar}` }}>{unreadCount}</span>}
+                </div>
+                <Link href={route('admin.profile')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid rgba(${t.accentRgb},.4)` }}>
+                        {avatarUrl ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg,${t.accent},${t.accentEnd})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: '700' }}>{auth?.user?.name?.[0]?.toUpperCase() || 'A'}</div>}
+                    </div>
+                    {auth?.user && <div style={{ lineHeight: 1.2 }}><div style={{ fontSize: '12px', fontWeight: '600', color: t.text, whiteSpace: 'nowrap' }}>{auth.user.name}</div><div style={{ fontSize: '10px', color: t.accent }}>Admin</div></div>}
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+// ─── Root Layout ────────────────────────────────────────────────────────────────
+export default function AdminLayout({ children, title = 'Dashboard' }) {
+    const [collapsed, setCollapsed] = useState(false);
+    const sw = collapsed ? '60px' : '210px';
+    const { auth } = usePage().props;
+    const dark = true;
+    const t = tokens.dark;
+    return (
+        <ThemeContext.Provider value={{ dark, toggle: () => {}, t }}>
+            <GlobalStyles t={t} dark={dark} />
+            <div style={{ display: 'flex', minHeight: '100vh', background: t.bg }}>
+                <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} unreadCount={0} t={t} />
+                <div style={{ marginLeft: sw, flex: 1, display: 'flex', flexDirection: 'column', transition: 'margin-left .22s ease', minWidth: 0 }}>
+                    <TopBar title={title} sidebarWidth={sw} profile={null} unreadCount={0} t={t} />
+                    <main style={{ marginTop: '60px', flex: 1, padding: '22px 26px', background: t.bg }}>
+                        <div className="adm-page">{children}</div>
+                    </main>
+                </div>
+            </div>
+        </ThemeContext.Provider>
+    );
+}

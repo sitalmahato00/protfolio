@@ -1,5 +1,4 @@
-import AdminLayout from '@/Layouts/AdminLayout';
-import { useTheme } from '@/Layouts/AdminLayout';
+import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';

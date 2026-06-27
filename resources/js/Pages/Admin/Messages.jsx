@@ -1,5 +1,4 @@
-import AdminLayout from '@/Layouts/AdminLayout';
-import { useTheme } from '@/Layouts/AdminLayout';
+import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -39,14 +38,15 @@ export default function AdminMessages() {
     const [active, setActive] = useState(null);
     const [search, setSearch] = useState('');
 
-    useEffect(() => { fetchMessages(); }, []);
-    function fetchMessages() { axios.get('/api/contact').then(r => { setMessages(r.data); }); }
+    useEffect(() => { axios.get('/api/contact').then(r => setMessages(r.data)); }, []);
+
+    function load() { axios.get('/api/contact').then(r => setMessages(r.data)); }
 
     function remove(id) {
-        if (confirm('Delete this message?')) axios.delete(`/api/contact/${id}`).then(() => { setActive(null); fetchMessages(); });
+        if (confirm('Delete this message?')) axios.delete(`/api/contact/${id}`).then(() => { setActive(null); load(); });
     }
 
-    function markRead(id) { axios.patch(`/api/contact/${id}/read`).then(fetchMessages); }
+    function markRead(id) { axios.patch(`/api/contact/${id}/read`).then(load); }
 
     function selectMsg(msg) {
         setActive(msg);

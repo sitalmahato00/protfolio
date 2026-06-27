@@ -1,6 +1,5 @@
-import AdminLayout from '@/Layouts/AdminLayout';
-import { useTheme } from '@/Layouts/AdminLayout';
-import { Head } from '@inertiajs/react';
+import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
+import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -107,6 +106,7 @@ function LineChart({ data, color, t }) {
 
 // ─── Donut Chart (SVG) ────────────────────────────────────────────────────────
 function DonutChart({ slices, total, centerLabel, t }) {
+    if (total <= 0) return <div style={{ textAlign: 'center', padding: '30px 0', color: t.textMuted, fontSize: '12px' }}>No data</div>;
     const r = 60, cx = 80, cy = 80, sw = 22;
     let angle = -90;
     const arcs = slices.map(s => {
@@ -166,5 +166,149 @@ function ActivityItem({ icon, bg, title, time, dot, t }) {
             </div>
             <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: dot, flexShrink: 0, boxShadow: `0 0 5px ${dot}` }} />
         </div>
+    );
+}
+
+// ─── Main Admin Dashboard ───────────────────────────────────────────────────────
+export default function AdminDashboard() {
+    const { t } = useTheme();
+    const [projects, setProjects] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [skills, setSkills] = useState([]);
+    const [services, setServices] = useState([]);
+    const [stats, setStats] = useState({});
+
+    useEffect(() => {
+        Promise.all([
+            axios.get('/api/projects'),
+            axios.get('/api/contact'),
+            axios.get('/api/skills'),
+            axios.get('/api/services'),
+            axios.get('/api/stats'),
+        ]).then(([p, m, sk, sv, st]) => {
+            setProjects(p.data); setMessages(m.data);
+            setSkills(sk.data); setServices(sv.data); setStats(st.data);
+        }).catch(() => {});
+    }, []);
+
+    const unread = messages.filter(m => !m.is_read).length;
+    const seed = n => Array.from({ length: 8 }, (_, i) => Math.max(1, Math.round(n * (0.4 + i * 0.1) + Math.random() * n * 0.3)));
+
+    const kpis = [
+        { icon: '📁', label: 'Total Projects',    value: projects.length,  change: 12,            color: '#6366F1', spark: seed(Math.max(projects.length || 4, 1)) },
+        { icon: '💬', label: 'Messages Received', value: messages.length,  change: unread > 0 ? 8 : -2, color: '#06B6D4', spark: seed(Math.max(messages.length || 2, 1)) },
+        { icon: '🛠️', label: 'Services Offered',  value: services.length,  change: 5,             color: '#F59E0B', spark: seed(Math.max(services.length || 3, 1)) },
+        { icon: '💡', label: 'Skills Listed',      value: skills.length,    change: 10,            color: '#10B981', spark: seed(Math.max(skills.length || 6, 1)) },
+    ];
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+    const base = Math.max(projects.length, 4);
+    const lineData = months.map((l, i) => ({ l, v: Math.round(base * (0.3 + i * 0.1 + Math.random() * 0.15)) }));
+
+    const statBars = [
+        { label: 'Years Experience',    val: `${stats.years_exp || 3}+`,                                       pct: 70,  color: '#6366F1' },
+        { label: 'Client Satisfaction', val: stats.client_satisfaction || '100%',                              pct: 100, color: '#10B981' },
+        { label: 'Projects Delivered',  val: `${stats.projects_delivered || projects.length}+`,               pct: Math.min(100, ((stats.projects_delivered || projects.length) / 50) * 100) || 60, color: '#06B6D4' },
+        { label: 'Tech Stack',          val: `${stats.tech_stack || skills.length}+`,                         pct: Math.min(100, ((stats.tech_stack || skills.length) / 20) * 100) || 55, color: '#F59E0B' },
+    ];
+
+    const topProjects = projects.slice(0, 3);
+    const msgTotal = Math.max(messages.length, 1);
+    const trafficSlices = [
+        { label: 'Direct',        v: Math.round(msgTotal * .40), color: '#6366F1' },
+        { label: 'Search Engine', v: Math.round(msgTotal * .30), color: '#06B6D4' },
+        { label: 'Social Media',  v: Math.round(msgTotal * .15), color: '#10B981' },
+        { label: 'Referral',      v: Math.round(msgTotal * .10), color: '#F59E0B' },
+        { label: 'Others',        v: Math.round(msgTotal * .05), color: '#EF4444' },
+    ];
+    const devBase = Math.max(projects.length * 10, 10);
+    const deviceSlices = [
+        { label: 'Desktop', v: Math.round(devBase * .60), color: '#6366F1' },
+        { label: 'Mobile',  v: Math.round(devBase * .30), color: '#8B5CF6' },
+        { label: 'Tablet',  v: Math.round(devBase * .10), color: '#06B6D4' },
+    ];
+    const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
+
+    return (
+        <AdminLayout title="Overview">
+            <Head title="Admin Dashboard" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '14px', marginBottom: '20px' }}>
+                {kpis.map(k => <KpiCard key={k.label} {...k} t={t} />)}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 280px', gap: '14px', marginBottom: '20px' }}>
+                <div className="adm-card" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: t.text }}>Portfolio Views</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                <span style={{ fontSize: '20px', fontWeight: '800', color: t.text }}>{stats.projects_delivered || projects.length * 10 || '—'}</span>
+                                <span style={{ fontSize: '11px', color: '#10B981', fontWeight: '700' }}>↑ 18.2%</span>
+                            </div>
+                        </div>
+                        <span className="adm-badge adm-badge-blue">This Month</span>
+                    </div>
+                    <LineChart data={lineData} color={t.accent} t={t} />
+                </div>
+
+                <div className="adm-card" style={{ padding: '20px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: t.text, marginBottom: '16px' }}>Platform Stats</div>
+                    {statBars.map(s => (
+                        <div key={s.label} style={{ marginBottom: '14px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                <span style={{ fontSize: '12px', color: t.textMuted }}>{s.label}</span>
+                                <span style={{ fontSize: '12px', fontWeight: '700', color: t.text }}>{s.val}</span>
+                            </div>
+                            <div style={{ height: '5px', borderRadius: '3px', background: `${s.color}20` }}>
+                                <div style={{ height: '100%', borderRadius: '3px', background: s.color, width: `${s.pct}%`, transition: 'width 1s ease' }} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="adm-card" style={{ padding: '16px 18px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '12px' }}>Recent Activity</div>
+                    {messages.slice(0, 3).map(m => (
+                        <ActivityItem key={m.id} icon="💬" bg="rgba(99,102,241,.15)" title={`Message from ${m.name}`} time={new Date(m.created_at).toLocaleDateString()} dot="#6366F1" t={t} />
+                    ))}
+                    {projects.slice(0, 2).map(p => (
+                        <ActivityItem key={p.id} icon="🚀" bg="rgba(16,185,129,.15)" title={`Project: ${p.title}`} time="Active" dot="#10B981" t={t} />
+                    ))}
+                    {messages.length === 0 && projects.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '20px 0', color: t.textMuted, fontSize: '12px' }}>No activity yet</div>
+                    )}
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+                <div className="adm-card" style={{ padding: '20px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '14px' }}>Traffic Sources</div>
+                    <DonutChart slices={trafficSlices} total={trafficSlices.reduce((a, s) => a + s.v, 0)} centerLabel="Views" t={t} />
+                </div>
+                <div className="adm-card" style={{ padding: '20px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '14px' }}>Device Usage</div>
+                    <DonutChart slices={deviceSlices} total={deviceSlices.reduce((a, s) => a + s.v, 0)} centerLabel="Visits" t={t} />
+                </div>
+                <div className="adm-card" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: t.text }}>Most Viewed Projects</div>
+                        <Link href={route('admin.projects')} style={{ fontSize: '11px', color: t.accent, textDecoration: 'none', fontWeight: '600' }}>View All</Link>
+                    </div>
+                    {topProjects.length === 0 && <div style={{ textAlign: 'center', padding: '20px 0', color: t.textMuted, fontSize: '12px' }}>No projects yet</div>}
+                    {topProjects.map((p, i) => (
+                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: i < topProjects.length - 1 ? `1px solid ${t.border}` : 'none' }}>
+                            <span style={{ fontSize: '11px', fontWeight: '700', color: t.textMuted, minWidth: '14px' }}>{i + 1}</span>
+                            <div style={{ width: '40px', height: '30px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, background: `${t.accent}15` }}>
+                                {imgUrl(p.image) ? <img src={imgUrl(p.image)} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>📁</div>}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: '12px', fontWeight: '600', color: t.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
+                                <div style={{ fontSize: '10px', color: t.textMuted }}>{(p.tags || []).slice(0, 2).join(', ')}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </AdminLayout>
     );
 }

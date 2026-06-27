@@ -1,5 +1,4 @@
-import AdminLayout from '@/Layouts/AdminLayout';
-import { useTheme } from '@/Layouts/AdminLayout';
+import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -72,18 +71,18 @@ export default function AdminSkills() {
     const [filterCat, setFilterCat] = useState('All');
     const [search, setSearch] = useState('');
 
-    useEffect(() => { fetchSkills(); }, []);
-    function fetchSkills() { axios.get('/api/skills').then(r => setSkills(r.data)); }
+    useEffect(() => { axios.get('/api/skills').then(r => setSkills(r.data)); }, []);
 
+    function load() { axios.get('/api/skills').then(r => setSkills(r.data)); }
     function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
     function openEdit(s) { setEditing(s.id); setForm({ category: s.category, name: s.name, icon: s.icon || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
 
     function save() {
         const req = editing ? axios.put(`/api/skills/${editing}`, form) : axios.post('/api/skills', form);
-        req.then(() => { closeModal(); fetchSkills(); });
+        req.then(() => { closeModal(); load(); });
     }
-    function remove(id) { if (confirm('Delete this skill?')) axios.delete(`/api/skills/${id}`).then(fetchSkills); }
+    function remove(id) { if (confirm('Delete this skill?')) axios.delete(`/api/skills/${id}`).then(load); }
 
     const categories = ['All', ...Array.from(new Set(skills.map(s => s.category).filter(Boolean)))];
     const filtered = skills.filter(s => {

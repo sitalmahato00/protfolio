@@ -1,5 +1,4 @@
-import AdminLayout from '@/Layouts/AdminLayout';
-import { useTheme } from '@/Layouts/AdminLayout';
+import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -79,9 +78,9 @@ export default function AdminProjects() {
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState([]);
 
-    useEffect(() => { fetch(); }, []);
-    function fetch() { axios.get('/api/projects').then(r => setProjects(r.data)); }
+    useEffect(() => { axios.get('/api/projects').then(r => setProjects(r.data)); }, []);
 
+    function load() { axios.get('/api/projects').then(r => setProjects(r.data)); }
     function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
     function openEdit(p) { setEditing(p.id); setForm({ ...p, tags: p.tags?.join(', ') || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
@@ -89,16 +88,16 @@ export default function AdminProjects() {
     function save() {
         const data = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
         const req = editing ? axios.put(`/api/projects/${editing}`, data) : axios.post('/api/projects', data);
-        req.then(() => { closeModal(); fetch(); });
+        req.then(() => { closeModal(); load(); });
     }
 
     function remove(id) {
-        if (confirm('Delete this project?')) axios.delete(`/api/projects/${id}`).then(fetch);
+        if (confirm('Delete this project?')) axios.delete(`/api/projects/${id}`).then(load);
     }
 
     function duplicate(p) {
         const data = { ...p, title: p.title + ' (Copy)', tags: p.tags || [] };
-        axios.post('/api/projects', data).then(fetch);
+        axios.post('/api/projects', data).then(load);
     }
 
     function toggleSelect(id) {
@@ -107,7 +106,7 @@ export default function AdminProjects() {
 
     function bulkDelete() {
         if (!selected.length || !confirm(`Delete ${selected.length} projects?`)) return;
-        Promise.all(selected.map(id => axios.delete(`/api/projects/${id}`))).then(() => { setSelected([]); fetch(); });
+        Promise.all(selected.map(id => axios.delete(`/api/projects/${id}`))).then(() => { setSelected([]); load(); });
     }
 
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
