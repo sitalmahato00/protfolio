@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
-import axios from 'axios';
 
-export default function Portfolio() {
-    const [profile, setProfile] = useState(null);
-    const [skills, setSkills] = useState({});
-    const [projects, setProjects] = useState([]);
-    const [services, setServices] = useState([]);
-    const [experiences, setExperiences] = useState([]);
-    const [stats, setStats] = useState({});
+const imgModules = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
+const assetImgMap = {};
+for (const [p, m] of Object.entries(imgModules)) {
+    const name = p.split('/').pop();
+    assetImgMap[name] = m.default || m;
+}
+
+export default function Portfolio({ profile = null, skills = {}, projects = [], services = [], experiences = [], stats = {} }) {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [typedText, setTypedText] = useState('');
@@ -21,20 +21,6 @@ export default function Portfolio() {
 
     const defaultWords = ['Full Stack Developer','UI/UX Designer','Laravel & PHP Expert','React Developer','Problem Solver','Freelancer · Nepal 🇳🇵'];
     const typewriterWords = profile?.typewriter_words?.length ? profile.typewriter_words : defaultWords;
-
-    useEffect(() => {
-        Promise.all([
-            axios.get('/api/profile'),
-            axios.get('/api/skills/categories'),
-            axios.get('/api/projects'),
-            axios.get('/api/services'),
-            axios.get('/api/experiences'),
-            axios.get('/api/stats'),
-        ]).then(([p, sk, pr, sv, ex, st]) => {
-            setProfile(p.data); setSkills(sk.data); setProjects(pr.data);
-            setServices(sv.data); setExperiences(ex.data); setStats(st.data);
-        }).catch(err => console.error('Fetch error', err));
-    }, []);
 
     useEffect(() => { window.addEventListener('scroll', () => setScrolled(window.scrollY > 40)); }, []);
 
@@ -53,9 +39,16 @@ export default function Portfolio() {
         return () => clearTimeout(t);
     }, [charIndex, isDeleting, wordIndex, typewriterWords]);
 
-    const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
+    const imgUrl = s => {
+        if (!s) return null;
+        if (s.startsWith('http')) return s;
+        const filename = s.replace(/^images\//, '').replace(/\.(png|jpg|jpeg)$/i, '.webp');
+        return assetImgMap[filename] || '/' + s.replace(/\.(png|jpg|jpeg)$/i, '.webp');
+    };
     const avatarUrl = imgUrl(profile?.avatar);
-    const resumeUrl = imgUrl(profile?.resume);
+    const resumeUrl = profile?.resume
+        ? imgUrl(profile.resume)
+        : '/images/sitalmahato.pdf';
     const navClick = (e, id) => { e.preventDefault(); setMenuOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
 
     function submitContact(e) {
@@ -81,9 +74,12 @@ export default function Portfolio() {
 
     return (
         <>
-        <Head title={(profile?.name || 'Sital Mahato') + ' — Portfolio'} />
+        <Head title={(profile?.name || 'Sital Mahato') + ' — Portfolio'}>
+            {avatarUrl && <link rel="preload" as="image" href={avatarUrl} />}
+            {avatarUrl && <link rel="icon" type="image/webp" href={avatarUrl + (profile?.updated_at ? '?v=' + new Date(profile.updated_at).getTime() : '')} />}
+        </Head>
         <style>{`
-            :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#f97316;--accent2:#10b981;--bg:#f8faff;--white:#ffffff;--dark:#0f172a;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--card:#ffffff;--gradient:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#7c3aed 100%);--gradient2:linear-gradient(135deg,#f97316 0%,#ef4444 100%);}
+            :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#c2410c;--accent2:#10b981;--bg:#f8faff;--white:#ffffff;--dark:#0f172a;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--card:#ffffff;--gradient:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#7c3aed 100%);--gradient2:linear-gradient(135deg,#c2410c 0%,#dc2626 100%);}
             *{margin:0;padding:0;box-sizing:border-box;}
             html{scroll-behavior:smooth;}
             body{font-family:'Plus Jakarta Sans','Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
@@ -164,6 +160,7 @@ export default function Portfolio() {
             <a href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`} className="mob-cta">Hire Me</a>
         </div>
 
+        <main id="main-content">
         {/* HERO */}
         <section id="hero" style={{minHeight:'100vh',padding:'124px 24px 60px',display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(145deg,#0a0f1e 0%,#0f1f3d 40%,#1a1040 70%,#0a0f1e 100%)',position:'relative',overflow:'hidden'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 700px 500px at 75% 30%,rgba(37,99,235,.25) 0%,transparent 65%),radial-gradient(ellipse 500px 400px at 15% 75%,rgba(249,115,22,.15) 0%,transparent 65%)',pointerEvents:'none'}}/>
@@ -188,7 +185,7 @@ export default function Portfolio() {
                     <div className="hero-btns" style={{display:'flex',gap:'12px',flexWrap:'wrap',marginBottom:'36px'}}>
                         <a href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`} style={{background:'var(--gradient2)',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem',boxShadow:'0 4px 20px rgba(249,115,22,.3)'}}>Hire Me</a>
                         {resumeUrl && <a href={resumeUrl} target="_blank" rel="noreferrer" style={{background:'#fff',color:'var(--primary)',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem',border:'2px solid var(--primary)'}}>Download CV</a>}
-                        <a href={`https://wa.me/${(profile?.phone||'+9779704191610').replace(/\D/g,'')}`} target="_blank" rel="noreferrer" style={{background:'#25d366',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem'}}>💬 WhatsApp</a>
+                        <a href={`https://wa.me/${(profile?.phone||'+9779704191610').replace(/\D/g,'')}`} target="_blank" rel="noreferrer" style={{background:'#1da958',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem'}}>💬 WhatsApp</a>
                     </div>
                     <div className="hero-socials" style={{display:'flex',gap:'12px'}}>
                         {[{url:profile?.github||'https://github.com/sitalmahato00',icon:GH,title:'GitHub'},{url:profile?.linkedin||'https://linkedin.com/in/sitalmahato',icon:LI,title:'LinkedIn'},{url:`mailto:${profile?.email||'sitalmahato077@gmail.com'}`,icon:EM,title:'Email'},{url:`tel:${(profile?.phone||'+9779704191610').replace(/\s/g,'')}`,icon:PH,title:'Phone'}].map(s=>(
@@ -206,7 +203,7 @@ export default function Portfolio() {
                             <div key={i} style={{position:'absolute',width:'12px',height:'12px',borderRadius:'50%',background:o.c,zIndex:3,animation:`orbit 4s linear infinite`,animationDelay:o.d,boxShadow:`0 0 8px ${o.c}`}}/>
                         ))}
                         {avatarUrl
-                            ? <img src={avatarUrl} alt={profile?.name||'Profile'} style={{width:'250px',height:'250px',borderRadius:'50%',objectFit:'cover',border:'4px solid rgba(255,255,255,.9)',boxShadow:'0 0 0 1px rgba(255,255,255,.1),0 20px 60px rgba(37,99,235,.4)',position:'relative',zIndex:2,animation:'float 6s ease-in-out infinite'}}/>
+                            ? <img fetchpriority="high" src={avatarUrl} alt={profile?.name||'Profile'} style={{width:'250px',height:'250px',borderRadius:'50%',objectFit:'cover',border:'4px solid rgba(255,255,255,.9)',boxShadow:'0 0 0 1px rgba(255,255,255,.1),0 20px 60px rgba(37,99,235,.4)',position:'relative',zIndex:2,animation:'float 6s ease-in-out infinite'}}/>
                             : <div style={{width:'250px',height:'250px',borderRadius:'50%',background:'var(--gradient)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'5rem',color:'#fff',fontWeight:'800',border:'4px solid rgba(255,255,255,.9)',position:'relative',zIndex:2,animation:'float 6s ease-in-out infinite'}}>SM</div>
                         }
                     </div>
@@ -248,7 +245,7 @@ export default function Portfolio() {
                     <div>
                         <span className="section-tag">// 02. WHO AM I</span>
                         <h2 className="section-title">About Me</h2>
-                        {avatarUrl && <div style={{marginBottom:'20px'}}><img src={avatarUrl} alt={profile?.name} style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'3px solid var(--primary)',boxShadow:'0 4px 16px rgba(37,99,235,.2)'}}/></div>}
+                        {avatarUrl && <div style={{marginBottom:'20px'}}><img fetchpriority="high" src={avatarUrl} alt={profile?.name} style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'3px solid var(--primary)',boxShadow:'0 4px 16px rgba(37,99,235,.2)'}}/></div>}
                         <p style={{color:'var(--muted)',fontSize:'.95rem',marginBottom:'20px'}}>{profile?.bio || "I'm Sital Mahato, a motivated IT student from Golbazar, Siraha, deeply passionate about building efficient, robust, and user-friendly software solutions."}</p>
                         <div style={{display:'flex',flexDirection:'column',gap:'10px',marginTop:'20px'}}>
                             {[['Name', profile?.name||'Sital Mahato'],['Email', profile?.email||'sitalmahato077@gmail.com'],['Phone', profile?.phone||'+977 9704191610'],['Location', profile?.location||'Golbazar, Siraha, Nepal 🇳🇵']].map(([k,v])=>(
@@ -456,6 +453,8 @@ export default function Portfolio() {
                 </div>
             </div>
         </section>
+
+        </main>
 
         {/* FOOTER */}
         <footer style={{background:'var(--dark)',color:'#94a3b8',padding:'40px 24px',textAlign:'center'}}>

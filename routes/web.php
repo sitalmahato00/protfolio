@@ -3,9 +3,28 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Profile;
+use App\Models\Skill;
+use App\Models\Project;
+use App\Models\Service;
+use App\Models\Experience;
 
 Route::get('/', function () {
-    return Inertia::render('Portfolio');
+    $profile = Profile::first();
+    return Inertia::render('Portfolio', [
+        'profile'          => $profile,
+        'skills'           => Skill::orderBy('order')->get()->groupBy('category'),
+        'projects'         => Project::orderBy('order')->get(),
+        'services'         => Service::orderBy('order')->get(),
+        'experiences'      => Experience::orderBy('order')->get(),
+        'stats'            => [
+            'projects_delivered' => Project::count() ?: 50,
+            'tech_stack'         => Skill::distinct('name')->count() ?: 8,
+            'years_exp'          => 3,
+            'client_satisfaction'=> '100%',
+            'support'            => '24/7',
+        ],
+    ]);
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {

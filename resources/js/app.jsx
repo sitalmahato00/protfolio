@@ -17,6 +17,16 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
+        const profile = props.initialPage.props?.profile;
+        if (profile?.avatar) {
+            const ts = profile.updated_at ? new Date(profile.updated_at).getTime() : Date.now();
+            const href = (profile.avatar.startsWith('http') ? profile.avatar : '/' + profile.avatar.replace(/\.(png|jpg|jpeg)$/i, '.webp')) + '?v=' + ts;
+            const link = document.querySelector('link[rel="icon"]') || document.createElement('link');
+            link.rel = 'icon';
+            link.href = href;
+            if (!link.parentNode) document.head.appendChild(link);
+        }
+
         root.render(<App {...props} />);
     },
     progress: {
