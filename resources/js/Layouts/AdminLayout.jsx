@@ -271,7 +271,7 @@ function SidebarContent({ collapsed, setCollapsed, onClose, unreadCount, t }) {
                     {!collapsed && <div style={{ padding: '8px 10px 3px', fontSize: '10px', fontWeight: '700', letterSpacing: '.1em', color: t.sidebarGroupLabel }}>{group.group}</div>}
                     {group.items.map(item => {
                         const active = url.startsWith(item.href);
-                        return <Link key={item.routeName} href={route(item.routeName)} className="adm-sidebar-link" title={collapsed ? item.label : undefined} onClick={onClose}>
+                        return <Link key={item.routeName} href={route(item.routeName, undefined, false)} className="adm-sidebar-link" title={collapsed ? item.label : undefined} onClick={onClose}>
                             <div className={active ? '' : 'adm-nav-item'} style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '9px 0' : '8px 10px', borderRadius: '9px', marginBottom: '1px', color: active ? '#fff' : t.sidebarText, fontWeight: active ? '600' : '400', fontSize: '13px', background: active ? `linear-gradient(135deg,${t.accent},${t.accentEnd})` : 'transparent', boxShadow: active ? `0 3px 10px rgba(${t.accentRgb},.28)` : 'none', transition: 'all .14s ease', position: 'relative' }}>
                                 <span style={{ flexShrink: 0, opacity: active ? 1 : 0.6, lineHeight: 0 }}>{item.icon}</span>
                                 {!collapsed && <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
@@ -284,7 +284,7 @@ function SidebarContent({ collapsed, setCollapsed, onClose, unreadCount, t }) {
 
             {/* Footer links */}
             <div style={{ padding: '8px 6px', borderTop: `1px solid ${t.sidebarBorder}`, flexShrink: 0 }}>
-                <Link href={route('home')} style={{ textDecoration: 'none', display: 'block' }} onClick={onClose}>
+                <Link href={route('home', undefined, false)} style={{ textDecoration: 'none', display: 'block' }} onClick={onClose}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '7px', padding: '7px 10px', borderRadius: '8px', color: t.textDim, fontSize: '12px', fontWeight: '500', marginBottom: '4px', cursor: 'pointer', transition: 'all .14s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#CBD5E1'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = t.textDim; }}>
@@ -292,7 +292,7 @@ function SidebarContent({ collapsed, setCollapsed, onClose, unreadCount, t }) {
                         {!collapsed && 'View Portfolio'}
                     </div>
                 </Link>
-                <Link href={route('logout')} method="post" as="button" style={{ width: '100%', background: 'none', border: 'none', padding: 0, display: 'block', cursor: 'pointer' }}>
+                <Link href={route('logout', undefined, false)} method="post" as="button" style={{ width: '100%', background: 'none', border: 'none', padding: 0, display: 'block', cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '7px', padding: '7px 10px', borderRadius: '8px', color: '#EF4444', fontSize: '12px', fontWeight: '600', cursor: 'pointer', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.1)', transition: 'all .14s' }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.14)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}>
@@ -355,7 +355,7 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark, onHamburge
                     <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: t.cardSolid, border: `1px solid ${t.border}`, borderRadius: '12px', boxShadow: '0 12px 40px rgba(0,0,0,0.3)', padding: '6px', zIndex: 300 }}>
                         {results.length === 0 && <div style={{ padding: '12px 14px', fontSize: '12px', color: t.textMuted, textAlign: 'center' }}>No pages found</div>}
                         {results.map(item => (
-                            <Link key={item.routeName} href={route(item.routeName)} onClick={() => { setSearch(''); setShowResults(false); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px', color: t.text, textDecoration: 'none', fontSize: '13px', fontWeight: '500', transition: 'background 0.12s' }}
+                            <Link key={item.routeName} href={route(item.routeName, undefined, false)} onClick={() => { setSearch(''); setShowResults(false); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px', color: t.text, textDecoration: 'none', fontSize: '13px', fontWeight: '500', transition: 'background 0.12s' }}
                                 onMouseEnter={e => e.currentTarget.style.background = t.navHover}
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                 <span style={{ opacity: 0.5, lineHeight: 0, flexShrink: 0 }}>{item.icon}</span>
@@ -372,12 +372,12 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t, dark, onHamburge
                     {isDark ? <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
                 </button>
                 <div style={{ position: 'relative' }}>
-                    <Link href={route('admin.messages')} style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0, textDecoration: 'none' }}>
+                    <Link href={route('admin.messages', undefined, false)} style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0, textDecoration: 'none' }}>
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     </Link>
                     {unreadCount > 0 && <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#EF4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '9px', fontWeight: '700', lineHeight: '16px', border: `2px solid ${t.topbar}` }}>{unreadCount}</span>}
                 </div>
-                <Link href={route('admin.profile')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
+                <Link href={route('admin.profile', undefined, false)} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
                     <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid rgba(${t.accentRgb},.4)`, background: `linear-gradient(135deg,${t.accent},${t.accentEnd})` }}>
                         {avatarUrl
                             ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
