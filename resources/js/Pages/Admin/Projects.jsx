@@ -1,7 +1,8 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 // ─── Status chip ──────────────────────────────────────────────────────────────
 const statusMap = {
@@ -71,16 +72,12 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t }) {
 export default function AdminProjects() {
     const { t } = useTheme();
     const blank = { title: '', description: '', image: '', tags: '', live_url: '', github_url: '' };
-    const [projects, setProjects] = useState([]);
+    const { data: projects = [], refresh } = useCachedData('projects', () => axios.get('/api/projects').then(r => r.data));
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(blank);
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState([]);
-
-    useEffect(() => { axios.get('/api/projects').then(r => setProjects(r.data)); }, []);
-
-    function load() { axios.get('/api/projects').then(r => setProjects(r.data)); }
     function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
     function openEdit(p) { setEditing(p.id); setForm({ ...p, tags: p.tags?.join(', ') || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
@@ -88,16 +85,16 @@ export default function AdminProjects() {
     function save() {
         const data = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
         const req = editing ? axios.put(`/api/projects/${editing}`, data) : axios.post('/api/projects', data);
-        req.then(() => { closeModal(); load(); });
+        req.then(() => { closeModal(); refresh(); });
     }
 
     function remove(id) {
-        if (confirm('Delete this project?')) axios.delete(`/api/projects/${id}`).then(load);
+        if (confirm('Delete this project?')) axios.delete(`/api/projects/${id}`).then(refresh);
     }
 
     function duplicate(p) {
         const data = { ...p, title: p.title + ' (Copy)', tags: p.tags || [] };
-        axios.post('/api/projects', data).then(load);
+        axios.post('/api/projects', data).then(refresh);
     }
 
     function toggleSelect(id) {
@@ -106,7 +103,7 @@ export default function AdminProjects() {
 
     function bulkDelete() {
         if (!selected.length || !confirm(`Delete ${selected.length} projects?`)) return;
-        Promise.all(selected.map(id => axios.delete(`/api/projects/${id}`))).then(() => { setSelected([]); load(); });
+        Promise.all(selected.map(id => axios.delete(`/api/projects/${id}`))).then(() => { setSelected([]); refresh(); });
     }
 
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;

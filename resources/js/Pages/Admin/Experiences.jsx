@@ -1,7 +1,8 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 function ExperienceModal({ form, setForm, editing, onSave, onCancel, t }) {
     return (
@@ -105,24 +106,20 @@ function TimelineItem({ entry, onEdit, onRemove, color, t }) {
 export default function AdminExperiences() {
     const { t } = useTheme();
     const blank = { type: 'work', title: '', subtitle: '', date_range: '', description: '', tags: '' };
-    const [experiences, setExperiences] = useState([]);
+    const { data: experiences = [], refresh } = useCachedData('experiences', () => axios.get('/api/experiences').then(r => r.data));
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(blank);
     const [showModal, setShowModal] = useState(false);
     const [tab, setTab] = useState('work');
-
-    useEffect(() => { axios.get('/api/experiences').then(r => setExperiences(r.data)); }, []);
-
-    function load() { axios.get('/api/experiences').then(r => setExperiences(r.data)); }
     function openCreate() { setEditing(null); setForm({ ...blank, type: tab }); setShowModal(true); }
     function openEdit(e) { setEditing(e.id); setForm({ ...e, tags: e.tags?.join(', ') || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
     function save() {
         const data = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
         const req = editing ? axios.put(`/api/experiences/${editing}`, data) : axios.post('/api/experiences', data);
-        req.then(() => { closeModal(); load(); });
+        req.then(() => { closeModal(); refresh(); });
     }
-    function remove(id) { if (confirm('Delete?')) axios.delete(`/api/experiences/${id}`).then(load); }
+    function remove(id) { if (confirm('Delete?')) axios.delete(`/api/experiences/${id}`).then(refresh); }
 
     const work = experiences.filter(e => e.type === 'work');
     const education = experiences.filter(e => e.type === 'education');

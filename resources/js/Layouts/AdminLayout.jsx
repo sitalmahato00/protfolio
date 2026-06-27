@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useRef, useEffect } from 'react';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const tokens = {
@@ -201,26 +201,60 @@ function Sidebar({ collapsed, setCollapsed, unreadCount, t }) {
     );
 }
 
+const NAV_FLAT = NAV.flatMap(g => g.items);
+
 function TopBar({ title, sidebarWidth, profile, unreadCount, t }) {
     const { auth } = usePage().props;
+    const { dark: isDark, toggle: toggleTheme } = useTheme();
+    const [search, setSearch] = useState('');
+    const [showResults, setShowResults] = useState(false);
+    const searchRef = useRef(null);
+
+    useEffect(() => {
+        function handleClick(e) { if (searchRef.current && !searchRef.current.contains(e.target)) setShowResults(false); }
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    const results = search.trim()
+        ? NAV_FLAT.filter(item => item.label.toLowerCase().includes(search.toLowerCase()))
+        : [];
+
     const avatarUrl = profile?.avatar ? (profile.avatar.startsWith('http') ? profile.avatar : '/' + profile.avatar) : null;
+
     return (
         <div style={{ position: 'fixed', top: 0, left: sidebarWidth, right: 0, zIndex: 150, height: '60px', background: t.topbar, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${t.sidebarBorder}`, display: 'flex', alignItems: 'center', padding: '0 22px', gap: '14px', transition: 'left .22s ease' }}>
             <div style={{ flexShrink: 0 }}>
                 <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, lineHeight: 1.2 }}>{title}</div>
                 <div style={{ fontSize: '11px', color: t.textMuted, marginTop: '1px' }}>Home <span style={{ opacity: .4, margin: '0 3px' }}>›</span><span style={{ color: t.accent }}>{title}</span></div>
             </div>
-            <div style={{ flex: 1, maxWidth: '320px', margin: '0 auto', position: 'relative' }}>
+            <div ref={searchRef} style={{ flex: 1, maxWidth: '320px', margin: '0 auto', position: 'relative' }}>
                 <span style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: t.textDim, lineHeight: 0 }}>
                     <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 </span>
-                <input placeholder="Search anything…" style={{ width: '100%', background: t.input, border: `1.5px solid ${t.inputBorder}`, borderRadius: '50px', padding: '7px 40px 7px 30px', fontSize: '12px', color: t.text, outline: 'none', fontFamily: 'inherit' }} />
+                <input placeholder="Search pages…" value={search} onChange={e => { setSearch(e.target.value); setShowResults(true); }} onFocus={() => setShowResults(true)} style={{ width: '100%', background: t.input, border: `1.5px solid ${t.inputBorder}`, borderRadius: '50px', padding: '7px 40px 7px 30px', fontSize: '12px', color: t.text, outline: 'none', fontFamily: 'inherit' }} />
+                {showResults && search.trim() && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: t.cardSolid, border: `1px solid ${t.border}`, borderRadius: '12px', boxShadow: '0 12px 40px rgba(0,0,0,0.3)', padding: '6px', zIndex: 300 }}>
+                        {results.length === 0 && <div style={{ padding: '12px 14px', fontSize: '12px', color: t.textMuted, textAlign: 'center' }}>No pages found</div>}
+                        {results.map(item => (
+                            <Link key={item.routeName} href={route(item.routeName)} onClick={() => { setSearch(''); setShowResults(false); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px', color: t.text, textDecoration: 'none', fontSize: '13px', fontWeight: '500', transition: 'background 0.12s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = t.navHover}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                <span style={{ opacity: 0.5, lineHeight: 0, flexShrink: 0 }}>{item.icon}</span>
+                                {item.label}
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+                <button onClick={toggleTheme} title={isDark ? 'Switch to Light' : 'Switch to Dark'} style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
+                    {isDark ? <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
+                </button>
                 <div style={{ position: 'relative' }}>
-                    <button style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }}>
+                    <Link href={route('admin.messages')} style={{ width: '32px', height: '32px', borderRadius: '9px', background: t.input, border: `1.5px solid ${t.inputBorder}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0, textDecoration: 'none' }}>
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                    </button>
+                    </Link>
                     {unreadCount > 0 && <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#EF4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '9px', fontWeight: '700', lineHeight: '16px', border: `2px solid ${t.topbar}` }}>{unreadCount}</span>}
                 </div>
                 <Link href={route('admin.profile')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px 4px 4px', borderRadius: '50px', background: t.input, border: `1.5px solid ${t.inputBorder}`, cursor: 'pointer' }}>
@@ -238,16 +272,23 @@ function TopBar({ title, sidebarWidth, profile, unreadCount, t }) {
 export default function AdminLayout({ children, title = 'Dashboard' }) {
     const [collapsed, setCollapsed] = useState(false);
     const sw = collapsed ? '60px' : '210px';
-    const { auth } = usePage().props;
-    const dark = true;
-    const t = tokens.dark;
+    const { auth, profile, unreadCount } = usePage().props;
+    const [dark, setDark] = useState(() => localStorage.getItem('admin-theme') !== 'light');
+    const t = dark ? tokens.dark : tokens.light;
+
+    useEffect(() => {
+        localStorage.setItem('admin-theme', dark ? 'dark' : 'light');
+    }, [dark]);
+
+    function toggleTheme() { setDark(d => !d); }
+
     return (
-        <ThemeContext.Provider value={{ dark, toggle: () => {}, t }}>
+        <ThemeContext.Provider value={{ dark, toggle: toggleTheme, t }}>
             <GlobalStyles t={t} dark={dark} />
             <div style={{ display: 'flex', minHeight: '100vh', background: t.bg }}>
-                <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} unreadCount={0} t={t} />
+                <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} unreadCount={unreadCount || 0} t={t} />
                 <div style={{ marginLeft: sw, flex: 1, display: 'flex', flexDirection: 'column', transition: 'margin-left .22s ease', minWidth: 0 }}>
-                    <TopBar title={title} sidebarWidth={sw} profile={null} unreadCount={0} t={t} />
+                    <TopBar title={title} sidebarWidth={sw} profile={profile} unreadCount={unreadCount || 0} t={t} />
                     <main style={{ marginTop: '60px', flex: 1, padding: '22px 26px', background: t.bg }}>
                         <div className="adm-page">{children}</div>
                     </main>

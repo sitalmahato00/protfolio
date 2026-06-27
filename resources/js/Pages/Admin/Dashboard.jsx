@@ -1,7 +1,7 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 // ─── Sparkline SVG ────────────────────────────────────────────────────────────
 function Sparkline({ data = [], color = '#6366F1' }) {
@@ -28,30 +28,45 @@ function Sparkline({ data = [], color = '#6366F1' }) {
     );
 }
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-function KpiCard({ icon, label, value, change, color, spark, t }) {
-    const up = change >= 0;
+// ─── Stat Card ─────────────────────────────────────────────────────────────────
+function StatCard({ accent, label, value, icon, progress, t }) {
     return (
-        <div className="adm-card adm-card-hover" style={{ padding: '18px 18px 14px', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', border: `1px solid ${color}25`, flexShrink: 0 }}>
-                    {icon}
+        <div style={{
+            position: 'relative',
+            background: t.card,
+            borderRadius: '12px',
+            padding: '20px',
+            overflow: 'hidden',
+            border: `1px solid ${t.border}`,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+            cursor: 'default',
+        }}
+            onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.1), 0 0 0 1px ${accent}22, 0 0 24px ${accent}15`;
+                e.currentTarget.style.borderColor = `${accent}30`;
+            }}
+            onMouseLeave={e => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)';
+                e.currentTarget.style.borderColor = t.border;
+            }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: `linear-gradient(180deg, ${accent}, ${accent}cc)`, borderRadius: '0 2px 2px 0' }} />
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '11px', fontWeight: '600', color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>{label}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '700', color: t.text, lineHeight: 1.1, letterSpacing: '-0.02em' }}>{value}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', fontWeight: '700',
-                    color: up ? (t.success || '#10B981') : (t.danger || '#EF4444'),
-                    background: up ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                    padding: '2px 7px', borderRadius: '5px' }}>
-                    {up ? '↑' : '↓'} {Math.abs(change)}%
+                <div style={{ opacity: 0.2, color: accent, flexShrink: 0, marginLeft: '12px', marginTop: '2px', lineHeight: 0 }}>{icon}</div>
+            </div>
+            {progress !== undefined && (
+                <div style={{ marginTop: '14px' }}>
+                    <div style={{ height: '4px', background: t.border, borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${accent}, ${accent}cc)`, borderRadius: '2px', transition: 'width 0.8s ease' }} />
+                    </div>
                 </div>
-            </div>
-            <div style={{ fontSize: '26px', fontWeight: '800', color: t.text, lineHeight: 1, marginBottom: '2px' }}>{value}</div>
-            <div style={{ fontSize: '11px', color: t.textMuted, fontWeight: '500', marginBottom: '10px' }}>{label}</div>
-            <Sparkline data={spark} color={color} />
-            <div style={{ fontSize: '10px', color: t.textMuted, marginTop: '6px' }}>
-                <span style={{ color: up ? (t.success || '#10B981') : (t.danger || '#EF4444'), fontWeight: '600' }}>
-                    {up ? '↑' : '↓'} {Math.abs(change)}%
-                </span> from last month
-            </div>
+            )}
         </div>
     );
 }
@@ -172,83 +187,94 @@ function ActivityItem({ icon, bg, title, time, dot, t }) {
 // ─── Main Admin Dashboard ───────────────────────────────────────────────────────
 export default function AdminDashboard() {
     const { t } = useTheme();
-    const [projects, setProjects] = useState([]);
-    const [messages, setMessages] = useState([]);
-    const [skills, setSkills] = useState([]);
-    const [services, setServices] = useState([]);
-    const [stats, setStats] = useState({});
-
-    useEffect(() => {
-        Promise.all([
-            axios.get('/api/projects'),
-            axios.get('/api/contact'),
-            axios.get('/api/skills'),
-            axios.get('/api/services'),
-            axios.get('/api/stats'),
-        ]).then(([p, m, sk, sv, st]) => {
-            setProjects(p.data); setMessages(m.data);
-            setSkills(sk.data); setServices(sv.data); setStats(st.data);
-        }).catch(() => {});
-    }, []);
+    const { data: projects = [] } = useCachedData('projects', () => axios.get('/api/projects').then(r => r.data));
+    const { data: messages = [] } = useCachedData('messages', () => axios.get('/api/contact').then(r => r.data));
+    const { data: skills = [] } = useCachedData('skills', () => axios.get('/api/skills').then(r => r.data));
+    const { data: services = [] } = useCachedData('services', () => axios.get('/api/services').then(r => r.data));
+    const { data: experiences = [] } = useCachedData('experiences', () => axios.get('/api/experiences').then(r => r.data));
+    const { data: stats = {} } = useCachedData('stats', () => axios.get('/api/stats').then(r => r.data));
 
     const unread = messages.filter(m => !m.is_read).length;
-    const seed = n => Array.from({ length: 8 }, (_, i) => Math.max(1, Math.round(n * (0.4 + i * 0.1) + Math.random() * n * 0.3)));
 
-    const kpis = [
-        { icon: '📁', label: 'Total Projects',    value: projects.length,  change: 12,            color: '#6366F1', spark: seed(Math.max(projects.length || 4, 1)) },
-        { icon: '💬', label: 'Messages Received', value: messages.length,  change: unread > 0 ? 8 : -2, color: '#06B6D4', spark: seed(Math.max(messages.length || 2, 1)) },
-        { icon: '🛠️', label: 'Services Offered',  value: services.length,  change: 5,             color: '#F59E0B', spark: seed(Math.max(services.length || 3, 1)) },
-        { icon: '💡', label: 'Skills Listed',      value: skills.length,    change: 10,            color: '#10B981', spark: seed(Math.max(skills.length || 6, 1)) },
+    const progressPct = Math.min(100, skills.length * 10);
+    const statsRow = [
+        {
+            accent: '#3B82F6', label: 'Total Projects', value: projects.length,
+            icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+        },
+        {
+            accent: '#10B981', label: 'Services Offered', value: services.length,
+            icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+        },
+        {
+            accent: '#06B6D4', label: 'Skills Listed', value: skills.length, progress: progressPct,
+            icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+        },
+        {
+            accent: '#F59E0B', label: 'Pending Requests', value: unread,
+            icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+        },
     ];
 
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-    const base = Math.max(projects.length, 4);
-    const lineData = months.map((l, i) => ({ l, v: Math.round(base * (0.3 + i * 0.1 + Math.random() * 0.15)) }));
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const msgByMonth = {};
+    messages.forEach(m => {
+        const d = new Date(m.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        msgByMonth[key] = (msgByMonth[key] || 0) + 1;
+    });
+    const sortedMonths = Object.keys(msgByMonth).sort();
+    const lineData = sortedMonths.map(key => {
+        const [, m] = key.split('-');
+        return { l: monthNames[parseInt(m)-1], v: msgByMonth[key] };
+    });
 
+    const maxExp = 10;
+    const maxStack = 30;
     const statBars = [
-        { label: 'Years Experience',    val: `${stats.years_exp || 3}+`,                                       pct: 70,  color: '#6366F1' },
-        { label: 'Client Satisfaction', val: stats.client_satisfaction || '100%',                              pct: 100, color: '#10B981' },
-        { label: 'Projects Delivered',  val: `${stats.projects_delivered || projects.length}+`,               pct: Math.min(100, ((stats.projects_delivered || projects.length) / 50) * 100) || 60, color: '#06B6D4' },
-        { label: 'Tech Stack',          val: `${stats.tech_stack || skills.length}+`,                         pct: Math.min(100, ((stats.tech_stack || skills.length) / 20) * 100) || 55, color: '#F59E0B' },
+        { label: 'Years Experience',    val: `${stats.years_exp || 0}+`,           pct: Math.min(100, ((stats.years_exp || 0) / maxExp) * 100),  color: '#6366F1' },
+        { label: 'Client Satisfaction', val: stats.client_satisfaction || '—',     pct: 100, color: '#10B981' },
+        { label: 'Projects Delivered',  val: `${stats.projects_delivered || 0}+`,  pct: Math.min(100, ((stats.projects_delivered || 0) / 50) * 100), color: '#06B6D4' },
+        { label: 'Tech Stack',          val: `${stats.tech_stack || 0}+`,          pct: Math.min(100, ((stats.tech_stack || 0) / maxStack) * 100),  color: '#F59E0B' },
     ];
 
     const topProjects = projects.slice(0, 3);
-    const msgTotal = Math.max(messages.length, 1);
-    const trafficSlices = [
-        { label: 'Direct',        v: Math.round(msgTotal * .40), color: '#6366F1' },
-        { label: 'Search Engine', v: Math.round(msgTotal * .30), color: '#06B6D4' },
-        { label: 'Social Media',  v: Math.round(msgTotal * .15), color: '#10B981' },
-        { label: 'Referral',      v: Math.round(msgTotal * .10), color: '#F59E0B' },
-        { label: 'Others',        v: Math.round(msgTotal * .05), color: '#EF4444' },
-    ];
-    const devBase = Math.max(projects.length * 10, 10);
+
+    const catColors = ['#6366F1','#10B981','#06B6D4','#F59E0B','#EF4444','#8B5CF6','#EC4899'];
+    const catCounts = {};
+    skills.forEach(s => { const c = s.category || 'Other'; catCounts[c] = (catCounts[c] || 0) + 1; });
+    const trafficSlices = Object.entries(catCounts).map(([label, v], i) => ({ label, v, color: catColors[i % catColors.length] }));
+    const trafficTotal = trafficSlices.reduce((a, s) => a + s.v, 0);
+
+    const workCount = experiences.filter(e => e.type === 'work').length;
+    const eduCount = experiences.filter(e => e.type === 'education').length;
     const deviceSlices = [
-        { label: 'Desktop', v: Math.round(devBase * .60), color: '#6366F1' },
-        { label: 'Mobile',  v: Math.round(devBase * .30), color: '#8B5CF6' },
-        { label: 'Tablet',  v: Math.round(devBase * .10), color: '#06B6D4' },
+        { label: 'Work',      v: workCount || 1, color: '#6366F1' },
+        { label: 'Education', v: eduCount || 1, color: '#8B5CF6' },
     ];
+    const deviceTotal = deviceSlices.reduce((a, s) => a + s.v, 0);
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
 
     return (
         <AdminLayout title="Overview">
             <Head title="Admin Dashboard" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '14px', marginBottom: '20px' }}>
-                {kpis.map(k => <KpiCard key={k.label} {...k} t={t} />)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                {statsRow.map(s => <StatCard key={s.label} {...s} t={t} />)}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 280px', gap: '14px', marginBottom: '20px' }}>
                 <div className="adm-card" style={{ padding: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                         <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: t.text }}>Portfolio Views</div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: t.text }}>Messages Received</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                <span style={{ fontSize: '20px', fontWeight: '800', color: t.text }}>{stats.projects_delivered || projects.length * 10 || '—'}</span>
-                                <span style={{ fontSize: '11px', color: '#10B981', fontWeight: '700' }}>↑ 18.2%</span>
+                                <span style={{ fontSize: '20px', fontWeight: '800', color: t.text }}>{messages.length}</span>
+                                <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '500' }}>total</span>
                             </div>
                         </div>
-                        <span className="adm-badge adm-badge-blue">This Month</span>
+                        <span className="adm-badge adm-badge-blue">{sortedMonths.length || 0} months</span>
                     </div>
-                    <LineChart data={lineData} color={t.accent} t={t} />
+                    {lineData.length > 0 ? <LineChart data={lineData} color={t.accent} t={t} /> : <div style={{ height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.textMuted, fontSize: '12px' }}>No messages yet</div>}
                 </div>
 
                 <div className="adm-card" style={{ padding: '20px' }}>
@@ -282,12 +308,12 @@ export default function AdminDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                 <div className="adm-card" style={{ padding: '20px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '14px' }}>Traffic Sources</div>
-                    <DonutChart slices={trafficSlices} total={trafficSlices.reduce((a, s) => a + s.v, 0)} centerLabel="Views" t={t} />
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '14px' }}>Skills by Category</div>
+                    {trafficTotal > 0 ? <DonutChart slices={trafficSlices} total={trafficTotal} centerLabel="Skills" t={t} /> : <div style={{ textAlign: 'center', padding: '30px 0', color: t.textMuted, fontSize: '12px' }}>No skills yet</div>}
                 </div>
                 <div className="adm-card" style={{ padding: '20px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '14px' }}>Device Usage</div>
-                    <DonutChart slices={deviceSlices} total={deviceSlices.reduce((a, s) => a + s.v, 0)} centerLabel="Visits" t={t} />
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: t.text, marginBottom: '14px' }}>Journey Entries</div>
+                    <DonutChart slices={deviceSlices} total={deviceTotal} centerLabel="Entries" t={t} />
                 </div>
                 <div className="adm-card" style={{ padding: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>

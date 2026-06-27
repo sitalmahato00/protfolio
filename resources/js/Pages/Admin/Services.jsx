@@ -1,7 +1,8 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 function ServiceModal({ form, setForm, editing, onSave, onCancel, t }) {
     return (
@@ -50,23 +51,19 @@ function ServiceModal({ form, setForm, editing, onSave, onCancel, t }) {
 export default function AdminServices() {
     const { t } = useTheme();
     const blank = { title: '', description: '', icon: '', features: '', is_popular: false };
-    const [services, setServices] = useState([]);
+    const { data: services = [], refresh } = useCachedData('services', () => axios.get('/api/services').then(r => r.data));
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(blank);
     const [showModal, setShowModal] = useState(false);
-
-    useEffect(() => { axios.get('/api/services').then(r => setServices(r.data)); }, []);
-
-    function load() { axios.get('/api/services').then(r => setServices(r.data)); }
     function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
     function openEdit(s) { setEditing(s.id); setForm({ ...s, features: s.features?.join('\n') || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
     function save() {
         const data = { ...form, features: form.features.split('\n').map(f => f.trim()).filter(Boolean) };
         const req = editing ? axios.put(`/api/services/${editing}`, data) : axios.post('/api/services', data);
-        req.then(() => { closeModal(); load(); });
+        req.then(() => { closeModal(); refresh(); });
     }
-    function remove(id) { if (confirm('Delete this service?')) axios.delete(`/api/services/${id}`).then(load); }
+    function remove(id) { if (confirm('Delete this service?')) axios.delete(`/api/services/${id}`).then(refresh); }
 
     return (
         <AdminLayout title="Services">

@@ -1,7 +1,8 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 // ─── Skill Card ───────────────────────────────────────────────────────────────
 function SkillCard({ skill, onEdit, onRemove, t }) {
@@ -64,25 +65,21 @@ function SkillModal({ form, setForm, editing, onSave, onCancel, t }) {
 export default function AdminSkills() {
     const { t } = useTheme();
     const blank = { category: '', name: '', icon: '' };
-    const [skills, setSkills] = useState([]);
+    const { data: skills = [], refresh } = useCachedData('skills', () => axios.get('/api/skills').then(r => r.data));
     const [form, setForm] = useState(blank);
     const [editing, setEditing] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [filterCat, setFilterCat] = useState('All');
     const [search, setSearch] = useState('');
-
-    useEffect(() => { axios.get('/api/skills').then(r => setSkills(r.data)); }, []);
-
-    function load() { axios.get('/api/skills').then(r => setSkills(r.data)); }
     function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
     function openEdit(s) { setEditing(s.id); setForm({ category: s.category, name: s.name, icon: s.icon || '' }); setShowModal(true); }
     function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
 
     function save() {
         const req = editing ? axios.put(`/api/skills/${editing}`, form) : axios.post('/api/skills', form);
-        req.then(() => { closeModal(); load(); });
+        req.then(() => { closeModal(); refresh(); });
     }
-    function remove(id) { if (confirm('Delete this skill?')) axios.delete(`/api/skills/${id}`).then(load); }
+    function remove(id) { if (confirm('Delete this skill?')) axios.delete(`/api/skills/${id}`).then(refresh); }
 
     const categories = ['All', ...Array.from(new Set(skills.map(s => s.category).filter(Boolean)))];
     const filtered = skills.filter(s => {

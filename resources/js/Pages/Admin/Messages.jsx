@@ -1,7 +1,8 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 function ConversationItem({ msg, active, onClick, t }) {
     return (
@@ -34,19 +35,15 @@ function ConversationItem({ msg, active, onClick, t }) {
 
 export default function AdminMessages() {
     const { t } = useTheme();
-    const [messages, setMessages] = useState([]);
+    const { data: messages = [], refresh } = useCachedData('messages', () => axios.get('/api/contact').then(r => r.data));
     const [active, setActive] = useState(null);
     const [search, setSearch] = useState('');
 
-    useEffect(() => { axios.get('/api/contact').then(r => setMessages(r.data)); }, []);
-
-    function load() { axios.get('/api/contact').then(r => setMessages(r.data)); }
-
     function remove(id) {
-        if (confirm('Delete this message?')) axios.delete(`/api/contact/${id}`).then(() => { setActive(null); load(); });
+        if (confirm('Delete this message?')) axios.delete(`/api/contact/${id}`).then(() => { setActive(null); refresh(); });
     }
 
-    function markRead(id) { axios.patch(`/api/contact/${id}/read`).then(load); }
+    function markRead(id) { axios.patch(`/api/contact/${id}/read`).then(refresh); }
 
     function selectMsg(msg) {
         setActive(msg);

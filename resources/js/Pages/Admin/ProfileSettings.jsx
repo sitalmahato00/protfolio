@@ -2,6 +2,7 @@ import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { useCachedData } from '@/hooks/useCachedData';
 
 const TABS = ['Personal', 'About & Typewriter', 'Media', 'Social Links'];
 
@@ -30,6 +31,7 @@ function Field({ label, children }) {
 export default function AdminProfileSettings() {
     const { t } = useTheme();
     const [tab, setTab] = useState('Personal');
+    const { data: profile, refresh } = useCachedData('profile', () => axios.get('/api/profile').then(r => r.data));
     const [form, setForm] = useState({});
     const [saved, setSaved] = useState(false);
     const [msg, setMsg] = useState('');
@@ -39,15 +41,15 @@ export default function AdminProfileSettings() {
     const resumeRef = useRef();
 
     useEffect(() => {
-        axios.get('/api/profile').then(r => {
-            const d = { ...r.data };
+        if (profile) {
+            const d = { ...profile };
             if (Array.isArray(d.typewriter_words)) d.typewriter_words = d.typewriter_words.join('\n');
             setForm(d);
-        });
-    }, []);
+        }
+    }, [profile]);
 
     function save() {
-        axios.put('/api/profile', form).then(() => { setSaved(true); setMsg(''); setTimeout(() => setSaved(false), 3000); });
+        axios.put('/api/profile', form).then(() => { refresh(); setSaved(true); setMsg(''); setTimeout(() => setSaved(false), 3000); });
     }
 
     function setF(k, v) { setForm(f => ({ ...f, [k]: v })); }
