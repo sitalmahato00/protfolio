@@ -1,67 +1,121 @@
 import AdminLayout from '@/Layouts/AdminLayout';
+import { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const inputStyle = { width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', background: '#fff', color: '#0f172a' };
-const btnStyle = (color = '#2563eb') => ({ background: color, color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' });
+function ServiceModal({ form, setForm, editing, onSave, onCancel, t }) {
+    return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div style={{ background: t.cardSolid, border: `1px solid ${t.border}`, borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '540px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '800', color: t.text }}>{editing ? 'Edit Service' : 'New Service'}</div>
+                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: '20px' }}>×</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '10px' }}>
+                        <div>
+                            <label className="adm-label">Service Title *</label>
+                            <input className="adm-input" placeholder="e.g. Web Development" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="adm-label">Icon</label>
+                            <input className="adm-input" placeholder="🖥️" value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} style={{ textAlign: 'center', fontSize: '20px' }} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="adm-label">Description</label>
+                        <textarea className="adm-input" rows={3} style={{ resize: 'vertical' }} placeholder="Short description of this service..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="adm-label">Features (one per line)</label>
+                        <textarea className="adm-input" rows={5} style={{ resize: 'vertical', fontFamily: 'inherit' }} placeholder={"Responsive design\nSEO optimization\nFast delivery"} value={form.features} onChange={e => setForm({ ...form, features: e.target.value })} />
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 14px', borderRadius: '10px', background: t.navHover, border: `1px solid ${t.border}` }}>
+                        <input type="checkbox" checked={form.is_popular} onChange={e => setForm({ ...form, is_popular: e.target.checked })} style={{ accentColor: '#6366F1', width: '16px', height: '16px' }} />
+                        <div>
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: t.text }}>Mark as Popular</div>
+                            <div style={{ fontSize: '11px', color: t.textMuted }}>Shows a Popular badge on the portfolio</div>
+                        </div>
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button className="adm-btn-ghost" onClick={onCancel}>Cancel</button>
+                        <button className="adm-btn-primary" onClick={onSave}>{editing ? 'Update' : 'Create Service'}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function AdminServices() {
+    const { t } = useTheme();
+    const blank = { title: '', description: '', icon: '', features: '', is_popular: false };
     const [services, setServices] = useState([]);
     const [editing, setEditing] = useState(null);
-    const [form, setForm] = useState({ title: '', description: '', icon: '', features: '', is_popular: false });
+    const [form, setForm] = useState(blank);
+    const [showModal, setShowModal] = useState(false);
 
-    useEffect(() => { fetchServices(); }, []);
-
-    function fetchServices() { axios.get('/api/services').then(r => setServices(r.data)); }
-
+    useEffect(() => { fetch(); }, []);
+    function fetch() { axios.get('/api/services').then(r => setServices(r.data)); }
+    function openCreate() { setEditing(null); setForm(blank); setShowModal(true); }
+    function openEdit(s) { setEditing(s.id); setForm({ ...s, features: s.features?.join('\n') || '' }); setShowModal(true); }
+    function closeModal() { setShowModal(false); setEditing(null); setForm(blank); }
     function save() {
         const data = { ...form, features: form.features.split('\n').map(f => f.trim()).filter(Boolean) };
         const req = editing ? axios.put(`/api/services/${editing}`, data) : axios.post('/api/services', data);
-        req.then(() => { setEditing(null); setForm({ title: '', description: '', icon: '', features: '', is_popular: false }); fetchServices(); });
+        req.then(() => { closeModal(); fetch(); });
     }
-
-    function edit(s) { setEditing(s.id); setForm({ ...s, features: s.features?.join('\n') || '' }); }
-    function remove(id) { if (confirm('Delete this service?')) axios.delete(`/api/services/${id}`).then(fetchServices); }
+    function remove(id) { if (confirm('Delete this service?')) axios.delete(`/api/services/${id}`).then(fetch); }
 
     return (
-        <AdminLayout title="Manage Services">
-            <Head title="Admin - Services" />
+        <AdminLayout title="Services">
+            <Head title="Admin – Services" />
+            {showModal && <ServiceModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} />}
 
-            <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px' }}>{editing ? 'Edit Service' : '+ Add New Service'}</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <input style={inputStyle} placeholder="Service title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
-                    <input style={inputStyle} placeholder="Icon emoji (e.g. 🖥️)" value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} />
-                    <textarea style={{ ...inputStyle, gridColumn: '1/-1', resize: 'vertical' }} rows={2} placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-                    <textarea style={{ ...inputStyle, gridColumn: '1/-1', resize: 'vertical' }} rows={4} placeholder="Features (one per line)" value={form.features} onChange={e => setForm({ ...form, features: e.target.value })} />
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#475569', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={form.is_popular} onChange={e => setForm({ ...form, is_popular: e.target.checked })} style={{ accentColor: '#2563eb', width: '16px', height: '16px' }} />
-                        Mark as Popular (shows badge)
-                    </label>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div>
+                    <span style={{ fontSize: '13px', color: t.textMuted }}>{services.length} services configured</span>
                 </div>
-                <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-                    <button onClick={save} style={btnStyle()}>{editing ? 'Update Service' : 'Create Service'}</button>
-                    {editing && <button onClick={() => { setEditing(null); setForm({ title: '', description: '', icon: '', features: '', is_popular: false }); }} style={btnStyle('#94a3b8')}>Cancel</button>}
-                </div>
+                <button className="adm-btn-primary" onClick={openCreate}>+ New Service</button>
             </div>
 
-            <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 24px', borderBottom: '1px solid #f1f5f9', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>All Services ({services.length})</div>
-                {services.length === 0 && <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No services yet.</div>}
+            {services.length === 0 && (
+                <div className="adm-card" style={{ padding: '60px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🛠️</div>
+                    <div style={{ color: t.textMuted, marginBottom: '16px' }}>No services yet. Add what you offer.</div>
+                    <button className="adm-btn-primary" onClick={openCreate}>Add First Service</button>
+                </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                 {services.map(s => (
-                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid #f8fafc', gap: '12px' }}>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                                <span>{s.icon}</span>
-                                <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>{s.title}</span>
-                                {s.is_popular && <span style={{ background: '#f97316', color: '#fff', fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '50px' }}>Popular</span>}
+                    <div key={s.id} className="adm-card" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                        {s.is_popular && (
+                            <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                                <span className="adm-badge adm-badge-orange">⭐ Popular</span>
                             </div>
-                            <div style={{ color: '#94a3b8', fontSize: '12px' }}>{s.features?.length} features</div>
+                        )}
+                        <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', marginBottom: '14px' }}>
+                            {s.icon || '🛠️'}
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                            <button onClick={() => edit(s)} style={{ ...btnStyle('#f59e0b'), padding: '6px 14px', fontSize: '13px' }}>Edit</button>
-                            <button onClick={() => remove(s.id)} style={{ ...btnStyle('#ef4444'), padding: '6px 14px', fontSize: '13px' }}>Delete</button>
+                        <div style={{ fontSize: '16px', fontWeight: '700', color: t.text, marginBottom: '6px' }}>{s.title}</div>
+                        <div style={{ fontSize: '13px', color: t.textMuted, marginBottom: '14px', lineHeight: 1.5 }}>{s.description}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '18px' }}>
+                            {(s.features || []).slice(0, 4).map((f, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: t.textMuted }}>
+                                    <span style={{ color: '#10B981', fontWeight: '700' }}>✓</span> {f}
+                                </div>
+                            ))}
+                            {(s.features || []).length > 4 && (
+                                <div style={{ fontSize: '11px', color: t.accent }}>+{s.features.length - 4} more features</div>
+                            )}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', paddingTop: '14px', borderTop: `1px solid ${t.border}` }}>
+                            <button onClick={() => openEdit(s)} className="adm-btn-ghost" style={{ flex: 1, padding: '8px', fontSize: '12px' }}>Edit</button>
+                            <button onClick={() => remove(s.id)} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>Delete</button>
                         </div>
                     </div>
                 ))}

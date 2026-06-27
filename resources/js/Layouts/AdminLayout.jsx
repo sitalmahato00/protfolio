@@ -1,171 +1,145 @@
 import { Link, usePage } from '@inertiajs/react';
+import { useState, createContext, useContext } from 'react';
 
-const navItems = [
-    {
-        label: 'Dashboard', routeName: 'admin.dashboard', href: '/admin/dashboard',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const tokens = {
+    dark: {
+        bg: '#0D1117', card: '#161B27', cardSolid: '#161B27',
+        border: 'rgba(255,255,255,0.09)', borderHover: 'rgba(99,102,241,0.55)',
+        text: '#E2E8F0', textMuted: '#94A3B8', textDim: '#64748B',
+        accent: '#6366F1', accentEnd: '#8B5CF6', accentRgb: '99,102,241',
+        sidebar: '#0A0F1A', sidebarBorder: 'rgba(255,255,255,0.07)',
+        sidebarText: '#CBD5E1', sidebarGroupLabel: '#475569',
+        topbar: 'rgba(13,17,23,0.97)',
+        input: '#1C2333', inputBorder: 'rgba(255,255,255,0.12)',
+        navHover: 'rgba(99,102,241,0.1)',
+        cardShadow: '0 1px 4px rgba(0,0,0,0.45)',
+        rowHover: 'rgba(99,102,241,0.06)',
+        success: '#10B981', warning: '#F59E0B', danger: '#EF4444', info: '#06B6D4',
     },
-    {
-        label: 'Projects', routeName: 'admin.projects', href: '/admin/projects',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    light: {
+        bg: '#EEF2F7', card: '#FFFFFF', cardSolid: '#FFFFFF',
+        border: '#C8D3E0', borderHover: 'rgba(79,70,229,0.45)',
+        text: '#0F172A', textMuted: '#4B5563', textDim: '#9CA3AF',
+        accent: '#4F46E5', accentEnd: '#7C3AED', accentRgb: '79,70,229',
+        sidebar: '#0F172A', sidebarBorder: 'rgba(255,255,255,0.07)',
+        sidebarText: '#CBD5E1', sidebarGroupLabel: '#475569',
+        topbar: 'rgba(238,242,247,0.98)',
+        input: '#FFFFFF', inputBorder: '#B8C4D0',
+        navHover: 'rgba(79,70,229,0.07)',
+        cardShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.07)',
+        rowHover: 'rgba(79,70,229,0.04)',
+        success: '#059669', warning: '#D97706', danger: '#DC2626', info: '#0891B2',
     },
-    {
-        label: 'Skills', routeName: 'admin.skills', href: '/admin/skills',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    },
-    {
-        label: 'Services', routeName: 'admin.services', href: '/admin/services',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-    },
-    {
-        label: 'Experiences', routeName: 'admin.experiences', href: '/admin/experiences',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    },
-    {
-        label: 'Messages', routeName: 'admin.messages', href: '/admin/messages',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-    },
-    {
-        label: 'Profile Settings', routeName: 'admin.profile', href: '/admin/profile',
-        icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    },
+};
+
+// ─── Theme Context ─────────────────────────────────────────────────────────────
+export const ThemeContext = createContext({ dark: true, toggle: () => {}, t: tokens.dark });
+export const useTheme = () => useContext(ThemeContext);
+
+// ─── Nav items ─────────────────────────────────────────────────────────────────
+const NAV = [
+    { group: 'Dashboard', items: [
+        { label: 'Overview',  routeName: 'admin.dashboard',   href: '/admin/dashboard',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> },
+    ]},
+    { group: 'Content', items: [
+        { label: 'Projects',  routeName: 'admin.projects',    href: '/admin/projects',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> },
+        { label: 'Skills',    routeName: 'admin.skills',      href: '/admin/skills',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> },
+        { label: 'Services',  routeName: 'admin.services',    href: '/admin/services',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+        { label: 'Journey',   routeName: 'admin.experiences', href: '/admin/experiences',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+    ]},
+    { group: 'Communication', items: [
+        { label: 'Messages',  routeName: 'admin.messages',    href: '/admin/messages',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+    ]},
+    { group: 'Settings', items: [
+        { label: 'Profile',   routeName: 'admin.profile',     href: '/admin/profile',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+    ]},
 ];
 
-export default function AdminLayout({ children, title = 'Admin' }) {
-    const { url } = usePage();
-    const { auth } = usePage().props;
-
-    const isActive = (href) => url.startsWith(href);
-
+// ─── Global Styles ─────────────────────────────────────────────────────────────
+function GlobalStyles({ t, dark }) {
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-            {/* Sidebar */}
-            <aside style={{
-                width: '260px',
-                minHeight: '100vh',
-                background: '#0f172a',
-                position: 'fixed',
-                left: 0, top: 0, bottom: 0,
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                zIndex: 100,
-            }}>
-                {/* Logo */}
-                <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                            width: '42px', height: '42px',
-                            background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #7c3aed 100%)',
-                            borderRadius: '10px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: '#fff', fontWeight: '800', fontSize: '16px', flexShrink: 0,
-                        }}>SM</div>
-                        <div>
-                            <div style={{ color: '#fff', fontWeight: '700', fontSize: '14px', lineHeight: 1.2 }}>Portfolio Admin</div>
-                            <div style={{ color: '#475569', fontSize: '11px', marginTop: '2px' }}>Management Panel</div>
-                        </div>
-                    </div>
-                </div>
+        <style id="adm-styles">{`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+            *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+            html,body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;}
+            body{background:${t.bg}!important;color:${t.text}!important;}
+            ::-webkit-scrollbar{width:5px;height:5px;}
+            ::-webkit-scrollbar-track{background:transparent;}
+            ::-webkit-scrollbar-thumb{background:${dark?'#2D3748':'#B8C4D0'};border-radius:4px;}
 
-                {/* Nav */}
-                <nav style={{ flex: 1, padding: '12px 10px' }}>
-                    {navItems.map(item => {
-                        const active = isActive(item.href);
-                        return (
-                            <Link
-                                key={item.routeName}
-                                href={route(item.routeName)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    padding: '10px 14px',
-                                    borderRadius: active ? '0 8px 8px 0' : '8px',
-                                    marginBottom: '2px',
-                                    marginLeft: active ? '-10px' : 0,
-                                    paddingLeft: active ? '24px' : '14px',
-                                    color: active ? '#60a5fa' : '#64748b',
-                                    fontWeight: active ? '600' : '500',
-                                    fontSize: '14px',
-                                    textDecoration: 'none',
-                                    background: active ? 'rgba(37,99,235,0.15)' : 'transparent',
-                                    borderLeft: active ? '3px solid #2563eb' : '3px solid transparent',
-                                    transition: 'all 0.15s',
-                                }}
-                            >
-                                <span style={{ opacity: active ? 1 : 0.6 }}>{item.icon}</span>
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
+            .adm-card{
+                background:${t.card}!important;
+                border:1.5px solid ${t.border}!important;
+                border-radius:14px;
+                box-shadow:${t.cardShadow};
+                transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+            }
+            .adm-card:hover{
+                border-color:${t.borderHover}!important;
+                box-shadow:0 8px 28px rgba(${t.accentRgb},.1);
+            }
 
-                {/* Bottom */}
-                <div style={{ padding: '16px 14px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                    {auth?.user && (
-                        <div style={{ marginBottom: '12px', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px' }}>
-                            <div style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: '600', marginBottom: '2px' }}>{auth.user.name}</div>
-                            <div style={{ color: '#475569', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{auth.user.email}</div>
-                        </div>
-                    )}
-                    <Link
-                        href={route('home')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px', textDecoration: 'none', padding: '8px 12px', borderRadius: '8px', marginBottom: '6px', transition: 'all 0.15s' }}
-                    >
-                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        View Portfolio
-                    </Link>
-                    <Link
-                        href={route('logout')}
-                        method="post"
-                        as="button"
-                        style={{
-                            width: '100%', textAlign: 'left',
-                            background: 'rgba(239,68,68,0.08)',
-                            color: '#ef4444',
-                            border: '1px solid rgba(239,68,68,0.15)',
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'all 0.15s',
-                        }}
-                    >
-                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                        Sign Out
-                    </Link>
-                </div>
-            </aside>
+            .adm-btn-primary{
+                background:linear-gradient(135deg,${t.accent} 0%,${t.accentEnd} 100%)!important;
+                color:#fff!important;border:none;border-radius:9px;
+                padding:9px 20px;font-size:13px;font-weight:600;
+                cursor:pointer;transition:all .18s;
+                box-shadow:0 3px 10px rgba(${t.accentRgb},.28);
+                font-family:inherit;display:inline-flex;align-items:center;justify-content:center;
+            }
+            .adm-btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(${t.accentRgb},.42);}
 
-            {/* Main */}
-            <main style={{ marginLeft: '260px', flex: 1, background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-                {/* Top bar */}
-                <div style={{
-                    background: '#fff',
-                    borderBottom: '1px solid #e2e8f0',
-                    padding: '18px 32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    position: 'sticky', top: 0, zIndex: 50,
-                }}>
-                    <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{title}</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: '700' }}>
-                            {auth?.user?.name?.[0]?.toUpperCase() || 'A'}
-                        </div>
-                    </div>
-                </div>
+            .adm-btn-ghost{
+                background:transparent!important;color:${t.textMuted}!important;
+                border:1.5px solid ${t.border}!important;border-radius:9px;
+                padding:9px 20px;font-size:13px;font-weight:600;
+                cursor:pointer;transition:all .18s;font-family:inherit;
+                display:inline-flex;align-items:center;justify-content:center;
+            }
+            .adm-btn-ghost:hover{background:${t.navHover}!important;color:${t.text}!important;border-color:${t.borderHover}!important;}
 
-                {/* Content */}
-                <div style={{ padding: '32px', flex: 1 }}>
-                    {children}
-                </div>
-            </main>
-        </div>
+            .adm-input{
+                width:100%;background:${t.input}!important;color:${t.text}!important;
+                border:1.5px solid ${t.inputBorder}!important;border-radius:9px;
+                padding:9px 13px;font-size:13px;outline:none;
+                font-family:inherit;transition:border-color .18s,box-shadow .18s;box-sizing:border-box;
+            }
+            .adm-input:focus{border-color:${t.accent}!important;box-shadow:0 0 0 3px rgba(${t.accentRgb},.14)!important;}
+            .adm-input::placeholder{color:${t.textDim}!important;}
+            textarea.adm-input{resize:vertical;line-height:1.6;}
+            select.adm-input{cursor:pointer;}
+            select.adm-input option{background:${t.card};color:${t.text};}
+
+            .adm-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${t.textMuted};margin-bottom:5px;}
+
+            .adm-badge{display:inline-flex;align-items:center;gap:4px;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;}
+            .adm-badge-green {background:rgba(16,185,129,.14);color:${dark?'#34D399':'#059669'};}
+            .adm-badge-blue  {background:rgba(${t.accentRgb},.14);color:${t.accent};}
+            .adm-badge-orange{background:rgba(245,158,11,.14);color:${dark?'#FCD34D':'#D97706'};}
+            .adm-badge-red   {background:rgba(239,68,68,.14);color:${dark?'#FCA5A5':'#DC2626'};}
+            .adm-badge-cyan  {background:rgba(6,182,212,.14);color:${dark?'#67E8F9':'#0891B2'};}
+
+            .adm-sidebar-link{text-decoration:none!important;display:block;}
+            .adm-nav-item{transition:all .14s ease;}
+            .adm-sidebar-link:hover .adm-nav-item:not(.adm-nav-active){background:rgba(99,102,241,.1)!important;color:#CBD5E1!important;}
+            .adm-nav-active{background:linear-gradient(135deg,${t.accent} 0%,${t.accentEnd} 100%)!important;color:#fff!important;box-shadow:0 3px 10px rgba(${t.accentRgb},.3)!important;}
+
+            .adm-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${t.sidebarGroupLabel};padding:10px 10px 4px;}
+            .adm-divider{height:1px;background:${dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)'};margin:6px 4px;}
+
+            .adm-table-header{background:${dark?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.03)'}!important;}
+            .adm-table-row:hover{background:${t.rowHover}!important;}
+
+            @keyframes adm-fade-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+            .adm-page{animation:adm-fade-in .22s ease;}
+        `}</style>
     );
 }
