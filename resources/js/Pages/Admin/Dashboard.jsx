@@ -335,25 +335,25 @@ export default function AdminDashboard() {
         {
             accent: '#7C3AED', label: 'Total Projects', value: projects.length,
             progress: Math.min(100, projects.length * 8),
-            link: route('admin.projects'), linkLabel: 'View all projects',
+            link: '/admin/projects', linkLabel: 'View all projects',
             icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
         },
         {
             accent: '#06B6D4', label: 'Skills Listed', value: skills.length,
             progress: Math.min(100, skills.length * 5),
-            link: route('admin.skills'), linkLabel: 'Explore skills',
+            link: '/admin/skills', linkLabel: 'Explore skills',
             icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
         },
         {
             accent: '#10B981', label: 'Services Offered', value: services.length,
             progress: Math.min(100, services.length * 12),
-            link: route('admin.services'), linkLabel: 'View all services',
+            link: '/admin/services', linkLabel: 'View all services',
             icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
         },
         {
             accent: '#F59E0B', label: 'Pending Messages', value: unread,
             progress: messages.length > 0 ? Math.round((unread / messages.length) * 100) : 0,
-            link: route('admin.messages'), linkLabel: 'View messages',
+            link: '/admin/messages', linkLabel: 'View messages',
             icon: <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
         },
     ];
@@ -461,7 +461,7 @@ export default function AdminDashboard() {
                 {/* Recent Projects */}
                 <Card
                     title="Recent Projects"
-                    action={<Link href={route('admin.projects')} style={{ fontSize: '11px', color: '#6366F1', textDecoration: 'none', fontWeight: '600' }}>View All →</Link>}
+                    action={<Link href="/admin/projects" style={{ fontSize: '11px', color: '#6366F1', textDecoration: 'none', fontWeight: '600' }}>View All →</Link>}
                     t={t} dark={dark}>
                     {topProjects.length === 0 && (
                         <div style={{ textAlign: 'center', padding: '24px 0', color: t.textMuted, fontSize: '12px' }}>No projects yet</div>
