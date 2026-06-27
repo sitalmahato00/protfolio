@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\SkillController;
+use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\ExperienceController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\StatsController;
+
+Route::get('/profile', [ProfileController::class, 'index']);
+Route::put('/profile', [ProfileController::class, 'update']);
+Route::post('/profile/avatar', [ProfileController::class, 'storeAvatar']);
+Route::post('/profile/resume', [ProfileController::class, 'storeResume']);
+Route::get('/skills/categories', [SkillController::class, 'categories']);
+Route::get('/skills', [SkillController::class, 'index']);
+Route::post('/skills', [SkillController::class, 'store']);
+Route::put('/skills/{skill}', [SkillController::class, 'update']);
+Route::delete('/skills/{skill}', [SkillController::class, 'destroy']);
+Route::get('/projects', [ProjectController::class, 'index']);
+Route::post('/projects', [ProjectController::class, 'store']);
+Route::put('/projects/{project}', [ProjectController::class, 'update']);
+Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
+Route::get('/services', [ServiceController::class, 'index']);
+Route::post('/services', [ServiceController::class, 'store']);
+Route::put('/services/{service}', [ServiceController::class, 'update']);
+Route::delete('/services/{service}', [ServiceController::class, 'destroy']);
+Route::get('/experiences', [ExperienceController::class, 'index']);
+Route::post('/experiences', [ExperienceController::class, 'store']);
+Route::put('/experiences/{experience}', [ExperienceController::class, 'update']);
+Route::delete('/experiences/{experience}', [ExperienceController::class, 'destroy']);
+Route::get('/contact', [ContactController::class, 'index']);
+Route::post('/contact', [ContactController::class, 'store']);
+Route::delete('/contact/{contact}', [ContactController::class, 'destroy']);
+Route::patch('/contact/{contact}/read', [ContactController::class, 'markRead']);
+Route::get('/stats', [StatsController::class, 'index']);
