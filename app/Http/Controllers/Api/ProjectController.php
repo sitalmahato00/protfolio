@@ -14,7 +14,7 @@ class ProjectController extends Controller
 
     public function uploadImages(Request $request, Project $project)
     {
-        $request->validate(['images' => 'required|array', 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
+        $request->validate(['images' => 'required|array', 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:10240']);
         $paths = $project->images ?? [];
         foreach ($request->file('images') as $file) {
             $filename = uniqid('project_') . '.' . $file->getClientOriginalExtension();

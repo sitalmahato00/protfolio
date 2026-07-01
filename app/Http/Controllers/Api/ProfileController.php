@@ -26,7 +26,7 @@ class ProfileController extends Controller
 
     public function storeAvatar(Request $request)
     {
-        $request->validate(['avatar' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048']);
+        $request->validate(['avatar' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240']);
         $profile = Profile::firstOrCreate([]);
         $file = $request->file('avatar');
         $filename = uniqid('avatar_') . '.' . $file->getClientOriginalExtension();

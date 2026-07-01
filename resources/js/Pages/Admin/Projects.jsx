@@ -45,7 +45,7 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
         try {
             const res = await axios.post(`/api/projects/${editing}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
             setForm(f => ({ ...f, images: res.data.images, image: res.data.images[0] || f.image }));
-        } catch { alert('Upload failed. Max 2MB per image.'); }
+        } catch { alert('Upload failed. Max 10MB per image.'); }
         finally { setUploading(false); if (imgRef.current) imgRef.current.value = ''; }
     }
 
