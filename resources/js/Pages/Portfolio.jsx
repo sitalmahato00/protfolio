@@ -315,18 +315,18 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                 <p className="section-desc">Real-world solutions built with precision and passion.</p>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:'24px'}}>
                     {projects.slice(0, 6).map(p=>(
-                        <Link key={p.id} href={`/project/${p.id}`} style={{textDecoration:'none',color:'inherit',display:'block'}}>
-                        <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.04)',transition:'all .25s',cursor:'pointer'}}
+                        <Link key={p.id} href={`/project/${p.id}`} style={{textDecoration:'none',color:'inherit',display:'block',height:'100%'}}>
+                        <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.04)',transition:'all .25s',cursor:'pointer',display:'flex',flexDirection:'column',height:'100%'}}
                             onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 8px 30px rgba(0,0,0,.1)';}}
                             onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';}}>
-                            {allProjectImgs(p).length > 0 && <div style={{height:'180px',overflow:'hidden'}}><img src={allProjectImgs(p)[0]} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
-                            <div style={{padding:'20px'}}>
+                            {allProjectImgs(p).length > 0 && <div style={{height:'180px',overflow:'hidden',flexShrink:0}}><img src={allProjectImgs(p)[0]} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
+                            <div style={{padding:'20px',display:'flex',flexDirection:'column',flex:1}}>
                                 <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'10px'}}>
                                     {(p.tags||[]).map(t=><span key={t} style={{background:'var(--bg)',color:'var(--primary)',borderRadius:'6px',padding:'3px 10px',fontSize:'.74rem',fontWeight:'700',border:'1px solid rgba(37,99,235,.15)'}}>{t}</span>)}
                                 </div>
                                 <div style={{fontSize:'1.05rem',fontWeight:'800',color:'var(--dark)',marginBottom:'6px'}}>{p.title}</div>
-                                <div style={{fontSize:'.85rem',color:'var(--muted)',marginBottom:'14px',lineHeight:'1.5'}}>{p.description}</div>
-                                <div style={{display:'flex',gap:'8px'}}>
+                                <div style={{fontSize:'.85rem',color:'var(--muted)',lineHeight:'1.5',flex:1}}>{p.description}</div>
+                                <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
                                     {p.live_url && p.live_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.live_url, '_blank', 'noreferrer'); }} style={{background:'var(--primary)',color:'#fff',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',cursor:'pointer'}}>Live Demo</span>}
                                     {p.github_url && p.github_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.github_url, '_blank', 'noreferrer'); }} style={{background:'var(--bg)',color:'var(--text)',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',border:'1px solid var(--border)',cursor:'pointer'}}>GitHub</span>}
                                 </div>
