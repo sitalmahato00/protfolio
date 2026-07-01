@@ -27,6 +27,22 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/project/{project}', function (Project $project) {
+    $profile = Profile::first();
+    return Inertia::render('Portfolio/ProjectShow', [
+        'project' => $project,
+        'profile' => $profile,
+    ]);
+})->name('project.show');
+
+Route::get('/projects', function () {
+    $profile = Profile::first();
+    return Inertia::render('Portfolio/ProjectsIndex', [
+        'projects' => Project::orderBy('order')->get(),
+        'profile'  => $profile,
+    ]);
+})->name('projects.index');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');

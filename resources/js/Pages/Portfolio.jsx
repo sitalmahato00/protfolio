@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 const imgModules = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
 const assetImgMap = {};
@@ -49,6 +49,7 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
     const resumeUrl = profile?.resume
         ? imgUrl(profile.resume)
         : '/images/sitalmahato.pdf';
+    const allProjectImgs = p => (p.images?.length ? p.images : (p.image ? [p.image] : []));
     const navClick = (e, id) => { e.preventDefault(); setMenuOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
 
     function submitContact(e) {
@@ -213,10 +214,10 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                                 <div style={{fontSize:'1.4rem',fontWeight:'800',color:'#60a5fa'}}>{s.n}</div>
                                 <div style={{fontSize:'.7rem',color:'rgba(255,255,255,.5)',marginTop:'2px'}}>{s.l}</div>
                             </div>
-                        ))}
-                    </div>
+                    ))}
                 </div>
             </div>
+        </div>
         </section>
 
         {/* PROMO BANNER */}
@@ -313,9 +314,12 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                 <h2 className="section-title">Featured Projects</h2>
                 <p className="section-desc">Real-world solutions built with precision and passion.</p>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:'24px'}}>
-                    {projects.map(p=>(
-                        <div key={p.id} style={{background:'#fff',border:'1px solid var(--border)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.04)'}}>
-                            {imgUrl(p.image) && <div style={{height:'180px',overflow:'hidden'}}><img src={imgUrl(p.image)} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
+                    {projects.slice(0, 6).map(p=>(
+                        <Link key={p.id} href={`/project/${p.id}`} style={{textDecoration:'none',color:'inherit',display:'block'}}>
+                        <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.04)',transition:'all .25s',cursor:'pointer'}}
+                            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 8px 30px rgba(0,0,0,.1)';}}
+                            onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';}}>
+                            {allProjectImgs(p).length > 0 && <div style={{height:'180px',overflow:'hidden'}}><img src={allProjectImgs(p)[0]} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
                             <div style={{padding:'20px'}}>
                                 <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'10px'}}>
                                     {(p.tags||[]).map(t=><span key={t} style={{background:'var(--bg)',color:'var(--primary)',borderRadius:'6px',padding:'3px 10px',fontSize:'.74rem',fontWeight:'700',border:'1px solid rgba(37,99,235,.15)'}}>{t}</span>)}
@@ -323,13 +327,24 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                                 <div style={{fontSize:'1.05rem',fontWeight:'800',color:'var(--dark)',marginBottom:'6px'}}>{p.title}</div>
                                 <div style={{fontSize:'.85rem',color:'var(--muted)',marginBottom:'14px',lineHeight:'1.5'}}>{p.description}</div>
                                 <div style={{display:'flex',gap:'8px'}}>
-                                    {p.live_url && p.live_url !== '#' && <a href={p.live_url} target="_blank" rel="noreferrer" style={{background:'var(--primary)',color:'#fff',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700'}}>Live Demo</a>}
-                                    {p.github_url && p.github_url !== '#' && <a href={p.github_url} target="_blank" rel="noreferrer" style={{background:'var(--bg)',color:'var(--text)',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',border:'1px solid var(--border)'}}>GitHub</a>}
+                                    {p.live_url && p.live_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.live_url, '_blank', 'noreferrer'); }} style={{background:'var(--primary)',color:'#fff',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',cursor:'pointer'}}>Live Demo</span>}
+                                    {p.github_url && p.github_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.github_url, '_blank', 'noreferrer'); }} style={{background:'var(--bg)',color:'var(--text)',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',border:'1px solid var(--border)',cursor:'pointer'}}>GitHub</span>}
                                 </div>
                             </div>
                         </div>
+                        </Link>
                     ))}
                 </div>
+                {projects.length > 0 && (
+                    <div style={{textAlign:'center',marginTop:'32px'}}>
+                        <Link href="/projects" style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'var(--gradient,linear-gradient(135deg,#1e3a8a,#2563eb,#7c3aed))',color:'#fff',padding:'12px 32px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem',boxShadow:'0 4px 20px rgba(37,99,235,.3)',transition:'all .25s',textDecoration:'none'}}
+                            onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'}
+                            onMouseLeave={e=>e.currentTarget.style.transform=''}>
+                            View All Projects ({projects.length})
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </Link>
+                    </div>
+                )}
             </div>
         </section>
 

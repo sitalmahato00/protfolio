@@ -1,6 +1,6 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useCachedData } from '@/hooks/useCachedData';
 
@@ -33,6 +33,32 @@ function tagColor(tag) {
 function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
     const cardBg = dark ? '#1E293B' : '#FFFFFF';
+    const [uploading, setUploading] = useState(false);
+    const imgRef = useRef(null);
+
+    async function handleImagesUpload(e) {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+        setUploading(true);
+        const fd = new FormData();
+        files.forEach(f => fd.append('images[]', f));
+        try {
+            const res = await axios.post(`/api/projects/${editing}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            setForm(f => ({ ...f, images: res.data.images, image: res.data.images[0] || f.image }));
+        } catch { alert('Upload failed. Max 2MB per image.'); }
+        finally { setUploading(false); if (imgRef.current) imgRef.current.value = ''; }
+    }
+
+    async function removeImage(img) {
+        if (!confirm('Remove this image?')) return;
+        try {
+            const res = await axios.delete(`/api/projects/${editing}/image`, { data: { image: img } });
+            setForm(f => ({ ...f, images: res.data.images, image: res.data.images[0] || '' }));
+        } catch { alert('Failed to remove image.'); }
+    }
+
+    const allImages = form.images?.length ? form.images : (form.image ? [form.image] : []);
+
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 500, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '0' }}>
             <div style={{ background: cardBg, border: `1px solid ${t.border}`, borderLeft: `5px solid ${MODULE_COLOR}`, borderRadius: '20px 20px 0 0', padding: '24px 22px', width: '100%', maxWidth: '640px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 -12px 60px rgba(0,0,0,0.4)' }}>
@@ -53,9 +79,31 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
                         <textarea className="adm-input" rows={3} placeholder="Describe what this project does..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                     </div>
                     <div>
-                        <label className="adm-label">Image Path</label>
-                        <input className="adm-input" placeholder="images/project.png or https://..." value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} />
-                        {imgUrl(form.image) && <img src={imgUrl(form.image)} alt="preview" style={{ marginTop: '8px', height: '80px', borderRadius: '10px', objectFit: 'cover', border: `1px solid ${t.border}` }} />}
+                        <label className="adm-label">Images</label>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input className="adm-input" style={{ flex: 1 }} placeholder="images/project.png or https://..." value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} />
+                            {editing && (
+                                <>
+                                    <input ref={imgRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImagesUpload} />
+                                    <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '9px 14px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {uploading ? '⏳' : '📁'} Upload
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                        {allImages.length > 0 && (
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                                {allImages.map((img, i) => (
+                                    <div key={i} style={{ position: 'relative' }}>
+                                        <img src={imgUrl(img)} alt="" style={{ height: '70px', borderRadius: '10px', objectFit: 'cover', border: i === 0 ? `2px solid ${MODULE_COLOR}` : `1px solid ${t.border}` }} />
+                                        {editing && (
+                                            <button onClick={() => removeImage(img)} style={{ position: 'absolute', top: '-6px', right: '-6px', width: '20px', height: '20px', borderRadius: '50%', background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                                        )}
+                                        {i === 0 && <span style={{ position: 'absolute', bottom: '2px', left: '2px', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '9px', padding: '1px 5px', borderRadius: '4px' }}>Cover</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div>
                         <label className="adm-label">Tags (comma separated)</label>
