@@ -112,7 +112,7 @@ export default function AdminServices() {
 
                         {/* Title & description */}
                         <div style={{ fontSize: '16px', fontWeight: '700', color: dark ? '#F1F5F9' : '#111827', marginBottom: '6px', lineHeight: 1.3 }}>{s.title}</div>
-                        <div style={{ fontSize: '13px', color: dark ? '#CBD5E1' : '#475569', marginBottom: '14px', lineHeight: 1.6 }}>{s.description}</div>
+                        <div style={{ fontSize: '13px', color: dark ? '#CBD5E1' : '#475569', marginBottom: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{s.description}</div>
 
                         {/* Features */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '18px' }}>

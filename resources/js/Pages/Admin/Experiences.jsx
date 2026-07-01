@@ -89,7 +89,7 @@ function TimelineItem({ entry, onEdit, onRemove, color, t, dark }) {
                             </div>
                         )}
                         {entry.description && (
-                            <div style={{ fontSize: '13px', color: dark ? '#CBD5E1' : '#475569', marginTop: '8px', lineHeight: 1.6 }}>{entry.description}</div>
+                            <div style={{ fontSize: '13px', color: dark ? '#CBD5E1' : '#475569', marginTop: '8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{entry.description}</div>
                         )}
                         {(entry.tags || []).length > 0 && (
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '10px' }}>

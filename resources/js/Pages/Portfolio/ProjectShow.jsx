@@ -83,7 +83,7 @@ export default function ProjectShow({ project, profile }) {
                         ))}
                     </div>
                     <h1 style={{fontSize:'2rem',fontWeight:'800',color:'var(--dark)',marginBottom:'16px',lineHeight:1.2}}>{project?.title}</h1>
-                    <p style={{fontSize:'1.05rem',color:'var(--muted)',lineHeight:'1.7',marginBottom:'28px'}}>{project?.description}</p>
+                    <p style={{fontSize:'1.05rem',color:'var(--muted)',lineHeight:'1.7',marginBottom:'28px',whiteSpace:'pre-wrap'}}>{project?.description}</p>
                     <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
                         {project?.live_url && project.live_url !== '#' && (
                             <a href={project.live_url} target="_blank" rel="noreferrer" style={{background:'var(--primary)',color:'#fff',padding:'12px 28px',borderRadius:'50px',fontWeight:'700',fontSize:'.95rem',display:'inline-flex',alignItems:'center',gap:'8px'}}>
