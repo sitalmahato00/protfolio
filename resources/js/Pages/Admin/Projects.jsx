@@ -1,6 +1,6 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useCachedData } from '@/hooks/useCachedData';
 
@@ -33,6 +33,26 @@ function tagColor(tag) {
 function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
     const cardBg = dark ? '#1E293B' : '#FFFFFF';
+    const [uploading, setUploading] = useState(false);
+    const [uploadErr, setUploadErr] = useState('');
+    const imgRef = useRef(null);
+
+    async function handleImagesUpload(e) {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+        setUploading(true);
+        setUploadErr('');
+        const fd = new FormData();
+        files.forEach(f => fd.append('images[]', f));
+        try {
+            const res = await axios.post(`/api/projects/${editing}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            setForm(f => ({ ...f, images: res.data.images, image: res.data.images[0] || f.image }));
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Upload failed';
+            setUploadErr(msg);
+        }
+        finally { setUploading(false); if (imgRef.current) imgRef.current.value = ''; }
+    }
 
     function removeImage(img) {
         if (!confirm('Remove this image?')) return;
@@ -67,10 +87,22 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
                     </div>
                     <div>
                         <label className="adm-label">Gallery Images</label>
-                        <textarea className="adm-input" rows={3} placeholder="images/photo1.png, images/photo2.png, https://example.com/photo3.jpg" value={(form.images || []).join(', ')} onChange={e => setForm({ ...form, images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} />
-                        <div style={{ fontSize: '11px', color: t.textMuted, marginTop: '4px' }}>Comma-separated paths or URLs</div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                            <input className="adm-input" style={{ flex: 1 }} placeholder="images/photo1.png, images/photo2.png" value={(form.images || []).join(', ')} onChange={e => setForm({ ...form, images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} />
+                            {editing && (
+                                <>
+                                    <input ref={imgRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImagesUpload} />
+                                    <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '9px 14px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {uploading ? '⏳' : '📁'} Upload
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                        {uploadErr && (
+                            <div style={{ fontSize: '12px', color: '#EF4444', marginBottom: '6px', padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px' }}>{uploadErr}</div>
+                        )}
                         {allImages.length > 0 && (
-                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                 {allImages.map((img, i) => (
                                     <div key={i} style={{ position: 'relative' }}>
                                         <img src={imgUrl(img)} alt="" style={{ height: '70px', borderRadius: '10px', objectFit: 'cover', border: i === 0 ? `2px solid ${MODULE_COLOR}` : `1px solid ${t.border}` }} />

@@ -29,8 +29,13 @@ class ProfileController extends Controller
         $request->validate(['avatar' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240']);
         $profile = Profile::firstOrCreate([]);
         $file = $request->file('avatar');
+        $dir = public_path('images');
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        if (!$file->isValid()) {
+            return response()->json(['error' => 'File upload failed: ' . $file->getErrorMessage()], 422);
+        }
         $filename = uniqid('avatar_') . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('images'), $filename);
+        $file->move($dir, $filename);
         $profile->update(['avatar' => 'images/' . $filename]);
         return response()->json(['avatar' => 'images/' . $filename]);
     }
@@ -40,8 +45,13 @@ class ProfileController extends Controller
         $request->validate(['resume' => 'required|file|mimes:pdf|max:5120']);
         $profile = Profile::firstOrCreate([]);
         $file = $request->file('resume');
+        $dir = public_path('images');
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        if (!$file->isValid()) {
+            return response()->json(['error' => 'File upload failed: ' . $file->getErrorMessage()], 422);
+        }
         $filename = uniqid('resume_') . '.pdf';
-        $file->move(public_path('images'), $filename);
+        $file->move($dir, $filename);
         $profile->update(['resume' => 'images/' . $filename]);
         return response()->json(['resume' => 'images/' . $filename]);
     }

@@ -15,10 +15,15 @@ class ProjectController extends Controller
     public function uploadImages(Request $request, Project $project)
     {
         $request->validate(['images' => 'required|array', 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:10240']);
+        $dir = public_path('images');
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
         $paths = $project->images ?? [];
         foreach ($request->file('images') as $file) {
+            if (!$file->isValid()) {
+                return response()->json(['error' => 'File upload failed: ' . $file->getErrorMessage()], 422);
+            }
             $filename = uniqid('project_') . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('images'), $filename);
+            $file->move($dir, $filename);
             $paths[] = 'images/' . $filename;
         }
         $project->update(['images' => $paths, 'image' => $paths[0] ?? $project->image]);
