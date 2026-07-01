@@ -325,7 +325,7 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
                                     {(p.tags||[]).map(t=><span key={t} style={{background:'var(--bg)',color:'var(--primary)',borderRadius:'6px',padding:'3px 10px',fontSize:'.74rem',fontWeight:'700',border:'1px solid rgba(37,99,235,.15)'}}>{t}</span>)}
                                 </div>
                                 <div style={{fontSize:'1.05rem',fontWeight:'800',color:'var(--dark)',marginBottom:'6px'}}>{p.title}</div>
-                                <div style={{fontSize:'.85rem',color:'var(--muted)',lineHeight:'1.5',flex:1}}>{p.description}</div>
+                                <div style={{fontSize:'.85rem',color:'var(--muted)',lineHeight:'1.5',flex:1,display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{p.description}</div>
                                 <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
                                     {p.live_url && p.live_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.live_url, '_blank', 'noreferrer'); }} style={{background:'var(--primary)',color:'#fff',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',cursor:'pointer'}}>Live Demo</span>}
                                     {p.github_url && p.github_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.github_url, '_blank', 'noreferrer'); }} style={{background:'var(--bg)',color:'var(--text)',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',border:'1px solid var(--border)',cursor:'pointer'}}>GitHub</span>}
