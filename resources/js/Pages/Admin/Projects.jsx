@@ -30,7 +30,7 @@ function tagColor(tag) {
     return { bg: 'rgba(100,116,139,0.12)', color: '#64748B' };
 }
 
-function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
+function ProjectModal({ form, setForm, editing, setEditing, onSave, onCancel, t, dark }) {
     const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
     const cardBg = dark ? '#1E293B' : '#FFFFFF';
     const [uploading, setUploading] = useState(false);
@@ -42,10 +42,25 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
         if (!files.length) return;
         setUploading(true);
         setUploadErr('');
+        let projectId = editing;
+        if (!projectId) {
+            try {
+                const data = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
+                const res = await axios.post('/api/projects', data);
+                projectId = res.data.id;
+                setEditing(projectId);
+                setForm(f => ({ ...f, images: res.data.images || [], image: res.data.image || f.image }));
+            } catch (err) {
+                const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to create project';
+                setUploadErr(msg);
+                setUploading(false);
+                return;
+            }
+        }
         const fd = new FormData();
         files.forEach(f => fd.append('images[]', f));
         try {
-            const res = await axios.post(`/api/projects/${editing}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const res = await axios.post(`/api/projects/${projectId}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
             setForm(f => ({ ...f, images: res.data.images, image: res.data.images[0] || f.image }));
         } catch (err) {
             const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Upload failed';
@@ -89,14 +104,12 @@ function ProjectModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
                         <label className="adm-label">Gallery Images</label>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                             <input className="adm-input" style={{ flex: 1 }} placeholder="images/photo1.png, images/photo2.png" value={(form.images || []).join(', ')} onChange={e => setForm({ ...form, images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} />
-                            {editing && (
                                 <>
                                     <input ref={imgRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImagesUpload} />
                                     <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '9px 14px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         {uploading ? '⏳' : '📁'} Upload
                                     </button>
                                 </>
-                            )}
                         </div>
                         {uploadErr && (
                             <div style={{ fontSize: '12px', color: '#EF4444', marginBottom: '6px', padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px' }}>{uploadErr}</div>
@@ -142,23 +155,23 @@ function ProjectCard({ p, selected, onToggle, onEdit, onRemove, imgUrl, dark, t 
     const cardBg = dark ? '#1E293B' : '#FFFFFF';
     const cardBorder = dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid #E8ECF2';
     return (
-        <div style={{ background: cardBg, border: selected ? `1px solid ${MODULE_COLOR}` : cardBorder, borderLeft: `4px solid ${MODULE_COLOR}`, borderRadius: '14px', overflow: 'hidden', boxShadow: dark ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.06)', transition: 'all .2s' }}>
+        <div style={{ background: cardBg, border: selected ? `1px solid ${MODULE_COLOR}` : cardBorder, borderLeft: `4px solid ${MODULE_COLOR}`, borderRadius: '14px', overflow: 'hidden', boxShadow: dark ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.06)', transition: 'all .2s', display: 'flex', flexDirection: 'column' }}>
             {/* Image */}
             {imgUrl(p.image)
-                ? <img src={imgUrl(p.image)} alt={p.title} style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block' }} />
-                : <div style={{ width: '100%', height: '80px', background: 'rgba(124,58,237,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📁</div>
+                ? <img src={imgUrl(p.image)} alt={p.title} style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block', flexShrink: 0 }} />
+                : <div style={{ width: '100%', height: '80px', flexShrink: 0, background: 'rgba(124,58,237,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📁</div>
             }
-            <div style={{ padding: '14px' }}>
+            <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                 {/* Title */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
                     <input type="checkbox" checked={selected} onChange={onToggle} style={{ accentColor: MODULE_COLOR, width: '15px', height: '15px', marginTop: '3px', flexShrink: 0 }} />
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '14px', fontWeight: '700', color: dark ? '#F8FAFC' : '#111827', lineHeight: 1.3 }}>{p.title}</div>
-                        <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '3px', lineHeight: 1.4 }}>{p.description}</div>
+                        <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '3px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.description}</div>
                     </div>
                 </div>
                 {/* Tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px', marginTop: 'auto' }}>
                     {(p.tags || []).slice(0, 4).map(tag => {
                         const { bg, color } = tagColor(tag);
                         return <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', background: bg, color }}>{tag}</span>;
@@ -232,7 +245,7 @@ export default function AdminProjects() {
     return (
         <>
             <Head title="Admin – Projects" />
-            {showModal && <ProjectModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
+            {showModal && <ProjectModal form={form} setForm={setForm} editing={editing} setEditing={setEditing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
 
             {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
