@@ -67,7 +67,7 @@ export default function AdminProfileSettings() {
             const res = await axios.post('/api/profile/avatar', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
             setF('avatar', res.data.avatar);
             setMsg('✓ Avatar uploaded!');
-        } catch { setMsg('Upload failed. Max 2MB, images only.'); }
+        } catch { setMsg('Upload failed. Max 10MB, images only.'); }
         finally { setAvatarUploading(false); }
     }
 
@@ -159,7 +159,7 @@ export default function AdminProfileSettings() {
                                     className="adm-btn-primary" style={{ marginBottom: '8px', display: 'block', width: '100%' }}>
                                     {avatarUploading ? '⏳ Uploading…' : '📷 Upload Photo'}
                                 </button>
-                                <div style={{ fontSize: '11px', color: t.textMuted }}>JPEG, PNG, WebP — Max 2MB</div>
+                                <div style={{ fontSize: '11px', color: t.textMuted }}>JPEG, PNG, WebP — Max 10MB</div>
                             </div>
                         </div>
                         <input ref={avatarRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
