@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─── asset map ─────────────────────────────────────────── */
 const imgMod = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
@@ -10,29 +10,49 @@ for (const [p, m] of Object.entries(imgMod)) { aMap[p.split('/').pop()] = m.defa
 /* ─── tiny helpers ───────────────────────────────────────── */
 const imgUrl = s => { if (!s) return null; if (s.startsWith('http')) return s; return aMap[s.replace(/^images\//,'')] || '/'+s; };
 
-const FadeUp = ({ children, delay = 0, className = '' }) => {
+/* ─── Native IntersectionObserver hook (replaces framer useInView — no layout thrashing) ── */
+function useVisible(margin = '-60px') {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { rootMargin: margin }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [margin]);
+  return [ref, visible];
+}
+
+/* ─── FadeUp — uses native IO, no framer useInView ── */
+const FadeUp = ({ children, delay = 0, className = '' }) => {
+  const [ref, visible] = useVisible('-60px');
   return (
-    <motion.div ref={ref} className={className}
-      initial={{ opacity: 0, y: 40 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.25, 0.46, 0.45, 0.94] }}>
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(32px)',
+      transition: `opacity 0.65s ${delay}s ease, transform 0.65s ${delay}s cubic-bezier(.25,.46,.45,.94)`,
+      willChange: 'opacity, transform',
+    }}>
       {children}
-    </motion.div>
+    </div>
   );
 };
 
+/* ─── FadeIn — opacity only ── */
 const FadeIn = ({ children, delay = 0, className = '' }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const [ref, visible] = useVisible('-40px');
   return (
-    <motion.div ref={ref} className={className}
-      initial={{ opacity: 0 }}
-      animate={inView ? { opacity: 1 } : {}}
-      transition={{ duration: 0.8, delay }}>
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transition: `opacity 0.75s ${delay}s ease`,
+      willChange: 'opacity',
+    }}>
       {children}
-    </motion.div>
+    </div>
   );
 };
 
@@ -192,20 +212,27 @@ const GLOBAL_CSS = `
 
   /* ── nav ── */
   .nav-root {
-    position: fixed; top:0; left:0; right:0; z-index:1000;
-    height: 68px; display:flex; align-items:center; justify-content:space-between;
-    padding: 0 40px; transition: all .4s;
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 1000; width: calc(100% - 48px); max-width: 1100px;
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.10);
+    transition: background .35s, box-shadow .35s, border-color .35s;
   }
   .nav-root.stuck {
-    background: rgba(5,8,22,.75); backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(255,255,255,.06);
-    box-shadow: 0 8px 40px rgba(0,0,0,.4);
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.16);
+    box-shadow: 0 8px 40px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
   }
   .nav-link {
     font-size: .84rem; font-weight: 500; color: rgba(226,232,240,.6);
     padding: 6px 14px; border-radius: 8px; transition: all .2s;
   }
-  .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,.06); }
+  .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,.08); }
 
   /* ── terminal window ── */
   .terminal {
@@ -250,18 +277,39 @@ const GLOBAL_CSS = `
 
   /* ── mobile ── */
   @media(max-width:768px){
-    .nav-root { padding:0 20px; }
+    .nav-root { top:10px; width:calc(100% - 24px); padding:0 14px; border-radius:14px; height:52px; }
     .hero-cols { grid-template-columns:1fr !important; }
     .hero-right { display:none !important; }
+    /* mobile avatar: show above hero text */
+    .hero-avatar-mob { display:flex !important; order:-1; }
+    .hero-left-col { display:flex; flex-direction:column; align-items:center; text-align:center; }
+    /* mobile stat mini row */
+    .hero-mob-stats { display:flex !important; }
+    .hero-section { padding:0 16px !important; }
+    .hero-inner { padding-top:76px !important; padding-bottom:40px !important; }
+    /* CTAs: Hire Me + Download CV side-by-side, WhatsApp below */
+    .hero-ctas { flex-direction:column !important; align-items:stretch !important; width:100%; }
+    .hero-cta-row1 { display:flex !important; gap:10px; width:100%; }
+    .hero-cta-row1 > div { flex:1 !important; }
+    .hero-cta-row1 > div > a, .hero-cta-row1 > div > button { width:100% !important; justify-content:center !important; }
+    .hero-cta-row2 { display:flex !important; width:100%; }
+    .hero-cta-row2 > div > a, .hero-cta-row2 > div > button { width:100% !important; justify-content:center !important; }
+    /* socials: hide on mobile to reduce clutter */
+    .hero-socials { display:none !important; }
     .about-cols { grid-template-columns:1fr !important; }
     .proj-bento { grid-template-columns:1fr !important; }
     .contact-cols { grid-template-columns:1fr !important; }
     .hide-mob { display:none !important; }
+    .show-mob { display:block !important; }
     .stat-row { grid-template-columns:repeat(2,1fr) !important; }
     .nav-links-row { display:none !important; }
     .mob-menu-show { display:flex !important; }
     .services-grid { grid-template-columns:1fr !important; }
     .exp-cols { grid-template-columns:1fr !important; }
+    /* skills section: tighter padding so card doesn't overflow */
+    .skills-section { padding:80px 16px !important; }
+    .skills-card { padding:20px !important; }
+    .skills-grid { grid-template-columns:1fr !important; }
   }
 `;
 
@@ -286,16 +334,15 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
   const [mouse,       setMouse]       = useState({ x:0, y:0 });
   const [hoveredProj, setHoveredProj] = useState(null);
 
-  /* parallax */
-  const { scrollY } = useScroll();
-  const heroY  = useTransform(scrollY, [0, 600], [0, -80]);
-  const heroO  = useTransform(scrollY, [0, 500], [1, 0]);
 
-  /* smooth spring for mouse */
-  const mx = useSpring(0, { stiffness: 80, damping: 20 });
-  const my = useSpring(0, { stiffness: 80, damping: 20 });
+  /* parallax removed — was causing 871ms main thread block */
 
-  /* typewriter words */
+  /* mouse tracker — passive only, no spring (spring caused layout thrashing) */
+  useEffect(() => {
+    const fn = e => setMouse({ x:e.clientX, y:e.clientY });
+    window.addEventListener('mousemove', fn, { passive:true });
+    return () => window.removeEventListener('mousemove', fn);
+  }, []);
   const words = profile?.typewriter_words?.length
     ? profile.typewriter_words
     : ['Full Stack Developer','Laravel & PHP Expert','UI/UX Designer','React Developer','Problem Solver','Freelancer · Nepal 🇳🇵'];
@@ -379,8 +426,22 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
   const navLinks = ['home','about','skills','projects','services','experience','contact'];
 
   const techStack = [
-    'React','Laravel','PHP','MySQL','JavaScript','TypeScript','Node.js','TailwindCSS',
-    'Git','Docker','Redis','REST API','Next.js','Vue.js','AWS','Figma',
+    { label:'React',      src:'https://cdn.simpleicons.org/react/61dafb',       color:'#61dafb' },
+    { label:'Laravel',    src:'https://cdn.simpleicons.org/laravel/ff2d20',      color:'#ff2d20' },
+    { label:'PHP',        src:'https://cdn.simpleicons.org/php/777bb4',          color:'#777bb4' },
+    { label:'MySQL',      src:'https://cdn.simpleicons.org/mysql/4479a1',        color:'#4479a1' },
+    { label:'JavaScript', src:'https://cdn.simpleicons.org/javascript/f7df1e',   color:'#f7df1e' },
+    { label:'TypeScript', src:'https://cdn.simpleicons.org/typescript/3178c6',   color:'#3178c6' },
+    { label:'Node.js',    src:'https://cdn.simpleicons.org/nodedotjs/417e38',    color:'#417e38' },
+    { label:'TailwindCSS',src:'https://cdn.simpleicons.org/tailwindcss/38bdf8',  color:'#38bdf8' },
+    { label:'Git',        src:'https://cdn.simpleicons.org/git/f05032',          color:'#f05032' },
+    { label:'Docker',     src:'https://cdn.simpleicons.org/docker/2496ed',       color:'#2496ed' },
+    { label:'Redis',      src:'https://cdn.simpleicons.org/redis/dc382d',        color:'#dc382d' },
+    { label:'Next.js',    src:'https://cdn.simpleicons.org/nextdotjs/ffffff',    color:'#fff'    },
+    { label:'Vue.js',     src:'https://cdn.simpleicons.org/vuedotjs/4fc08d',     color:'#4fc08d' },
+    { label:'AWS',        src:'https://cdn.simpleicons.org/amazonaws/ff9900',    color:'#ff9900' },
+    { label:'Figma',      src:'https://cdn.simpleicons.org/figma/f24e1e',        color:'#f24e1e' },
+    { label:'Linux',      src:'https://cdn.simpleicons.org/linux/fcc624',        color:'#fcc624' },
   ];
 
 
@@ -419,19 +480,21 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
       <div className="aurora-blob" style={{width:'400px',height:'400px',background:'#06b6d4',bottom:'20%',right:'10%',animationDelay:'-4s'}}/>
     </div>
 
-    {/* ── CURSOR SPOTLIGHT ──────────────────────────────────── */}
-    <motion.div style={{
+    {/* ── CURSOR SPOTLIGHT — CSS transform, no spring ─────── */}
+    <div style={{
       position:'fixed', zIndex:1, pointerEvents:'none', borderRadius:'50%',
       width:400, height:400,
       background:'radial-gradient(circle, rgba(124,58,237,.06) 0%, transparent 70%)',
-      x: useTransform(mx, v=>v-200), y: useTransform(my, v=>v-200),
+      transform:`translate(${mouse.x-200}px,${mouse.y-200}px)`,
+      transition:'transform 0.1s linear',
+      willChange:'transform',
     }}/>
 
     {/* ═══ NAVBAR ════════════════════════════════════════════ */}
     <nav className={`nav-root${stuck?' stuck':''}`} style={{zIndex:1000}}>
       <a href="#home" onClick={e=>navTo(e,'home')} style={{display:'flex',alignItems:'center',gap:10,fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:'1.05rem',color:'#fff'}}>
         <div style={{width:34,height:34,borderRadius:9,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.8rem',fontWeight:900,boxShadow:'0 0 20px rgba(124,58,237,.4)'}}>SM</div>
-        <span className="hide-mob">{profile?.name||'Sital Mahato'}</span>
+        <span>{profile?.name||'Sital Mahato'}</span>
       </a>
 
       <div className="nav-links-row" style={{display:'flex',gap:2}}>
@@ -442,12 +505,23 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
         ))}
       </div>
 
-      <div style={{display:'flex',alignItems:'center',gap:12}}>
-        <GlowBtn href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`} className="hide-mob">
+      <div style={{display:'flex',alignItems:'center',gap:8}}>
+        {/* Hire Me — desktop full, mobile compact */}
+        <a href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`}
+          className="hide-mob"
+          style={{
+            display:'inline-flex', alignItems:'center', gap:6,
+            padding:'8px 18px', borderRadius:10,
+            background:'linear-gradient(135deg,#7c3aed,#4f46e5)',
+            border:'1px solid rgba(124,58,237,.4)',
+            color:'#fff', fontWeight:600, fontSize:'.84rem',
+            textDecoration:'none', whiteSpace:'nowrap',
+            boxShadow:'0 0 20px rgba(124,58,237,.3)',
+          }}>
           Hire Me <IconArrow />
-        </GlowBtn>
-        <button onClick={()=>setMenuOpen(!menuOpen)} style={{display:'none',background:'none',border:'none',cursor:'pointer',color:'#fff',padding:4}} className="mob-menu-show" aria-label="Menu">
-          <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        </a>
+        <button onClick={()=>setMenuOpen(!menuOpen)} style={{display:'none',background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:9,cursor:'pointer',color:'#fff',padding:'7px',lineHeight:0}} className="mob-menu-show" aria-label="Menu">
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             {menuOpen ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></> : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
           </svg>
         </button>
@@ -457,7 +531,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
     <AnimatePresence>
       {menuOpen && (
         <motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}
-          style={{position:'fixed',top:68,left:0,right:0,zIndex:999,background:'rgba(5,8,22,.97)',backdropFilter:'blur(24px)',borderBottom:'1px solid rgba(255,255,255,.06)',padding:'12px 20px 20px',display:'flex',flexDirection:'column',gap:4}}>
+          style={{position:'fixed',top:78,left:12,right:12,zIndex:999,background:'rgba(8,11,28,.97)',backdropFilter:'blur(24px)',border:'1px solid rgba(255,255,255,.10)',borderRadius:14,padding:'12px 20px 20px',display:'flex',flexDirection:'column',gap:4}}>
           {navLinks.map(l=>(
             <a key={l} href={`#${l}`} onClick={e=>navTo(e,l)} style={{color:'rgba(226,232,240,.7)',fontWeight:500,padding:'12px 16px',borderRadius:10,fontSize:'.95rem'}}>
               {l.charAt(0).toUpperCase()+l.slice(1)}
@@ -473,28 +547,48 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
     <main style={{position:'relative',zIndex:2}}>
 
     {/* ═══ HERO ═══════════════════════════════════════════════ */}
-    <section id="home" style={{minHeight:'100vh',display:'flex',alignItems:'center',position:'relative',overflow:'hidden',padding:'0 40px'}}>
+    <section id="home" className="hero-section" style={{minHeight:'100vh',display:'flex',alignItems:'center',position:'relative',overflow:'hidden',padding:'0 40px'}}>
       <div className="hero-grid-bg"/>
       {/* radial glow center */}
       <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:'900px',height:'900px',background:'radial-gradient(circle,rgba(124,58,237,.08) 0%,transparent 65%)',pointerEvents:'none'}}/>
 
-      <div style={{maxWidth:1200,width:'100%',margin:'0 auto',paddingTop:100,paddingBottom:60}}>
+      <div className="hero-inner" style={{maxWidth:1200,width:'100%',margin:'0 auto',paddingTop:100,paddingBottom:60}}>
         <motion.div className="hero-cols" style={{display:'grid',gridTemplateColumns:'1fr 480px',gap:60,alignItems:'center'}} style2={{}} >
           {/* LEFT */}
-          <motion.div style={{y:heroY,opacity:heroO}}>
+          <div className="hero-left-col" style={{animation:'fade-up .7s ease both'}}>
+
+            {/* ── MOBILE MINI STATS — 3 cards: Projects, Tech Stack, Yrs Exp ── */}
+            <div className="hero-mob-stats" style={{
+              display:'none', gap:10, justifyContent:'center', width:'100%', marginBottom:24,
+            }}>
+              {[
+                {n:`${stats.projects_delivered||6}+`, l:'Projects'},
+                {n:`${techStack.length}+`, l:'Tech Stack'},
+                {n:`${stats.years_exp||3}+`, l:'Yrs Exp.'},
+              ].map(s=>(
+                <div key={s.l} style={{
+                  flex:1, textAlign:'center', padding:'14px 8px',
+                  background:'rgba(255,255,255,.04)',
+                  border:'1px solid rgba(255,255,255,.08)',
+                  borderRadius:14,
+                }}>
+                  <div style={{fontSize:'1.4rem',fontWeight:800,background:'linear-gradient(135deg,#60a5fa,#a78bfa)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',fontFamily:"'Space Grotesk'"}}>{s.n}</div>
+                  <div style={{fontSize:'.72rem',color:'rgba(148,163,184,.6)',marginTop:2}}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+
             {/* available badge */}
             <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:.1}}
-              style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(16,185,129,.08)',border:'1px solid rgba(16,185,129,.2)',padding:'6px 14px',borderRadius:999,fontSize:'.78rem',fontWeight:600,color:'#34d399',marginBottom:28}}>
+              style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(16,185,129,.08)',border:'1px solid rgba(16,185,129,.2)',padding:'6px 14px',borderRadius:999,fontSize:'.78rem',fontWeight:600,color:'#34d399',marginBottom:20}}>
               <span style={{width:7,height:7,borderRadius:'50%',background:'#34d399',animation:'pulse-glow 2s infinite',display:'inline-block'}}/>
               {profile?.availability||'Available for Work'}
-              <span style={{color:'rgba(52,211,153,.5)',margin:'0 4px'}}>·</span>
-              <span style={{color:'rgba(52,211,153,.6)',fontSize:'.72rem'}}>{stats.years_exp||3}+ yrs exp</span>
             </motion.div>
 
             {/* typewriter role */}
             <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.2}}
               style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'1rem',color:'#7c3aed',marginBottom:16,display:'flex',alignItems:'center',gap:4,minHeight:'1.6em'}}>
-              <span style={{color:'rgba(124,58,237,.4)'}}>&#47;&#47; </span>
+              <span style={{color:'rgba(124,58,237,.6)'}}>&#62;_ </span>
               <span style={{color:'#a78bfa'}}>{typedText}</span>
               <span style={{width:2,height:'1.1em',background:'#7c3aed',animation:'blink .75s step-end infinite',display:'inline-block',verticalAlign:'middle',marginLeft:2}}/>
             </motion.div>
@@ -513,21 +607,30 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
 
             {/* CTAs */}
             <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:.5}}
-              style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:48,alignItems:'center'}}>
-              <GlowBtn href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`}>
-                Let's Work Together <IconArrow />
-              </GlowBtn>
-              {resumeUrl && <GlowBtn href={resumeUrl} variant="outline">
-                Download CV
-              </GlowBtn>}
-              <GlowBtn href={`https://wa.me/${(profile?.phone||'9779704191610').replace(/\D/g,'')}`} variant="outline"
-                style={{borderColor:'rgba(34,197,94,.25)',color:'#4ade80'}}>
-                <IconWA /> WhatsApp
-              </GlowBtn>
+              className="hero-ctas"
+              style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:48,alignItems:'center',width:'100%'}}>
+              {/* Row 1: Hire Me + Download CV */}
+              <div className="hero-cta-row1" style={{display:'contents'}}>
+                <GlowBtn href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`}
+                  style={{flex:1,justifyContent:'center',background:'linear-gradient(135deg,#e53e3e,#c53030)',borderColor:'rgba(229,62,62,.4)',boxShadow:'0 0 24px rgba(229,62,62,.3)'}}>
+                  Hire Me
+                </GlowBtn>
+                {resumeUrl && <GlowBtn href={resumeUrl} variant="outline" style={{flex:1,justifyContent:'center'}}>
+                  Download CV
+                </GlowBtn>}
+              </div>
+              {/* Row 2: WhatsApp */}
+              <div className="hero-cta-row2" style={{display:'contents'}}>
+                <GlowBtn href={`https://wa.me/${(profile?.phone||'9779704191610').replace(/\D/g,'')}`}
+                  style={{background:'linear-gradient(135deg,#16a34a,#15803d)',borderColor:'rgba(22,163,74,.4)',boxShadow:'0 0 24px rgba(22,163,74,.3)',justifyContent:'center',width:'100%'}}>
+                  <IconWA /> WhatsApp
+                </GlowBtn>
+              </div>
             </motion.div>
 
             {/* socials */}
             <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.6}}
+              className="hero-socials"
               style={{display:'flex',gap:10,alignItems:'center'}}>
               {[
                 {href:profile?.github||'https://github.com/sitalmahato00', Icon:IconGH, label:'GitHub'},
@@ -546,9 +649,89 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                 </motion.a>
               ))}
             </motion.div>
-          </motion.div>
+          </div>
 
-          {/* RIGHT — avatar + orbit badges + terminal */}
+          {/* ── MOBILE AVATAR — spinning animation, shown only on mobile ── */}
+          <div className="hero-avatar-mob" style={{
+            display:'none',
+            justifyContent:'center', alignItems:'center',
+            marginTop:8, marginBottom:8,
+          }}>
+            <div style={{
+              position:'relative',
+              width:300, height:300,
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>
+              {/* bg glow */}
+              <div style={{position:'absolute',inset:0,borderRadius:'50%',background:'radial-gradient(circle,rgba(124,58,237,.2) 0%,transparent 65%)',pointerEvents:'none'}}/>
+              {/* ring 1 — conic gradient spinning CW */}
+              <div style={{
+                position:'absolute', width:260, height:260, borderRadius:'50%',
+                background:'conic-gradient(from 0deg,#7c3aed,#4f46e5,#3b82f6,#06b6d4,#7c3aed)',
+                animation:'spin-slow 25s linear infinite',
+                WebkitMask:'radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))',
+                mask:'radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))',
+                opacity:.85,
+              }}/>
+              {/* ring 2 — dashed CCW */}
+              <div style={{
+                position:'absolute', width:232, height:232, borderRadius:'50%',
+                border:'1.5px dashed rgba(167,139,250,.35)',
+                animation:'spin-rev 18s linear infinite',
+              }}/>
+              {/* ring 3 — pulse */}
+              <div style={{
+                position:'absolute', width:210, height:210, borderRadius:'50%',
+                border:'1px solid rgba(59,130,246,.2)',
+                animation:'pulse-glow 4s ease-in-out infinite',
+              }}/>
+              {/* orbit badges */}
+              <motion.div
+                style={{position:'absolute',inset:0,width:300,height:300,pointerEvents:'none',zIndex:6}}
+                animate={{rotate:360}}
+                transition={{duration:30,repeat:Infinity,ease:'linear'}}>
+                {[
+                  {label:'React',   color:'#61dafb',bg:'rgba(97,218,251,.12)', border:'rgba(97,218,251,.4)',  src:'https://cdn.simpleicons.org/react/61dafb'},
+                  {label:'Laravel', color:'#ff2d20',bg:'rgba(255,45,32,.12)', border:'rgba(255,45,32,.4)',   src:'https://cdn.simpleicons.org/laravel/ff2d20'},
+                  {label:'PHP',     color:'#777bb4',bg:'rgba(119,123,180,.12)',border:'rgba(119,123,180,.4)',src:'https://cdn.simpleicons.org/php/777bb4'},
+                  {label:'MySQL',   color:'#4479a1',bg:'rgba(68,121,161,.12)', border:'rgba(68,121,161,.4)', src:'https://cdn.simpleicons.org/mysql/4479a1'},
+                  {label:'JS',      color:'#f7df1e',bg:'rgba(247,223,30,.12)', border:'rgba(247,223,30,.4)', src:'https://cdn.simpleicons.org/javascript/f7df1e'},
+                  {label:'Tailwind',color:'#38bdf8',bg:'rgba(56,189,248,.12)', border:'rgba(56,189,248,.4)', src:'https://cdn.simpleicons.org/tailwindcss/38bdf8'},
+                ].map((item,i,arr)=>{
+                  const r=138, cx=150, cy=150;
+                  const deg=(360/arr.length)*i-90;
+                  const rad=(deg*Math.PI)/180;
+                  const x=cx+r*Math.cos(rad);
+                  const y=cy+r*Math.sin(rad);
+                  return (
+                    <motion.div key={item.label}
+                      style={{position:'absolute',left:x,top:y,translateX:'-50%',translateY:'-50%',zIndex:7,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}
+                      animate={{rotate:-360}}
+                      transition={{duration:30,repeat:Infinity,ease:'linear'}}>
+                      <motion.div
+                        style={{width:34,height:34,borderRadius:'50%',background:item.bg,border:`1.5px solid ${item.border}`,backdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:`0 0 12px ${item.color}55`}}
+                        animate={{rotate:360}}
+                        transition={{duration:8,repeat:Infinity,ease:'linear'}}>
+                        <img src={item.src} alt={item.label} width={18} height={18} style={{display:'block',objectFit:'contain'}} onError={e=>{e.target.style.display='none';}}/>
+                      </motion.div>
+                      <span style={{fontSize:'.56rem',fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:item.color,background:'rgba(5,8,22,.9)',border:`1px solid ${item.border}`,borderRadius:5,padding:'1px 5px',whiteSpace:'nowrap'}}>
+                        {item.label}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+              {/* avatar */}
+              <div style={{position:'absolute',width:168,height:168,borderRadius:'50%',zIndex:5,boxShadow:'0 0 40px rgba(124,58,237,.4)'}}>
+                {avatarUrl
+                  ? <img src={avatarUrl} alt={seoName} fetchpriority="high" style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover',objectPosition:'top center',border:'2.5px solid rgba(124,58,237,.5)',display:'block'}}/>
+                  : <div style={{width:'100%',height:'100%',borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'3rem',fontWeight:900,color:'#fff'}}>SM</div>
+                }
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT — avatar + orbit badges (desktop) */}
           <motion.div className="hero-right" initial={{opacity:0,x:40}} animate={{opacity:1,x:0}} transition={{delay:.3,duration:.8}}
             style={{display:'flex',flexDirection:'column',alignItems:'center',gap:28}}>
 
@@ -728,13 +911,27 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
         <FadeUp delay={.7}>
           <div className="stat-row" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginTop:60,paddingTop:60,borderTop:'1px solid rgba(255,255,255,.05)'}}>
             {[
-              {n:`${stats.projects_delivered||18}+`,l:'Projects Delivered',icon:'🏗️'},
-              {n:`${stats.years_exp||3}+`,l:'Years Experience',icon:'⚡'},
-              {n:stats.client_satisfaction||'100%',l:'Client Satisfaction',icon:'⭐'},
-              {n:stats.support||'24/7',l:'Support Available',icon:'🌍'},
+              {
+                n:`${stats.projects_delivered||18}+`, l:'Projects Delivered', color:'#a78bfa',
+                icon:<svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" width="22" height="22"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h10M7 11h6"/></svg>,
+              },
+              {
+                n:`${stats.years_exp||3}+`, l:'Years Experience', color:'#fbbf24',
+                icon:<svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>,
+              },
+              {
+                n:stats.client_satisfaction||'100%', l:'Client Satisfaction', color:'#34d399',
+                icon:<svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.8" width="22" height="22"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
+              },
+              {
+                n:stats.support||'24/7', l:'Support Available', color:'#60a5fa',
+                icon:<svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" width="22" height="22"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>,
+              },
             ].map(s=>(
               <div key={s.l} className="stat-card">
-                <div style={{fontSize:'1.8rem',marginBottom:6}}>{s.icon}</div>
+                <div style={{width:44,height:44,margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',background:`${s.color}18`,border:`1px solid ${s.color}35`,borderRadius:12}}>
+                  {s.icon}
+                </div>
                 <div style={{fontSize:'2rem',fontWeight:800,background:'linear-gradient(135deg,#fff,#a78bfa)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',fontFamily:"'Space Grotesk'"}}>{s.n}</div>
                 <div style={{fontSize:'.78rem',color:'rgba(148,163,184,.6)',marginTop:4}}>{s.l}</div>
               </div>
@@ -749,9 +946,9 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
       <div style={{overflow:'hidden'}}>
         <div className="marquee-track">
           {[...techStack,...techStack].map((t,i)=>(
-            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 20px',borderRadius:999,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.07)',color:'rgba(226,232,240,.5)',fontSize:'.82rem',fontWeight:500,whiteSpace:'nowrap'}}>
-              <span style={{width:6,height:6,borderRadius:'50%',background:'#7c3aed',display:'inline-block'}}/>
-              {t}
+            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:8,padding:'7px 16px',borderRadius:999,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.07)',color:'rgba(226,232,240,.55)',fontSize:'.82rem',fontWeight:500,whiteSpace:'nowrap'}}>
+              <img src={t.src} alt={t.label} width={16} height={16} style={{display:'block',objectFit:'contain',flexShrink:0}} onError={e=>e.target.style.display='none'}/>
+              {t.label}
             </span>
           ))}
         </div>
@@ -869,7 +1066,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
     </section>
 
     {/* ═══ SKILLS ═════════════════════════════════════════════ */}
-    <section id="skills" style={{padding:'140px 40px',background:'rgba(0,0,0,.25)',backdropFilter:'blur(4px)',position:'relative'}}>
+    <section id="skills" className="skills-section" style={{padding:'140px 40px',background:'rgba(0,0,0,.25)',backdropFilter:'blur(4px)',position:'relative'}}>
       {/* diagonal separator top */}
       <div style={{position:'absolute',top:-1,left:0,right:0,height:80,background:'linear-gradient(to bottom right,#050816 49.9%,transparent 50%)',zIndex:1}}/>
       <div style={{maxWidth:1200,margin:'0 auto',position:'relative',zIndex:2}}>
@@ -899,7 +1096,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
         {/* category tabs + bars */}
         {Object.keys(skills).length > 0 && (
           <FadeUp delay={.2}>
-            <div className="grad-border" style={{padding:36}}>
+            <div className="grad-border skills-card" style={{padding:36}}>
               <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:28}}>
                 {Object.keys(skills).map(cat=>(
                   <motion.button key={cat} onClick={()=>setSkillTab(cat)} whileHover={{scale:1.03}} whileTap={{scale:.97}}
@@ -912,7 +1109,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                   </motion.button>
                 ))}
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'10px 32px'}}>
+              <div className="skills-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'10px 32px'}}>
                 {(skills[skillTab]||[]).map((s,i)=>(
                   <motion.div key={s.id||i} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:i*.05}}>
                     <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
@@ -1044,9 +1241,42 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
             <FadeUp key={s.id} delay={i*.08}>
               <motion.div className="grad-border" whileHover={{y:-6,boxShadow:'0 20px 60px rgba(124,58,237,.2)'}}
                 style={{padding:32,height:'100%',cursor:'default',transition:'box-shadow .3s'}}>
-                <div style={{width:52,height:52,borderRadius:14,background:'linear-gradient(135deg,rgba(124,58,237,.25),rgba(79,70,229,.25))',border:'1px solid rgba(124,58,237,.3)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.5rem',marginBottom:20}}>
-                  {s.icon||['🌐','⚙️','🗄️','🎨','🔌','🔧'][i%6]}
-                </div>
+                {/* service icon — always SVG, keyed by title keyword */}
+                {(()=>{
+                  const t = (s.title||'').toLowerCase();
+                  const iconMap = [
+                    { test: k => k.includes('full stack')||k.includes('frontend')||k.includes('react')||k.includes('next'),
+                      color:'#61dafb',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg> },
+                    { test: k => k.includes('ui')||k.includes('ux')||k.includes('design')||k.includes('figma'),
+                      color:'#f472b6',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="8" cy="16" r="3"/><rect x="13" y="13" width="6" height="6" rx="1.5"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" opacity=".4"/></svg> },
+                    { test: k => k.includes('laravel')||k.includes('php')||k.includes('backend')||k.includes('api'),
+                      color:'#ff2d20',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg> },
+                    { test: k => k.includes('database')||k.includes('mysql')||k.includes('sql')||k.includes('data'),
+                      color:'#34d399',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg> },
+                    { test: k => k.includes('mobile')||k.includes('app')||k.includes('pwa'),
+                      color:'#fb923c',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/><path d="M9 6h6"/></svg> },
+                    { test: k => k.includes('deploy')||k.includes('devops')||k.includes('cloud')||k.includes('aws')||k.includes('docker'),
+                      color:'#38bdf8',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> },
+                    { test: k => k.includes('seo')||k.includes('optim')||k.includes('performance'),
+                      color:'#fbbf24',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
+                    { test: k => k.includes('ecommerce')||k.includes('shop')||k.includes('store'),
+                      color:'#a78bfa',
+                      svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+                  ];
+                  const match = iconMap.find(m => m.test(t)) || { color:'#a78bfa', svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" width="24" height="24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> };
+                  return (
+                    <div style={{width:52,height:52,borderRadius:14,background:`${match.color}18`,border:`1px solid ${match.color}35`,color:match.color,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:20}}>
+                      {match.svg}
+                    </div>
+                  );
+                })()}
                 <h3 style={{fontFamily:"'Space Grotesk'",fontWeight:700,fontSize:'1.05rem',color:'#fff',marginBottom:10}}>{s.title}</h3>
                 <p style={{color:'rgba(148,163,184,.65)',fontSize:'.85rem',lineHeight:1.75,marginBottom:16}}>{s.description}</p>
                 {(s.features||[]).slice(0,4).map((f,fi)=>(
@@ -1172,14 +1402,32 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
           <FadeUp delay={.1}>
             <div style={{display:'flex',flexDirection:'column',gap:16,height:'100%'}}>
               {[
-                {icon:'✉',label:'Email',val:profile?.email||'sitalmahato077@gmail.com',href:`mailto:${profile?.email||'sitalmahato077@gmail.com'}`},
-                {icon:'📞',label:'Phone',val:profile?.phone||'+977 9704191610',href:`tel:${(profile?.phone||'+9779704191610').replace(/\s/g,'')}`},
-                {icon:'📍',label:'Location',val:profile?.location||'Nepal 🇳🇵'},
-                {icon:'🕐',label:'Working Hours',val:'24/7 Available'},
+                {
+                  icon:<svg width="20" height="20" fill="none" stroke="#a78bfa" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>,
+                  color:'rgba(124,58,237,.15)', border:'rgba(124,58,237,.3)',
+                  label:'Email', val:profile?.email||'sitalmahato077@gmail.com',
+                  href:`mailto:${profile?.email||'sitalmahato077@gmail.com'}`
+                },
+                {
+                  icon:<svg width="20" height="20" fill="none" stroke="#34d399" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>,
+                  color:'rgba(52,211,153,.12)', border:'rgba(52,211,153,.3)',
+                  label:'Phone', val:profile?.phone||'+977 9704191610',
+                  href:`tel:${(profile?.phone||'+9779704191610').replace(/\s/g,'')}`
+                },
+                {
+                  icon:<svg width="20" height="20" fill="none" stroke="#60a5fa" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+                  color:'rgba(96,165,250,.12)', border:'rgba(96,165,250,.3)',
+                  label:'Location', val:profile?.location||'Golbazar, Siraha, Nepal'
+                },
+                {
+                  icon:<svg width="20" height="20" fill="none" stroke="#fbbf24" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>,
+                  color:'rgba(251,191,36,.12)', border:'rgba(251,191,36,.3)',
+                  label:'Working Hours', val:'24/7 Available'
+                },
               ].map((c,i)=>(
                 <motion.div key={c.label} whileHover={{x:4,background:'rgba(124,58,237,.06)'}} className="grad-border"
                   style={{padding:'18px 22px',display:'flex',alignItems:'center',gap:16,cursor:'default',transition:'background .2s'}}>
-                  <div style={{width:44,height:44,borderRadius:12,background:'rgba(124,58,237,.1)',border:'1px solid rgba(124,58,237,.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.1rem',flexShrink:0}}>
+                  <div style={{width:44,height:44,borderRadius:12,background:c.color,border:`1px solid ${c.border}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                     {c.icon}
                   </div>
                   <div>

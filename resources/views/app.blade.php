@@ -5,15 +5,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <meta name="theme-color" content="#7c3aed">
 
-        {{-- Theme colour (browser UI / mobile) --}}
-        <meta name="theme-color" content="#2563eb">
+        {{-- DNS prefetch for external resources --}}
+        <link rel="dns-prefetch" href="//cdn.simpleicons.org">
+        <link rel="dns-prefetch" href="//fonts.bunny.net">
+        <link rel="preconnect" href="https://cdn.simpleicons.org" crossorigin>
 
-        {{-- Default favicon — Inertia Head will override with the avatar on the portfolio page --}}
+        {{-- LCP image preload (profile avatar) --}}
         @php $avatar = \App\Models\Profile::first()?->avatar; @endphp
         @if($avatar)
-            <link rel="icon"            type="image/webp" href="/{{ $avatar }}">
-            <link rel="apple-touch-icon"                  href="/{{ $avatar }}">
+            <link rel="preload" as="image" href="/{{ $avatar }}" fetchpriority="high">
+            <link rel="icon" type="image/webp" href="/{{ $avatar }}">
+            <link rel="apple-touch-icon" href="/{{ $avatar }}">
         @else
             <link rel="icon" type="image/x-icon" href="/favicon.ico">
         @endif
@@ -21,9 +25,10 @@
         {{-- Web App Manifest --}}
         <link rel="manifest" href="/site.webmanifest">
 
-        <!-- Fonts -->
+        {{-- Fonts with font-display:swap to prevent render blocking --}}
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap&font-display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+        <noscript><link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"></noscript>
 
         <!-- Scripts -->
         @routes
