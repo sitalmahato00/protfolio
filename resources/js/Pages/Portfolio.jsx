@@ -618,48 +618,77 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                 transition={{duration:30, repeat:Infinity, ease:'linear'}}>
 
                 {[
-                  {label:'React',      color:'#06b6d4', bg:'rgba(6,182,212,.12)',   border:'rgba(6,182,212,.4)',   delay:0   },
-                  {label:'Laravel',    color:'#ef4444', bg:'rgba(239,68,68,.12)',   border:'rgba(239,68,68,.4)',   delay:0.5 },
-                  {label:'PHP',        color:'#a78bfa', bg:'rgba(167,139,250,.12)', border:'rgba(167,139,250,.4)', delay:1.0 },
-                  {label:'MySQL',      color:'#f97316', bg:'rgba(249,115,22,.12)',  border:'rgba(249,115,22,.4)',  delay:1.5 },
-                  {label:'JavaScript', color:'#fbbf24', bg:'rgba(251,191,36,.12)',  border:'rgba(251,191,36,.4)',  delay:2.0 },
-                  {label:'Tailwind',   color:'#34d399', bg:'rgba(52,211,153,.12)',  border:'rgba(52,211,153,.4)',  delay:2.5 },
+                  { label:'React',      color:'#61dafb', bg:'rgba(97,218,251,.12)',  border:'rgba(97,218,251,.4)',
+                    src:'https://cdn.simpleicons.org/react/61dafb' },
+                  { label:'Laravel',    color:'#ff2d20', bg:'rgba(255,45,32,.12)',   border:'rgba(255,45,32,.4)',
+                    src:'https://cdn.simpleicons.org/laravel/ff2d20' },
+                  { label:'PHP',        color:'#777bb4', bg:'rgba(119,123,180,.12)', border:'rgba(119,123,180,.4)',
+                    src:'https://cdn.simpleicons.org/php/777bb4' },
+                  { label:'MySQL',      color:'#4479a1', bg:'rgba(68,121,161,.12)',  border:'rgba(68,121,161,.4)',
+                    src:'https://cdn.simpleicons.org/mysql/4479a1' },
+                  { label:'JavaScript', color:'#f7df1e', bg:'rgba(247,223,30,.12)',  border:'rgba(247,223,30,.4)',
+                    src:'https://cdn.simpleicons.org/javascript/f7df1e' },
+                  { label:'Tailwind',   color:'#38bdf8', bg:'rgba(56,189,248,.12)',  border:'rgba(56,189,248,.4)',
+                    src:'https://cdn.simpleicons.org/tailwindcss/38bdf8' },
                 ].map((item, i, arr) => {
-                  // evenly space badges on a 230px radius circle
-                  const r    = 230;           // orbit radius from center (250,250)
-                  const cx   = 250;
-                  const cy   = 250;
-                  const deg  = (360 / arr.length) * i - 90; // start from top
-                  const rad  = (deg * Math.PI) / 180;
-                  const x    = cx + r * Math.cos(rad);
-                  const y    = cy + r * Math.sin(rad);
+                  const r   = 230;
+                  const cx  = 250;
+                  const cy  = 250;
+                  const deg = (360 / arr.length) * i - 90;
+                  const rad = (deg * Math.PI) / 180;
+                  const x   = cx + r * Math.cos(rad);
+                  const y   = cy + r * Math.sin(rad);
                   return (
                     <motion.div
                       key={item.label}
                       style={{
                         position:'absolute',
                         left: x, top: y,
-                        // anchor to center of badge
                         translateX:'-50%', translateY:'-50%',
-                        background: item.bg,
-                        border:`1px solid ${item.border}`,
-                        borderRadius:999,
-                        padding:'8px 16px',
-                        fontSize:'.75rem',
-                        fontWeight:700,
-                        fontFamily:"'JetBrains Mono',monospace",
-                        color: item.color,
-                        backdropFilter:'blur(18px)',
-                        WebkitBackdropFilter:'blur(18px)',
-                        whiteSpace:'nowrap',
-                        boxShadow:`0 0 16px ${item.color}40, inset 0 1px 0 rgba(255,255,255,.08)`,
                         zIndex:7,
+                        display:'flex', flexDirection:'column', alignItems:'center', gap:5,
                       }}
-                      // counter-spin — exactly cancels parent rotation so text stays upright
                       animate={{rotate:-360}}
                       transition={{duration:30, repeat:Infinity, ease:'linear'}}
                     >
-                      {item.label}
+                      {/* icon circle — spins on its own axis */}
+                      <motion.div
+                        style={{
+                          width:46, height:46,
+                          borderRadius:'50%',
+                          background: item.bg,
+                          border:`1.5px solid ${item.border}`,
+                          backdropFilter:'blur(20px)',
+                          WebkitBackdropFilter:'blur(20px)',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          boxShadow:`0 0 20px ${item.color}55, inset 0 1px 0 rgba(255,255,255,.1)`,
+                        }}
+                        animate={{rotate:360}}
+                        transition={{duration:8, repeat:Infinity, ease:'linear'}}
+                      >
+                        <img
+                          src={item.src}
+                          alt={item.label}
+                          width={26}
+                          height={26}
+                          style={{display:'block',objectFit:'contain'}}
+                          onError={e=>{e.target.style.display='none';}}
+                        />
+                      </motion.div>
+                      {/* label — upright because parent counter-rotates */}
+                      <span style={{
+                        fontSize:'.63rem', fontWeight:700,
+                        fontFamily:"'JetBrains Mono',monospace",
+                        color: item.color,
+                        background:'rgba(5,8,22,.9)',
+                        border:`1px solid ${item.border}`,
+                        borderRadius:6, padding:'2px 8px',
+                        whiteSpace:'nowrap',
+                        backdropFilter:'blur(10px)',
+                        letterSpacing:'.03em',
+                      }}>
+                        {item.label}
+                      </span>
                     </motion.div>
                   );
                 })}
