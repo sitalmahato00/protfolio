@@ -73,11 +73,137 @@ export default function Portfolio({ profile = null, skills = {}, projects = [], 
     const EM = <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>;
     const PH = <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>;
 
+    const siteUrl        = 'https://sital.info.np';
+    const name           = profile?.name  || 'Sital Mahato';
+    // Keyword-rich title: name | role | location — helps Google bold key terms in SERP
+    const title          = `${name} | Best Full Stack Developer in Nepal — Laravel, React & PHP Expert`;
+    // Bold-trigger description: starts with a strong claim, weaves in searchable keywords naturally
+    const desc           = profile?.bio
+        ? profile.bio.slice(0, 158)
+        : `${name} is widely recognised as one of the best web developers in Nepal, with expertise in Laravel development, React, PHP, UI/UX design, and custom software solutions. Available worldwide.`;
+    const faviconHref    = avatarUrl
+        ? (avatarUrl.startsWith('http') ? avatarUrl : '/' + (profile?.avatar || ''))
+        : '/images/avatar_6a3fbd303e6af.webp';
+    // OG image must be an absolute URL
+    const ogImage        = avatarUrl
+        ? (avatarUrl.startsWith('http') ? avatarUrl : siteUrl + '/' + (profile?.avatar || ''))
+        : siteUrl + '/images/avatar_6a3fbd303e6af.webp';
+    const twitterHandle  = '@sitalmahato';
+    const faviconCacheBust = profile?.updated_at
+        ? '?v=' + new Date(profile.updated_at).getTime()
+        : '';
+
+    // Three schema types for maximum Google rich-result coverage
+    const jsonLd = JSON.stringify([
+        {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            '@id': siteUrl + '/#person',
+            name,
+            url: siteUrl,
+            image: { '@type': 'ImageObject', url: ogImage, width: 400, height: 400 },
+            jobTitle: 'Full Stack Developer & UI/UX Designer',
+            description: desc,
+            email: profile?.email    || 'sitalmahato077@gmail.com',
+            telephone: profile?.phone || '+977 9704191610',
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: 'Golbazar, Siraha',
+                addressRegion: 'Madhesh Province',
+                addressCountry: 'NP',
+            },
+            knowsAbout: ['Laravel', 'React', 'PHP', 'UI/UX Design', 'JavaScript', 'MySQL', 'REST API', 'Tailwind CSS'],
+            sameAs: [
+                profile?.github   || 'https://github.com/sitalmahato00',
+                profile?.linkedin || 'https://linkedin.com/in/sitalmahato',
+                siteUrl,
+            ],
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            '@id': siteUrl + '/#website',
+            url: siteUrl,
+            name: name + ' — Portfolio',
+            description: desc,
+            author: { '@id': siteUrl + '/#person' },
+            inLanguage: 'en-US',
+            potentialAction: {
+                '@type': 'SearchAction',
+                target: siteUrl + '/?s={search_term_string}',
+                'query-input': 'required name=search_term_string',
+            },
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            '@id': siteUrl + '/#webpage',
+            url: siteUrl,
+            name: title,
+            description: desc,
+            isPartOf: { '@id': siteUrl + '/#website' },
+            about: { '@id': siteUrl + '/#person' },
+            dateModified: profile?.updated_at || new Date().toISOString(),
+            inLanguage: 'en-US',
+            breadcrumb: {
+                '@type': 'BreadcrumbList',
+                itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl }],
+            },
+        },
+    ]);
+
     return (
         <>
-        <Head title={(profile?.name || 'Sital Mahato') + ' — Portfolio'}>
-            {avatarUrl && <link rel="preload" as="image" href={avatarUrl} />}
-            {avatarUrl && <link rel="icon" type="image/webp" href={avatarUrl + (profile?.updated_at ? '?v=' + new Date(profile.updated_at).getTime() : '')} />}
+        <Head title={title}>
+            {/* ── Basics ── */}
+            <link rel="canonical"   href={siteUrl} />
+            <meta name="description"    content={desc} />
+            <meta name="author"         content={name} />
+            <meta name="robots"         content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+            <meta name="keywords"       content={`${name}, Full Stack Developer Nepal, Best Web Developer Nepal, Laravel Developer Nepal, React Developer Nepal, PHP Expert Nepal, UI UX Designer Nepal, Freelance Web Developer Nepal, Custom Software Nepal, Siraha Developer`} />
+            <meta name="theme-color"    content="#2563eb" />
+            <meta name="rating"         content="general" />
+            <meta name="revisit-after"  content="7 days" />
+            <meta name="language"       content="English" />
+            <meta name="geo.region"     content="NP" />
+            <meta name="geo.placename"  content="Nepal" />
+
+            {/* ── Favicon (profile photo → Google shows it in SERPs) ── */}
+            <link rel="icon"            type="image/webp" sizes="32x32"  href={faviconHref + faviconCacheBust} />
+            <link rel="icon"            type="image/webp" sizes="192x192" href={faviconHref + faviconCacheBust} />
+            <link rel="apple-touch-icon" sizes="180x180"                  href={faviconHref + faviconCacheBust} />
+            <link rel="manifest"        href="/site.webmanifest" />
+
+            {/* ── Preload hero image for LCP ── */}
+            {avatarUrl && <link rel="preload" as="image" href={avatarUrl} fetchpriority="high" />}
+
+            {/* ── Open Graph (Facebook / LinkedIn / WhatsApp preview) ── */}
+            <meta property="og:type"         content="website" />
+            <meta property="og:url"          content={siteUrl} />
+            <meta property="og:title"        content={title} />
+            <meta property="og:description"  content={desc} />
+            <meta property="og:image"        content={ogImage} />
+            <meta property="og:image:secure_url" content={ogImage} />
+            <meta property="og:image:type"   content="image/webp" />
+            <meta property="og:image:width"  content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt"    content={`${name} — Full Stack Developer Nepal`} />
+            <meta property="og:site_name"    content={name} />
+            <meta property="og:locale"       content="en_US" />
+            <meta property="og:profile:first_name" content={name.split(' ')[0]} />
+            <meta property="og:profile:last_name"  content={name.split(' ').slice(1).join(' ')} />
+
+            {/* ── Twitter / X Card ── */}
+            <meta name="twitter:card"        content="summary_large_image" />
+            <meta name="twitter:site"        content={twitterHandle} />
+            <meta name="twitter:creator"     content={twitterHandle} />
+            <meta name="twitter:title"       content={title} />
+            <meta name="twitter:description" content={desc} />
+            <meta name="twitter:image"       content={ogImage} />
+            <meta name="twitter:image:alt"   content={`${name} — Full Stack Developer Nepal`} />
+
+            {/* ── JSON-LD Structured Data (Person + WebSite + WebPage) ── */}
+            <script type="application/ld+json">{jsonLd}</script>
         </Head>
         <style>{`
             :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#c2410c;--accent2:#10b981;--bg:#f8faff;--white:#ffffff;--dark:#0f172a;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--card:#ffffff;--gradient:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#7c3aed 100%);--gradient2:linear-gradient(135deg,#c2410c 0%,#dc2626 100%);}

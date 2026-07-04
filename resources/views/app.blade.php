@@ -5,10 +5,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
-        <meta name="description" content="Sital Mahato — Full Stack Developer & UI/UX Designer. Crafting high-performance web applications with Laravel, React, and modern technologies.">
+
+        {{-- Theme colour (browser UI / mobile) --}}
         <meta name="theme-color" content="#2563eb">
 
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='23' font-size='20' font-weight='bold' text-anchor='middle' fill='white'>S</text></svg>">
+        {{-- Default favicon — Inertia Head will override with the avatar on the portfolio page --}}
+        @php $avatar = \App\Models\Profile::first()?->avatar; @endphp
+        @if($avatar)
+            <link rel="icon"            type="image/webp" href="/{{ $avatar }}">
+            <link rel="apple-touch-icon"                  href="/{{ $avatar }}">
+        @else
+            <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        @endif
+
+        {{-- Web App Manifest --}}
+        <link rel="manifest" href="/site.webmanifest">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

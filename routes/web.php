@@ -9,6 +9,29 @@ use App\Models\Project;
 use App\Models\Service;
 use App\Models\Experience;
 
+// Dynamic web app manifest — uses current profile avatar so Google SERP favicon stays up-to-date
+Route::get('/site.webmanifest', function () {
+    $profile  = Profile::first();
+    $avatar   = $profile?->avatar ? '/' . $profile->avatar : '/images/avatar_6a3fbd303e6af.webp';
+    $name     = $profile?->name   ?? 'Sital Mahato';
+    $manifest = [
+        'name'             => $name . ' — Full Stack Developer',
+        'short_name'       => $name,
+        'description'      => 'Full Stack Developer & UI/UX Designer. Laravel, React, PHP. Based in Nepal.',
+        'start_url'        => '/',
+        'display'          => 'standalone',
+        'background_color' => '#0f172a',
+        'theme_color'      => '#2563eb',
+        'icons'            => [
+            ['src' => $avatar, 'sizes' => '192x192', 'type' => 'image/webp', 'purpose' => 'any maskable'],
+            ['src' => $avatar, 'sizes' => '512x512', 'type' => 'image/webp', 'purpose' => 'any maskable'],
+        ],
+    ];
+    return response()->json($manifest)
+        ->header('Content-Type', 'application/manifest+json')
+        ->header('Cache-Control', 'public, max-age=3600');
+})->name('webmanifest');
+
 Route::get('/', function () {
     $profile = Profile::first();
     return Inertia::render('Portfolio', [
