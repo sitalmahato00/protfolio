@@ -1322,7 +1322,9 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                   <motion.div key={exp.id||i} initial={{opacity:0,x:-20}} whileInView={{opacity:1,x:0}} viewport={{once:true}} transition={{delay:i*.1}}
                     style={{display:'flex',gap:20,paddingBottom:28,position:'relative'}}>
                     {i<arr.length-1 && <div className="tl-line"/>}
-                    <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.9rem',flexShrink:0,zIndex:1,boxShadow:'0 0 20px rgba(124,58,237,.4)'}}>💼</div>
+                    <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,zIndex:1,boxShadow:'0 0 20px rgba(124,58,237,.4)'}}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" width="18" height="18"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/><path d="M12 12h.01"/></svg>
+                    </div>
                     <div className="grad-border" style={{padding:18,flex:1}}>
                       <div style={{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:6,marginBottom:6}}>
                         <div style={{fontFamily:"'Space Grotesk'",fontWeight:700,fontSize:'.95rem',color:'#fff'}}>{exp.title}</div>
@@ -1348,7 +1350,9 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                 ]).map((exp,i)=>(
                   <motion.div key={exp.id||i} initial={{opacity:0,x:20}} whileInView={{opacity:1,x:0}} viewport={{once:true}} transition={{delay:i*.1}}
                     style={{display:'flex',gap:20,paddingBottom:24}}>
-                    <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.9rem',flexShrink:0,boxShadow:'0 0 20px rgba(59,130,246,.3)'}}>🎓</div>
+                    <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 0 20px rgba(59,130,246,.3)'}}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" width="18" height="18"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
                     <div className="grad-border" style={{padding:18,flex:1}}>
                       <div style={{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:6,marginBottom:6}}>
                         <div style={{fontFamily:"'Space Grotesk'",fontWeight:700,fontSize:'.9rem',color:'#fff'}}>{exp.title}</div>

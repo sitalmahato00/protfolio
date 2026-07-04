@@ -1,118 +1,194 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const imgModules = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
 const assetImgMap = {};
 for (const [p, m] of Object.entries(imgModules)) {
-    const name = p.split('/').pop();
-    assetImgMap[name] = m.default || m;
+    assetImgMap[p.split('/').pop()] = m.default || m;
 }
-
 const imgUrl = s => {
     if (!s) return null;
     if (s.startsWith('http')) return s;
-    const webpName = s.replace(/^images\//, '').replace(/\.(png|jpg|jpeg)$/i, '.webp');
-    return assetImgMap[webpName] || '/' + s;
+    const webp = s.replace(/^images\//, '').replace(/\.(png|jpg|jpeg)$/i, '.webp');
+    return assetImgMap[webp] || '/' + s;
 };
-
 const allProjectImgs = p => (p.images?.length ? p.images : (p.image ? [p.image] : []));
+
+const GLOBAL_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Inter',sans-serif;background:#050816;color:#e2e8f0;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  ::selection{background:rgba(124,58,237,.4);color:#fff;}
+  ::-webkit-scrollbar{width:3px;}
+  ::-webkit-scrollbar-track{background:#050816;}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(#7c3aed,#3b82f6);border-radius:3px;}
+  a{color:inherit;text-decoration:none;}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity:.4;}
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .aurora-blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.1;animation:aurora-move 20s ease-in-out infinite alternate;}
+  @keyframes aurora-move{0%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-30px) scale(1.08);}100%{transform:translate(-20px,20px) scale(.96);}}
+  .nav-root{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;width:calc(100% - 48px);max-width:1100px;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(255,255,255,.06);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1);transition:background .35s;}
+  .grad-border{position:relative;background:rgba(5,8,22,.8);border-radius:20px;}
+  .grad-border::before{content:'';position:absolute;inset:0;border-radius:20px;padding:1px;background:linear-gradient(135deg,rgba(124,58,237,.5),rgba(59,130,246,.3),transparent 60%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+  .tag-pill{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#a78bfa;font-size:.73rem;font-weight:600;white-space:nowrap;}
+  .section-label{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;letter-spacing:.15em;color:#7c3aed;text-transform:uppercase;}
+  .section-label::before{content:'';width:24px;height:1px;background:linear-gradient(90deg,#7c3aed,transparent);}
+  .grad-text{background:linear-gradient(135deg,#fff 0%,#a78bfa 50%,#60a5fa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .project-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);transition:transform .3s,border-color .3s,box-shadow .3s;}
+  .project-card:hover{transform:translateY(-6px);border-color:rgba(124,58,237,.3);box-shadow:0 20px 60px rgba(124,58,237,.15);}
+  .filter-btn{padding:6px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:rgba(148,163,184,.7);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+  .filter-btn.active,.filter-btn:hover{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-color:transparent;color:#fff;}
+  @media(max-width:640px){.nav-root{width:calc(100% - 24px);padding:0 14px;top:10px;}}
+`;
 
 export default function ProjectsIndex({ projects, profile }) {
     const [filter, setFilter] = useState('');
-
     const allTags = [...new Set(projects.flatMap(p => p.tags || []))];
-    const filtered = filter
-        ? projects.filter(p => (p.tags || []).some(t => t.toLowerCase().includes(filter.toLowerCase())))
-        : projects;
+    const filtered = filter ? projects.filter(p => (p.tags || []).includes(filter)) : projects;
 
     return (
         <>
-        <Head title={'Projects — ' + (profile?.name || 'Sital Mahato')} />
-        <style>{`
-            :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#c2410c;--accent2:#10b981;--bg:#f8faff;--white:#ffffff;--dark:#0f172a;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--card:#ffffff;}
-            *{margin:0;padding:0;box-sizing:border-box;}
-            body{font-family:'Plus Jakarta Sans','Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
-            a{color:inherit;text-decoration:none;}
-            .nav-pill{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:calc(100% - 48px);max-width:1100px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.08);border-radius:16px;z-index:1000;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 24px rgba(0,0,0,0.06);}
-            .nav-logo{font-size:.95rem;font-weight:800;color:var(--dark);display:flex;align-items:center;gap:10px;}
-            .badge{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#1e3a8a,#2563eb,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;}
-            .nav-links{list-style:none;display:flex;gap:6px;align-items:center;}
-            .nav-links a{padding:6px 14px;border-radius:10px;font-size:.82rem;font-weight:600;color:var(--muted);transition:all .2s;}
-            .nav-links a:hover{background:rgba(37,99,235,0.08);color:var(--primary);}
-            .section-inner{max-width:1100px;margin:0 auto;}
-            @media(max-width:640px){.nav-links{display:none;}}
-        `}</style>
+        <Head title={'All Projects — ' + (profile?.name || 'Sital Mahato')} />
+        <style dangerouslySetInnerHTML={{__html: GLOBAL_CSS}} />
 
-        <nav className="nav-pill">
-            <Link href="/" className="nav-logo">
-                <div className="badge">SM</div>
+        {/* Aurora */}
+        <div className="aurora">
+            <div className="aurora-blob" style={{width:'700px',height:'700px',background:'#7c3aed',top:'-200px',left:'-200px'}}/>
+            <div className="aurora-blob" style={{width:'500px',height:'500px',background:'#4f46e5',top:'30%',right:'-100px',animationDelay:'-7s'}}/>
+            <div className="aurora-blob" style={{width:'400px',height:'400px',background:'#3b82f6',bottom:'0',left:'30%',animationDelay:'-14s'}}/>
+        </div>
+
+        {/* Nav */}
+        <nav className="nav-root">
+            <Link href="/" style={{display:'flex',alignItems:'center',gap:10,fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:'1rem',color:'#fff'}}>
+                <div style={{width:34,height:34,borderRadius:9,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.8rem',fontWeight:900,boxShadow:'0 0 20px rgba(124,58,237,.4)'}}>SM</div>
                 {profile?.name || 'Sital Mahato'}
             </Link>
-            <ul className="nav-links">
-                <li><Link href="/">Home</Link></li>
-            </ul>
+            <Link href="/" style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 18px',borderRadius:10,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',color:'rgba(226,232,240,.7)',fontSize:'.84rem',fontWeight:600}}>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                Home
+            </Link>
         </nav>
 
-        <main style={{padding:'100px 24px 60px'}}>
-            <div className="section-inner">
-                <div style={{marginBottom:'40px'}}>
-                    <Link href="/" style={{display:'inline-flex',alignItems:'center',gap:'6px',color:'var(--muted)',fontSize:'.85rem',fontWeight:'600',marginBottom:'16px'}}>← Back to Portfolio</Link>
-                    <h1 style={{fontSize:'2.2rem',fontWeight:'800',color:'var(--dark)',marginBottom:'8px'}}>All Projects</h1>
-                    <p style={{color:'var(--muted)',fontSize:'1rem'}}>Explore my complete collection of work — {projects.length} projects and counting.</p>
-                </div>
+        <main style={{position:'relative',zIndex:2,padding:'100px 24px 80px',minHeight:'100vh'}}>
+            <div style={{maxWidth:1200,margin:'0 auto'}}>
 
+                {/* Header */}
+                <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.6}} style={{marginBottom:52}}>
+                    <Link href="/" style={{display:'inline-flex',alignItems:'center',gap:6,color:'rgba(148,163,184,.6)',fontSize:'.84rem',fontWeight:600,marginBottom:20,padding:'6px 14px',borderRadius:8,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.07)'}}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                        Back to Portfolio
+                    </Link>
+                    <div className="section-label" style={{marginBottom:12}}>Portfolio</div>
+                    <h1 style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:'clamp(32px,5vw,56px)',fontWeight:800,letterSpacing:'-.02em',marginBottom:12}}>
+                        All <span className="grad-text">Projects</span>
+                    </h1>
+                    <p style={{color:'rgba(148,163,184,.65)',fontSize:'1rem'}}>
+                        Explore my complete collection — <span style={{color:'#a78bfa',fontWeight:600}}>{projects.length} projects</span> and counting.
+                    </p>
+                </motion.div>
+
+                {/* Filter tabs */}
                 {allTags.length > 0 && (
-                    <div style={{display:'flex',gap:'8px',flexWrap:'wrap',marginBottom:'32px'}}>
-                        <button onClick={() => setFilter('')} style={{padding:'6px 16px',borderRadius:'50px',border:'1px solid var(--border)',background: !filter ? 'var(--primary)' : '#fff',color: !filter ? '#fff' : 'var(--text)',fontSize:'.82rem',fontWeight:'600',cursor:'pointer',transition:'all .2s'}}>All</button>
-                        {allTags.slice(0, 12).map(t => (
-                            <button key={t} onClick={() => setFilter(t)} style={{padding:'6px 16px',borderRadius:'50px',border:'1px solid var(--border)',background: filter === t ? 'var(--primary)' : '#fff',color: filter === t ? '#fff' : 'var(--text)',fontSize:'.82rem',fontWeight:'600',cursor:'pointer',transition:'all .2s'}}>{t}</button>
+                    <motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:.15}}
+                        style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:40}}>
+                        <button className={`filter-btn${!filter?' active':''}`} onClick={() => setFilter('')}>All</button>
+                        {allTags.slice(0,14).map(t => (
+                            <button key={t} className={`filter-btn${filter===t?' active':''}`} onClick={() => setFilter(t)}>{t}</button>
                         ))}
-                    </div>
+                    </motion.div>
                 )}
 
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:'24px'}}>
-                    {filtered.map(p => (
-                        <Link key={p.id} href={`/project/${p.id}`} style={{textDecoration:'none',color:'inherit',display:'block',height:'100%'}}>
-                            <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.04)',transition:'all .25s',cursor:'pointer',display:'flex',flexDirection:'column',height:'100%'}}
-                                onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 8px 30px rgba(0,0,0,.1)';}}
-                                onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';}}>
-                                {allProjectImgs(p).length > 0 && <div style={{height:'180px',overflow:'hidden',flexShrink:0}}><img src={imgUrl(allProjectImgs(p)[0])} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div>}
-                                <div style={{padding:'20px',display:'flex',flexDirection:'column',flex:1}}>
-                                    <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'10px'}}>
-                                        {(p.tags||[]).map(t=><span key={t} style={{background:'var(--bg)',color:'var(--primary)',borderRadius:'6px',padding:'3px 10px',fontSize:'.74rem',fontWeight:'700',border:'1px solid rgba(37,99,235,.15)'}}>{t}</span>)}
+                {/* Grid */}
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:24}}>
+                    <AnimatePresence>
+                    {filtered.map((p, i) => {
+                        const imgs = allProjectImgs(p);
+                        return (
+                            <motion.div key={p.id}
+                                initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.95}}
+                                transition={{delay:i*.06}}>
+                                <Link href={`/project/${p.id}`} style={{display:'block',height:'100%'}}>
+                                    <div className="project-card" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+                                        {/* Image */}
+                                        <div style={{height:200,overflow:'hidden',flexShrink:0,background:'rgba(124,58,237,.08)'}}>
+                                            {imgs.length > 0
+                                                ? <img src={imgUrl(imgs[0])} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block',transition:'transform .4s'}}
+                                                    onMouseEnter={e=>e.target.style.transform='scale(1.05)'}
+                                                    onMouseLeave={e=>e.target.style.transform='scale(1)'}/>
+                                                : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(124,58,237,.4)" strokeWidth="1.5" width="48" height="48"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+                                                  </div>
+                                            }
+                                            {/* gradient overlay */}
+                                            <div style={{position:'absolute',bottom:0,left:0,right:0,height:'50%',background:'linear-gradient(to top,rgba(5,8,22,.9),transparent)',pointerEvents:'none'}}/>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div style={{padding:'20px 22px 22px',flex:1,display:'flex',flexDirection:'column'}}>
+                                            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:10}}>
+                                                {(p.tags||[]).slice(0,4).map(t=><span key={t} className="tag-pill">{t}</span>)}
+                                            </div>
+                                            <div style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:'1.05rem',color:'#fff',marginBottom:8}}>{p.title}</div>
+                                            <div style={{fontSize:'.84rem',color:'rgba(148,163,184,.65)',lineHeight:1.65,flex:1,display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{p.description}</div>
+                                            <div style={{display:'flex',gap:8,marginTop:16,flexWrap:'wrap'}}>
+                                                {p.live_url && p.live_url !== '#' && (
+                                                    <span onClick={e=>{e.stopPropagation();e.preventDefault();window.open(p.live_url,'_blank','noreferrer');}}
+                                                        style={{display:'inline-flex',alignItems:'center',gap:5,padding:'6px 14px',borderRadius:8,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',color:'#fff',fontSize:'.78rem',fontWeight:700,cursor:'pointer'}}>
+                                                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                                        Live Demo
+                                                    </span>
+                                                )}
+                                                {p.github_url && p.github_url !== '#' && (
+                                                    <span onClick={e=>{e.stopPropagation();e.preventDefault();window.open(p.github_url,'_blank','noreferrer');}}
+                                                        style={{display:'inline-flex',alignItems:'center',gap:5,padding:'6px 14px',borderRadius:8,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',color:'rgba(226,232,240,.7)',fontSize:'.78rem',fontWeight:700,cursor:'pointer'}}>
+                                                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                                        GitHub
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div style={{fontSize:'1.05rem',fontWeight:'800',color:'var(--dark)',marginBottom:'6px'}}>{p.title}</div>
-                                    <div style={{fontSize:'.85rem',color:'var(--muted)',lineHeight:'1.5',flex:1,display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{p.description}</div>
-                                    <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
-                                        {p.live_url && p.live_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.live_url, '_blank', 'noreferrer'); }} style={{background:'var(--primary)',color:'#fff',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',cursor:'pointer'}}>Live Demo</span>}
-                                        {p.github_url && p.github_url !== '#' && <span onClick={e => { e.stopPropagation(); e.preventDefault(); window.open(p.github_url, '_blank', 'noreferrer'); }} style={{background:'var(--bg)',color:'var(--text)',borderRadius:'8px',padding:'6px 16px',fontSize:'.8rem',fontWeight:'700',border:'1px solid var(--border)',cursor:'pointer'}}>GitHub</span>}
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
+                                </Link>
+                            </motion.div>
+                        );
+                    })}
+                    </AnimatePresence>
                 </div>
 
                 {filtered.length === 0 && (
-                    <div style={{textAlign:'center',padding:'80px 24px',color:'var(--muted)'}}>
-                        <div style={{fontSize:'48px',marginBottom:'16px'}}>🔍</div>
-                        <div style={{fontSize:'18px',fontWeight:'600',color:'var(--dark)',marginBottom:'6px'}}>No projects found</div>
-                        <p style={{fontSize:'14px'}}>Try a different filter or <Link href="/projects" style={{color:'var(--primary)',fontWeight:'600'}}>view all</Link></p>
+                    <div style={{textAlign:'center',padding:'80px 24px',color:'rgba(148,163,184,.5)'}}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(124,58,237,.4)" strokeWidth="1.5" width="56" height="56" style={{margin:'0 auto 16px',display:'block'}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <div style={{fontSize:'1.1rem',fontWeight:700,color:'rgba(226,232,240,.6)',marginBottom:6}}>No projects found</div>
+                        <button className="filter-btn active" onClick={()=>setFilter('')} style={{marginTop:12}}>Clear filter</button>
                     </div>
                 )}
             </div>
         </main>
 
-        <footer style={{background:'var(--dark)',color:'#94a3b8',padding:'40px 24px',textAlign:'center'}}>
-            <div style={{maxWidth:'700px',margin:'0 auto'}}>
-                <div style={{fontSize:'1.5rem',fontWeight:'800',color:'#fff',marginBottom:'12px'}}>[ <span style={{color:'var(--accent)'}}>{(profile?.name||'Sital Mahato').split(' ')[0]}</span> {(profile?.name||'Sital Mahato').split(' ').slice(1).join(' ')} ]</div>
-                <p style={{fontSize:'.88rem',marginBottom:'20px'}}>Crafting digital experiences. Building the future. 🇳🇵</p>
-                <div style={{display:'flex',justifyContent:'center',gap:'20px',flexWrap:'wrap',marginBottom:'20px'}}>
-                    {['about','skills','projects','services','journey','contact'].map(s => (
-                        <Link key={s} href="/" style={{color:'#94a3b8',fontSize:'.85rem'}}>{s.charAt(0).toUpperCase() + s.slice(1)}</Link>
+        {/* Footer */}
+        <footer style={{position:'relative',zIndex:2,background:'rgba(0,0,0,.4)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,.06)',padding:'48px 24px',textAlign:'center'}}>
+            <div style={{maxWidth:700,margin:'0 auto'}}>
+                <div style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:'1.4rem',fontWeight:800,color:'#fff',marginBottom:10}}>
+                    <span style={{color:'rgba(167,139,250,.8)'}}>{(profile?.name||'Sital Mahato').split(' ')[0]}</span>{' '}
+                    {(profile?.name||'Sital Mahato').split(' ').slice(1).join(' ')}
+                </div>
+                <p style={{color:'rgba(148,163,184,.5)',fontSize:'.85rem',marginBottom:20}}>Crafting digital experiences. Building the future. 🇳🇵</p>
+                <div style={{display:'flex',justifyContent:'center',gap:6,flexWrap:'wrap',marginBottom:24}}>
+                    {['about','skills','projects','services','experience','contact'].map(s=>(
+                        <Link key={s} href={`/#${s}`} style={{padding:'5px 14px',borderRadius:8,color:'rgba(148,163,184,.5)',fontSize:'.82rem',fontWeight:500,transition:'color .2s'}}
+                            onMouseEnter={e=>e.target.style.color='#a78bfa'} onMouseLeave={e=>e.target.style.color='rgba(148,163,184,.5)'}>
+                            {s.charAt(0).toUpperCase()+s.slice(1)}
+                        </Link>
                     ))}
                 </div>
-                <div style={{fontSize:'.8rem',borderTop:'1px solid #1e293b',paddingTop:'20px'}}>© {new Date().getFullYear()} {profile?.name||'Sital Mahato'}. Crafted with ♥ &amp; ☕ in Nepal.</div>
+                <div style={{fontSize:'.78rem',color:'rgba(148,163,184,.3)',borderTop:'1px solid rgba(255,255,255,.05)',paddingTop:20}}>
+                    © {new Date().getFullYear()} {profile?.name||'Sital Mahato'}. Crafted with ♥ in Nepal.
+                </div>
             </div>
         </footer>
         </>
