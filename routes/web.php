@@ -9,10 +9,17 @@ use App\Models\Project;
 use App\Models\Service;
 use App\Models\Experience;
 
+// Temporary: clear compiled views on server — remove after use
+Route::get('/clear-views', function () {
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    return 'Views and cache cleared.';
+});
+
 // Dynamic web app manifest — uses current profile avatar so Google SERP favicon stays up-to-date
 Route::get('/site.webmanifest', function () {
     $profile  = Profile::first();
-    $avatar   = $profile?->avatar ? '/' . $profile->avatar : '/images/avatar_6a3fbd303e6af.webp';
+    $avatar   = $profile?->avatar ? '/' . $profile->avatar : '/images/image.webp';
     $name     = $profile?->name   ?? 'Sital Mahato';
     $manifest = [
         'name'             => $name . ' — Full Stack Developer',
