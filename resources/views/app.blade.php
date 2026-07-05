@@ -6,21 +6,22 @@
 
         @php
             $profile  = \App\Models\Profile::first();
-            $name     = $profile?->name    ?? 'Sital Mahato';
-            $title    = $profile?->title   ?? 'Full Stack Developer';
-            $bio      = $profile?->bio     ?? "{$name} is a Full Stack Developer based in Nepal, specialising in Laravel, React, PHP, and modern web technologies. Available for freelance projects worldwide.";
-            $email    = $profile?->email   ?? 'sitalmahato077@gmail.com';
-            $phone    = $profile?->phone   ?? '+977 9704191610';
+            $name     = $profile?->name     ?? 'Sital Mahato';
+            $title    = $profile?->title    ?? 'Full Stack Developer';
+            $defaultBio = $name . ' is a Full Stack Developer based in Nepal, specialising in Laravel, React, PHP, and modern web technologies. Available for freelance projects worldwide.';
+            $bio      = $profile?->bio      ?? $defaultBio;
+            $email    = $profile?->email    ?? 'sitalmahato077@gmail.com';
+            $phone    = $profile?->phone    ?? '+977 9704191610';
             $location = $profile?->location ?? 'Golbazar, Siraha, Nepal';
-            $github   = $profile?->github  ?? 'https://github.com/sitalmahato00';
+            $github   = $profile?->github   ?? 'https://github.com/sitalmahato00';
             $linkedin = $profile?->linkedin ?? 'https://linkedin.com/in/sitalmahato';
             $avatar   = $profile?->avatar;
             $siteUrl  = 'https://sital.info.np';
             $avatarUrl = $avatar ? $siteUrl . '/' . $avatar : $siteUrl . '/images/image.webp';
             $ogImage   = $avatarUrl;
-            $seoTitle = "{$name} | {$title} in Nepal — Laravel, React & PHP Expert";
+            $seoTitle = $name . ' | ' . $title . ' in Nepal — Laravel, React & PHP Expert';
             $seoDesc  = mb_substr(strip_tags($bio), 0, 158);
-            $keywords = "{$name}, Full Stack Developer Nepal, Laravel Developer Nepal, React Developer Nepal, PHP Developer, Web Developer Nepal, Freelance Developer Nepal, {$name} portfolio";
+            $keywords = $name . ', Full Stack Developer Nepal, Laravel Developer Nepal, React Developer Nepal, PHP Developer, Web Developer Nepal, Freelance Developer Nepal, ' . $name . ' portfolio';
         @endphp
 
         {{-- Primary SEO --}}
@@ -78,12 +79,12 @@
 
         {{-- Favicon / Icons --}}
         @if($avatar)
-            <link rel="icon"              type="image/webp" sizes="32x32" href="/{{ $avatar }}">
-            <link rel="icon"              type="image/webp" sizes="16x16" href="/{{ $avatar }}">
-            <link rel="apple-touch-icon"  sizes="180x180"  href="/{{ $avatar }}">
+            <link rel="icon"             type="image/webp" sizes="32x32" href="/{{ $avatar }}">
+            <link rel="icon"             type="image/webp" sizes="16x16" href="/{{ $avatar }}">
+            <link rel="apple-touch-icon" sizes="180x180"  href="/{{ $avatar }}">
             <link rel="preload" as="image" href="/{{ $avatar }}" fetchpriority="high">
         @else
-            <link rel="icon"              type="image/x-icon" href="/favicon.ico">
+            <link rel="icon" type="image/x-icon" href="/favicon.ico">
         @endif
         <link rel="manifest" href="/site.webmanifest">
 
