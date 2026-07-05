@@ -17,7 +17,7 @@
             $avatar   = $profile?->avatar;
             $siteUrl  = 'https://sital.info.np';
             $avatarUrl = $avatar ? $siteUrl . '/' . $avatar : $siteUrl . '/images/image.webp';
-            $ogImage   = $avatarUrl; {{-- used for OG/Twitter and JSON-LD --}}
+            $ogImage   = $avatarUrl;
             $seoTitle = "{$name} | {$title} in Nepal — Laravel, React & PHP Expert";
             $seoDesc  = mb_substr(strip_tags($bio), 0, 158);
             $keywords = "{$name}, Full Stack Developer Nepal, Laravel Developer Nepal, React Developer Nepal, PHP Developer, Web Developer Nepal, Freelance Developer Nepal, {$name} portfolio";
