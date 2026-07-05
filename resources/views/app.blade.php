@@ -89,99 +89,68 @@
         <link rel="manifest" href="/site.webmanifest">
 
         {{-- JSON-LD Structured Data --}}
-        <script type="application/ld+json">
-        [
-          {
-            "@context": "https://schema.org",
-            "@type": "Person",
-            "@id": "{{ $siteUrl }}/#person",
-            "name": "{{ $name }}",
-            "url": "{{ $siteUrl }}",
-            "image": [
-              {
-                "@type": "ImageObject",
-                "url": "{{ $ogImage }}",
-                "width": 1200,
-                "height": 630
-              },
-              {
-                "@type": "ImageObject",
-                "url": "{{ $avatarUrl }}",
-                "width": 400,
-                "height": 400
-              }
+        @php
+        $jsonLd = json_encode([
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'Person',
+                '@id' => $siteUrl . '/#person',
+                'name' => $name,
+                'url' => $siteUrl,
+                'image' => [
+                    ['@type' => 'ImageObject', 'url' => $ogImage, 'width' => 1200, 'height' => 630],
+                    ['@type' => 'ImageObject', 'url' => $avatarUrl, 'width' => 400, 'height' => 400],
+                ],
+                'jobTitle' => $title,
+                'description' => $seoDesc,
+                'email' => $email,
+                'telephone' => $phone,
+                'address' => ['@type' => 'PostalAddress', 'addressLocality' => $location, 'addressCountry' => 'NP'],
+                'knowsAbout' => ['Laravel','React','PHP','UI/UX Design','JavaScript','MySQL','Node.js','TailwindCSS'],
+                'sameAs' => [$github, $linkedin],
+                'nationality' => ['@type' => 'Country', 'name' => 'Nepal'],
             ],
-            "jobTitle": "{{ $title }}",
-            "description": "{{ $seoDesc }}",
-            "email": "{{ $email }}",
-            "telephone": "{{ $phone }}",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "{{ $location }}",
-              "addressCountry": "NP"
-            },
-            "knowsAbout": ["Laravel","React","PHP","UI/UX Design","JavaScript","MySQL","Node.js","TailwindCSS"],
-            "sameAs": [
-              "{{ $github }}",
-              "{{ $linkedin }}"
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                '@id' => $siteUrl . '/#website',
+                'url' => $siteUrl,
+                'name' => $name,
+                'alternateName' => $name . ' — Portfolio',
+                'description' => $seoDesc,
+                'author' => ['@id' => $siteUrl . '/#person'],
+                'potentialAction' => [
+                    '@type' => 'SearchAction',
+                    'target' => ['@type' => 'EntryPoint', 'urlTemplate' => $siteUrl . '/projects?q={search_term_string}'],
+                    'query-input' => 'required name=search_term_string',
+                ],
             ],
-            "nationality": {
-              "@type": "Country",
-              "name": "Nepal"
-            }
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "@id": "{{ $siteUrl }}/#website",
-            "url": "{{ $siteUrl }}",
-            "name": "{{ $name }}",
-            "alternateName": "{{ $name }} — Portfolio",
-            "description": "{{ $seoDesc }}",
-            "author": { "@id": "{{ $siteUrl }}/#person" },
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "{{ $siteUrl }}/projects?q={search_term_string}"
-              },
-              "query-input": "required name=search_term_string"
-            }
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "WebPage",
-            "@id": "{{ $siteUrl }}/#webpage",
-            "url": "{{ $siteUrl }}",
-            "name": "{{ $seoTitle }}",
-            "description": "{{ $seoDesc }}",
-            "isPartOf": { "@id": "{{ $siteUrl }}/#website" },
-            "about": { "@id": "{{ $siteUrl }}/#person" },
-            "primaryImageOfPage": {
-              "@type": "ImageObject",
-              "url": "{{ $ogImage }}",
-              "width": 1200,
-              "height": 630
-            }
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "ProfessionalService",
-            "name": "{{ $name }} — Web Development Services",
-            "url": "{{ $siteUrl }}",
-            "telephone": "{{ $phone }}",
-            "email": "{{ $email }}",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "{{ $location }}",
-              "addressCountry": "NP"
-            },
-            "priceRange": "$$",
-            "areaServed": "Worldwide",
-            "serviceType": ["Full Stack Development","Laravel Development","React Development","UI/UX Design","API Integration"]
-          }
-        ]
-        </script>
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebPage',
+                '@id' => $siteUrl . '/#webpage',
+                'url' => $siteUrl,
+                'name' => $seoTitle,
+                'description' => $seoDesc,
+                'isPartOf' => ['@id' => $siteUrl . '/#website'],
+                'about' => ['@id' => $siteUrl . '/#person'],
+                'primaryImageOfPage' => ['@type' => 'ImageObject', 'url' => $ogImage, 'width' => 1200, 'height' => 630],
+            ],
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'ProfessionalService',
+                'name' => $name . ' — Web Development Services',
+                'url' => $siteUrl,
+                'telephone' => $phone,
+                'email' => $email,
+                'address' => ['@type' => 'PostalAddress', 'addressLocality' => $location, 'addressCountry' => 'NP'],
+                'priceRange' => '$$',
+                'areaServed' => 'Worldwide',
+                'serviceType' => ['Full Stack Development','Laravel Development','React Development','UI/UX Design','API Integration'],
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        @endphp
+        <script type="application/ld+json">{!! $jsonLd !!}</script>
 
         {{-- DNS prefetch for performance --}}
         <link rel="dns-prefetch"  href="//cdn.simpleicons.org">
