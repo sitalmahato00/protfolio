@@ -59,29 +59,34 @@ const FadeIn = ({ children, delay = 0, className = '' }) => {
 const GlowBtn = ({ href, children, variant = 'primary', onClick, style = {} }) => {
   const Tag = href ? 'a' : 'button';
   return (
-    <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} style={{ display: 'inline-block' }}>
-      <Tag href={href} onClick={onClick}
-        target={href?.startsWith('http') ? '_blank' : undefined}
-        rel={href?.startsWith('http') ? 'noreferrer' : undefined}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: variant === 'primary' ? '13px 28px' : '12px 26px',
-          borderRadius: 12,
-          background: variant === 'primary'
-            ? 'linear-gradient(135deg,#7c3aed,#4f46e5)'
-            : 'transparent',
-          border: variant === 'primary'
-            ? '1px solid rgba(124,58,237,.4)'
-            : '1px solid rgba(255,255,255,.12)',
-          color: '#fff', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer',
-          textDecoration: 'none', whiteSpace: 'nowrap',
-          boxShadow: variant === 'primary' ? '0 0 30px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.1)' : 'none',
-          backdropFilter: 'blur(12px)',
-          ...style,
-        }}>
-        {children}
-      </Tag>
-    </motion.div>
+    <Tag href={href} onClick={onClick}
+      target={href?.startsWith('http') ? '_blank' : undefined}
+      rel={href?.startsWith('http') ? 'noreferrer' : undefined}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: variant === 'primary' ? '13px 28px' : '12px 26px',
+        borderRadius: 12,
+        background: variant === 'primary'
+          ? 'linear-gradient(135deg,#7c3aed,#4f46e5)'
+          : 'transparent',
+        border: variant === 'primary'
+          ? '1px solid rgba(124,58,237,.4)'
+          : '1px solid rgba(255,255,255,.12)',
+        color: '#fff', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer',
+        textDecoration: 'none', whiteSpace: 'nowrap',
+        boxShadow: variant === 'primary' ? '0 0 30px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.1)' : 'none',
+        backdropFilter: 'blur(12px)',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        willChange: 'transform',
+        ...style,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+      onMouseDown={e  => { e.currentTarget.style.transform = 'scale(0.97)'; }}
+      onMouseUp={e    => { e.currentTarget.style.transform = 'scale(1.04)'; }}
+    >
+      {children}
+    </Tag>
   );
 };
 
@@ -348,7 +353,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
 
   /* parallax removed — was causing 871ms main thread block */
 
-  /* mouse tracker — passive only, no spring (spring caused layout thrashing) */
+  /* mouse tracker — cursor spotlight only, no framer motion values */
   useEffect(() => {
     const fn = e => setMouse({ x:e.clientX, y:e.clientY });
     window.addEventListener('mousemove', fn, { passive:true });
@@ -363,13 +368,6 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
     const fn = () => setStuck(window.scrollY > 40);
     window.addEventListener('scroll', fn, { passive:true });
     return () => window.removeEventListener('scroll', fn);
-  }, []);
-
-  /* mouse tracker */
-  useEffect(() => {
-    const fn = e => { mx.set(e.clientX); my.set(e.clientY); setMouse({ x:e.clientX, y:e.clientY }); };
-    window.addEventListener('mousemove', fn, { passive:true });
-    return () => window.removeEventListener('mousemove', fn);
   }, []);
 
   /* typewriter */
@@ -735,7 +733,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
               {/* avatar */}
               <div style={{position:'absolute',width:168,height:168,borderRadius:'50%',zIndex:5,boxShadow:'0 0 40px rgba(124,58,237,.4)'}}>
                 {avatarUrl
-                  ? <img src={avatarUrl} alt={seoName} fetchpriority="high" style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover',objectPosition:'top center',border:'2.5px solid rgba(124,58,237,.5)',display:'block'}}/>
+                  ? <img src={avatarUrl} alt={seoName} fetchpriority="high" loading="eager" width="168" height="168" style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover',objectPosition:'top center',border:'2.5px solid rgba(124,58,237,.5)',display:'block'}}/>
                   : <div style={{width:'100%',height:'100%',borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'3rem',fontWeight:900,color:'#fff'}}>SM</div>
                 }
               </div>
@@ -1036,7 +1034,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
             {avatarUrl && (
               <FadeIn delay={.1}>
                 <div style={{position:'relative',borderRadius:24,overflow:'hidden'}} className="grad-border">
-                  <img src={avatarUrl} alt={seoName} style={{width:'100%',height:'auto',display:'block',objectFit:'contain',borderRadius:24}}/>
+                  <img src={avatarUrl} alt={seoName} loading="lazy" width="400" height="400" style={{width:'100%',height:'auto',display:'block',objectFit:'contain',borderRadius:24}}/>
                   <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,8,22,.75) 0%,transparent 55%)'}}/>
                   <div style={{position:'absolute',bottom:18,left:20}}>
                     <div style={{fontFamily:"'Space Grotesk'",fontWeight:700,color:'#fff',fontSize:'1rem'}}>{profile?.name||'Sital Mahato'}</div>
