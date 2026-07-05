@@ -119,6 +119,17 @@ const GLOBAL_CSS = `
 
   a { color: inherit; text-decoration: none; }
 
+  /* ── focus indicators for keyboard navigation ── */
+  :focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  button:focus-visible, a:focus-visible {
+    outline: 2px solid #a78bfa;
+    outline-offset: 3px;
+  }
+
   /* ── noise overlay ── */
   body::before {
     content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
@@ -1447,8 +1458,9 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
               <div className="grad-border" style={{padding:24,flex:1}}>
                 <div style={{fontFamily:"'Space Grotesk'",fontWeight:700,color:'#fff',marginBottom:14,fontSize:'.9rem'}}>Let's Connect</div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:18}}>
-                  {[{href:profile?.github||'https://github.com/sitalmahato00',Icon:IconGH},{href:profile?.linkedin||'https://linkedin.com/in/sitalmahato',Icon:IconLI},{href:'#',Icon:IconTW},{href:'#',Icon:IconIG}].map((s,i)=>(
+                  {[{href:profile?.github||'https://github.com/sitalmahato00',Icon:IconGH,label:'GitHub'},{href:profile?.linkedin||'https://linkedin.com/in/sitalmahato',Icon:IconLI,label:'LinkedIn'},{href:'#',Icon:IconTW,label:'Twitter / X'},{href:'#',Icon:IconIG,label:'Instagram'}].map((s,i)=>(
                     <motion.a key={i} href={s.href} target={s.href.startsWith('http')?'_blank':undefined} rel="noreferrer"
+                      aria-label={s.label}
                       whileHover={{scale:1.15,y:-3}} style={{width:40,height:40,borderRadius:10,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',display:'flex',alignItems:'center',justifyContent:'center',color:'rgba(148,163,184,.7)'}}>
                       <s.Icon />
                     </motion.a>
@@ -1529,7 +1541,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
             <div style={{fontFamily:"'Space Grotesk'",fontSize:'clamp(24px,3vw,36px)',fontWeight:800,color:'#fff',lineHeight:1.2,marginBottom:10}}>
               Ready to build something <span className="grad-text-purple">amazing</span>?
             </div>
-            <p style={{color:'rgba(148,163,184,.55)',fontSize:'.95rem',maxWidth:440}}>
+            <p style={{color:'rgba(148,163,184,.75)',fontSize:'.95rem',maxWidth:440}}>
               Let's turn your ideas into reality. Available for freelance projects worldwide.
             </p>
           </div>
@@ -1556,24 +1568,24 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                 <div style={{width:36,height:36,borderRadius:9,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.85rem',fontWeight:900,boxShadow:'0 0 16px rgba(124,58,237,.4)'}}>SM</div>
                 {profile?.name||'Sital Mahato'}
               </div>
-              <p style={{color:'rgba(148,163,184,.45)',fontSize:'.83rem',lineHeight:1.75,marginBottom:20,maxWidth:240}}>
+              <p style={{color:'rgba(148,163,184,.75)',fontSize:'.83rem',lineHeight:1.75,marginBottom:20,maxWidth:240}}>
                 Full Stack Developer & UI/UX Designer based in Nepal. Building digital experiences that matter.
               </p>
               {/* contact quick links */}
               <div style={{display:'flex',flexDirection:'column',gap:8}}>
                 <a href={`mailto:${profile?.email||'sitalmahato077@gmail.com'}`}
-                  style={{display:'flex',alignItems:'center',gap:8,color:'rgba(148,163,184,.5)',fontSize:'.8rem',transition:'color .2s'}}
+                  style={{display:'flex',alignItems:'center',gap:8,color:'rgba(148,163,184,.75)',fontSize:'.8rem',transition:'color .2s'}}
                   onMouseEnter={e=>e.currentTarget.style.color='#c4b5fd'}
-                  onMouseLeave={e=>e.currentTarget.style.color='rgba(148,163,184,.5)'}>
+                  onMouseLeave={e=>e.currentTarget.style.color='rgba(148,163,184,.75)'}>
                   <IconMail /> {profile?.email||'sitalmahato077@gmail.com'}
                 </a>
                 <a href={`tel:${(profile?.phone||'+9779704191610').replace(/\s/g,'')}`}
-                  style={{display:'flex',alignItems:'center',gap:8,color:'rgba(148,163,184,.5)',fontSize:'.8rem',transition:'color .2s'}}
+                  style={{display:'flex',alignItems:'center',gap:8,color:'rgba(148,163,184,.75)',fontSize:'.8rem',transition:'color .2s'}}
                   onMouseEnter={e=>e.currentTarget.style.color='#c4b5fd'}
-                  onMouseLeave={e=>e.currentTarget.style.color='rgba(148,163,184,.5)'}>
+                  onMouseLeave={e=>e.currentTarget.style.color='rgba(148,163,184,.75)'}>
                   📞 {profile?.phone||'+977 9704191610'}
                 </a>
-                <span style={{display:'flex',alignItems:'center',gap:8,color:'rgba(148,163,184,.5)',fontSize:'.8rem'}}>
+                <span style={{display:'flex',alignItems:'center',gap:8,color:'rgba(148,163,184,.75)',fontSize:'.8rem'}}>
                   📍 {profile?.location||'Golbazar, Siraha, Nepal'}
                 </span>
               </div>
@@ -1581,12 +1593,12 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
 
             {/* Navigation */}
             <div>
-              <div style={{fontSize:'.7rem',fontWeight:700,color:'rgba(148,163,184,.35)',marginBottom:16,letterSpacing:'.12em',textTransform:'uppercase',fontFamily:"'JetBrains Mono'"}}>Navigation</div>
+              <div style={{fontSize:'.7rem',fontWeight:700,color:'rgba(148,163,184,.65)',marginBottom:16,letterSpacing:'.12em',textTransform:'uppercase',fontFamily:"'JetBrains Mono'"}}>Navigation</div>
               {navLinks.map(l=>(
                 <a key={l} href={`#${l}`} onClick={e=>navTo(e,l)}
-                  style={{display:'block',fontSize:'.85rem',color:'rgba(148,163,184,.5)',marginBottom:10,transition:'color .2s'}}
+                  style={{display:'block',fontSize:'.85rem',color:'rgba(148,163,184,.75)',marginBottom:10,transition:'color .2s'}}
                   onMouseEnter={e=>e.target.style.color='#c4b5fd'}
-                  onMouseLeave={e=>e.target.style.color='rgba(148,163,184,.5)'}>
+                  onMouseLeave={e=>e.target.style.color='rgba(148,163,184,.75)'}>
                   {l.charAt(0).toUpperCase()+l.slice(1)}
                 </a>
               ))}
@@ -1594,15 +1606,15 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
 
             {/* Services */}
             <div>
-              <div style={{fontSize:'.7rem',fontWeight:700,color:'rgba(148,163,184,.35)',marginBottom:16,letterSpacing:'.12em',textTransform:'uppercase',fontFamily:"'JetBrains Mono'"}}>Services</div>
+              <div style={{fontSize:'.7rem',fontWeight:700,color:'rgba(148,163,184,.65)',marginBottom:16,letterSpacing:'.12em',textTransform:'uppercase',fontFamily:"'JetBrains Mono'"}}>Services</div>
               {['Web Development','Backend Development','UI/UX Design','API Integration','Database Design','Performance Tuning'].map(s=>(
-                <div key={s} style={{fontSize:'.83rem',color:'rgba(148,163,184,.45)',marginBottom:10,cursor:'default'}}>{s}</div>
+                <div key={s} style={{fontSize:'.83rem',color:'rgba(148,163,184,.75)',marginBottom:10,cursor:'default'}}>{s}</div>
               ))}
             </div>
 
             {/* Connect */}
             <div>
-              <div style={{fontSize:'.7rem',fontWeight:700,color:'rgba(148,163,184,.35)',marginBottom:16,letterSpacing:'.12em',textTransform:'uppercase',fontFamily:"'JetBrains Mono'"}}>Connect</div>
+              <div style={{fontSize:'.7rem',fontWeight:700,color:'rgba(148,163,184,.65)',marginBottom:16,letterSpacing:'.12em',textTransform:'uppercase',fontFamily:"'JetBrains Mono'"}}>Connect</div>
               <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>
                 {[
                   {label:'GitHub',Icon:IconGH,href:profile?.github||'https://github.com/sitalmahato00'},
@@ -1611,9 +1623,10 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                   {label:'Instagram',Icon:IconIG,href:'#'},
                 ].map(s=>(
                   <a key={s.label} href={s.href} target={s.href.startsWith('http')?'_blank':undefined} rel="noreferrer"
-                    style={{display:'flex',alignItems:'center',gap:8,fontSize:'.83rem',color:'rgba(148,163,184,.5)',transition:'color .2s'}}
+                    aria-label={s.label}
+                    style={{display:'flex',alignItems:'center',gap:8,fontSize:'.83rem',color:'rgba(148,163,184,.75)',transition:'color .2s'}}
                     onMouseEnter={e=>e.currentTarget.style.color='#c4b5fd'}
-                    onMouseLeave={e=>e.currentTarget.style.color='rgba(148,163,184,.5)'}>
+                    onMouseLeave={e=>e.currentTarget.style.color='rgba(148,163,184,.75)'}>
                     <s.Icon /> {s.label}
                   </a>
                 ))}
@@ -1624,22 +1637,22 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
                   <span style={{width:6,height:6,borderRadius:'50%',background:'#34d399',display:'inline-block'}}/>
                   Available for work
                 </div>
-                <div style={{fontSize:'.72rem',color:'rgba(148,163,184,.4)'}}>Open to freelance · remote · fulltime</div>
+                <div style={{fontSize:'.72rem',color:'rgba(148,163,184,.65)'}}>Open to freelance · remote · fulltime</div>
               </div>
             </div>
           </div>
 
           {/* bottom bar */}
           <div style={{borderTop:'1px solid rgba(255,255,255,.05)',paddingTop:24,display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
-            <div style={{fontSize:'.78rem',color:'rgba(148,163,184,.3)'}}>
+            <div style={{fontSize:'.78rem',color:'rgba(148,163,184,.65)'}}>
               &copy; {new Date().getFullYear()} {profile?.name||'Sital Mahato'}. All rights reserved.
             </div>
             <div style={{display:'flex',gap:20,flexWrap:'wrap'}}>
               {['Laravel','React','PHP','MySQL','TailwindCSS'].map(t=>(
-                <span key={t} style={{fontSize:'.72rem',color:'rgba(148,163,184,.25)',fontFamily:"'JetBrains Mono'"}}>{t}</span>
+                <span key={t} style={{fontSize:'.72rem',color:'rgba(148,163,184,.55)',fontFamily:"'JetBrains Mono'"}}>{t}</span>
               ))}
             </div>
-            <div style={{fontSize:'.78rem',color:'rgba(148,163,184,.3)'}}>
+            <div style={{fontSize:'.78rem',color:'rgba(148,163,184,.65)'}}>
               Made with <span style={{color:'#7c3aed'}}>♥</span> in Nepal
             </div>
           </div>
