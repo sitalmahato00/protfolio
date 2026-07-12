@@ -886,7 +886,7 @@ export function PortfolioFooter({ profile, navLinks, navTo }) {
           <div style={{ borderTop: '1px solid rgba(255,255,255,.05)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div style={{ fontSize: '.78rem', color: 'rgba(148,163,184,.78)' }}>&copy; {new Date().getFullYear()} {profile?.name || 'Sital Mahato'}. All rights reserved.</div>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>{['Laravel', 'React', 'PHP', 'MySQL', 'TailwindCSS'].map(t => (
-              <span key={t} style={{ fontSize: '.72rem', color: 'rgba(148,163,184,.55)', fontFamily: "'JetBrains Mono'" }}>{t}</span>
+              <span key={t} style={{ fontSize: '.72rem', color: 'rgba(148,163,184,.78)', fontFamily: "'JetBrains Mono'" }}>{t}</span>
             ))}</div>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <Link href="/privacy" style={{ fontSize: '.78rem', color: 'rgba(148,163,184,.78)' }}>Privacy Policy</Link>

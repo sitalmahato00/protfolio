@@ -1,11 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Head } from '@inertiajs/react';
 import '../../css/portfolio.css';
 import {
-  PortfolioNavbar, PortfolioHero, PortfolioMarquee, PortfolioAbout,
-  PortfolioSkills, PortfolioProjects, PortfolioServices,
-  PortfolioExperience, PortfolioContact, PortfolioFAQ, PortfolioFooter,
+  PortfolioNavbar, PortfolioHero, PortfolioMarquee,
 } from '../Components/PortfolioSections';
+
+const PortfolioAbout = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioAbout })));
+const PortfolioSkills = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioSkills })));
+const PortfolioProjects = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioProjects })));
+const PortfolioServices = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioServices })));
+const PortfolioExperience = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioExperience })));
+const PortfolioContact = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioContact })));
+const PortfolioFAQ = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioFAQ })));
+const PortfolioFooter = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioFooter })));
 
 const imgMod = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
 const aMap = {};
@@ -29,11 +36,18 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
   const [mouse, setMouse] = useState({ x:0, y:0 });
   const [hoveredProj, setHoveredProj] = useState(null);
 
-  /* mouse tracker */
+  /* throttled mouse tracker */
   useEffect(() => {
-    const fn = e => setMouse({ x:e.clientX, y:e.clientY });
+    let raf = null;
+    const fn = e => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        setMouse({ x:e.clientX, y:e.clientY });
+        raf = null;
+      });
+    };
     window.addEventListener('mousemove', fn, { passive:true });
-    return () => window.removeEventListener('mousemove', fn);
+    return () => { window.removeEventListener('mousemove', fn); if (raf) cancelAnimationFrame(raf); };
   }, []);
 
   const words = profile?.typewriter_words?.length
@@ -47,9 +61,10 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  /* typewriter */
+  /* typewriter — starts after initial render */
   useEffect(() => {
     const word = words[wIdx] || '';
+    const delay = wIdx === 0 && cIdx === 0 ? 600 : (deleting ? 45 : 90);
     const t = setTimeout(() => {
       if (!deleting) {
         if (cIdx < word.length) { setTypedText(word.slice(0, cIdx+1)); setCIdx(c=>c+1); }
@@ -58,7 +73,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
         if (cIdx > 0) { setTypedText(word.slice(0, cIdx-1)); setCIdx(c=>c-1); }
         else { setDeleting(false); setWIdx(i=>(i+1)%words.length); }
       }
-    }, deleting ? 35 : 75);
+    }, delay);
     return () => clearTimeout(t);
   }, [cIdx, deleting, wIdx, words]);
 
@@ -187,25 +202,25 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
 
       <PortfolioMarquee techStack={techStack} />
 
-      <PortfolioAbout profile={profile} stats={stats} avatarUrl={avatarUrl} seoName={seoName} resumeUrl={resumeUrl} />
+      <Suspense fallback={null}><PortfolioAbout profile={profile} stats={stats} avatarUrl={avatarUrl} seoName={seoName} resumeUrl={resumeUrl} /></Suspense>
 
-      <PortfolioSkills skills={skills} skillTab={skillTab} setSkillTab={setSkillTab} />
+      <Suspense fallback={null}><PortfolioSkills skills={skills} skillTab={skillTab} setSkillTab={setSkillTab} /></Suspense>
 
-      <PortfolioProjects projects={projects} allTags={allTags} projFilter={projFilter}
+      <Suspense fallback={null}><PortfolioProjects projects={projects} allTags={allTags} projFilter={projFilter}
         setProjFilter={setProjFilter} filteredProjects={filteredProjects}
-        allImgs={allImgs} hoveredProj={hoveredProj} setHoveredProj={setHoveredProj} />
+        allImgs={allImgs} hoveredProj={hoveredProj} setHoveredProj={setHoveredProj} /></Suspense>
 
-      <PortfolioServices services={services} profile={profile} />
+      <Suspense fallback={null}><PortfolioServices services={services} profile={profile} /></Suspense>
 
-      <PortfolioExperience experiences={experiences} profile={profile} workExp={workExp} eduExp={eduExp} />
+      <Suspense fallback={null}><PortfolioExperience experiences={experiences} profile={profile} workExp={workExp} eduExp={eduExp} /></Suspense>
 
-      <PortfolioContact profile={profile} contactForm={contactForm} setContactForm={setContactForm}
+      <Suspense fallback={null}><PortfolioContact profile={profile} contactForm={contactForm} setContactForm={setContactForm}
         cStatus={cStatus} setCStatus={setCStatus} cErrors={cErrors} setCErrors={setCErrors}
-        submitContact={submitContact} />
+        submitContact={submitContact} /></Suspense>
 
-      <PortfolioFAQ profile={profile} />
+      <Suspense fallback={null}><PortfolioFAQ profile={profile} /></Suspense>
 
-      <PortfolioFooter profile={profile} navLinks={navLinks} navTo={navTo} />
+      <Suspense fallback={null}><PortfolioFooter profile={profile} navLinks={navLinks} navTo={navTo} /></Suspense>
     </main>
   </>);
 }
