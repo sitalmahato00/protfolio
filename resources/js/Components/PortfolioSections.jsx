@@ -287,7 +287,7 @@ function AvatarOrbit({ avatarUrl, seoName, size, ringSizes, orbitR, badges }) {
           );
         })}
       </div>
-      <div style={{ position: 'absolute', width: size > 400 ? 280 : 168, height: size > 400 ? 280 : 168, borderRadius: '50%', zIndex: 5, boxShadow: size > 400 ? '0 0 60px rgba(124,58,237,.35), 0 0 120px rgba(124,58,237,.15)' : '0 0 40px rgba(124,58,237,.4)' }}>
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: size > 400 ? 280 : 168, height: size > 400 ? 280 : 168, borderRadius: '50%', zIndex: 5, boxShadow: size > 400 ? '0 0 60px rgba(124,58,237,.35), 0 0 120px rgba(124,58,237,.15)' : '0 0 40px rgba(124,58,237,.4)' }}>
         {avatarUrl
           ? <img fetchpriority="high" src={avatarUrl} alt={seoName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', objectPosition: 'top center', border: '2.5px solid rgba(124,58,237,.5)', display: 'block' }} />
           : <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size > 400 ? '4.5rem' : '3rem', fontWeight: 900, color: '#fff' }}>SM</div>
