@@ -216,7 +216,7 @@ export function PortfolioHero({
           </div>
 
           <div className="hero-avatar-mob" style={{ display: 'none', justifyContent: 'center', alignItems: 'center', marginTop: 8, marginBottom: 8 }}>
-            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={300} ringSizes={[260, 232, 210]} orbitR={130} badges={[
+            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={300} ringSizes={[260, 232, 210]} orbitR={110} badges={[
               { label: 'React', color: '#61dafb', src: 'https://cdn.simpleicons.org/react/61dafb' },
               { label: 'Laravel', color: '#ff2d20', src: 'https://cdn.simpleicons.org/laravel/ff2d20' },
               { label: 'PHP', color: '#777bb4', src: 'https://cdn.simpleicons.org/php/777bb4' },
@@ -227,7 +227,7 @@ export function PortfolioHero({
           </div>
 
           <div className="hero-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
-            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={500} ringSizes={[420, 380, 350]} orbitR={210} badges={[
+            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={500} ringSizes={[420, 380, 350]} orbitR={175} badges={[
               { label: 'React', color: '#61dafb', src: 'https://cdn.simpleicons.org/react/61dafb' },
               { label: 'Laravel', color: '#ff2d20', src: 'https://cdn.simpleicons.org/laravel/ff2d20' },
               { label: 'PHP', color: '#777bb4', src: 'https://cdn.simpleicons.org/php/777bb4' },
@@ -260,39 +260,44 @@ export function PortfolioHero({
 
 function AvatarOrbit({ avatarUrl, seoName, size, ringSizes, orbitR, badges }) {
   const cx = size / 2;
-  const cy = size / 2 - (size * 0.1); // shift orbit center up 10% to align with avatar face position (objectPosition: 'center 40%')
+  const cy = size / 2;
+  const avatarSize = size > 400 ? 280 : 168;
+  
   return (
     <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,.18) 0%, transparent 65%)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', width: ringSizes[0], height: ringSizes[0], borderRadius: '50%', background: 'conic-gradient(from 0deg, #7c3aed, #4f46e5, #3b82f6, #06b6d4, #7c3aed)', animation: 'spin-slow 25s linear infinite', WebkitMask: `radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))`, mask: `radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))`, opacity: .85, filter: 'blur(.5px)' }} />
       <div style={{ position: 'absolute', width: ringSizes[1], height: ringSizes[1], borderRadius: '50%', border: '1.5px dashed rgba(167,139,250,.35)', animation: 'spin-rev 18s linear infinite' }} />
       <div style={{ position: 'absolute', width: ringSizes[2], height: ringSizes[2], borderRadius: '50%', border: '1px solid rgba(59,130,246,.2)', animation: 'pulse-glow 4s ease-in-out infinite', boxShadow: 'inset 0 0 30px rgba(124,58,237,.08)' }} />
-      <div className="orbit-container" style={{ position: 'absolute', inset: 0, width: size, height: size, pointerEvents: 'none', zIndex: 6, animation: 'spin-slow 30s linear infinite' }}>
+      
+      {/* Static badges on outer ring */}
+      <div className="orbit-container-static" style={{ position: 'absolute', inset: 0, width: size, height: size, pointerEvents: 'none', zIndex: 6 }}>
         {badges.map((item, i, arr) => {
           const deg = (360 / arr.length) * i - 90;
           const rad = (deg * Math.PI) / 180;
-          // Add extra radius for MySQL, JavaScript, and Tailwind
-          const radiusOffset = (item.label === 'MySQL' || item.label === 'JavaScript' || item.label === 'JS' || item.label === 'Tailwind') ? 30 : 0;
-          const adjustedR = orbitR + radiusOffset;
-          const x = cx + adjustedR * Math.cos(rad);
-          const y = cy + adjustedR * Math.sin(rad);
-          const bg = `rgba(${item.color === '#61dafb' ? '97,218,251' : item.color === '#ff2d20' ? '255,45,32' : item.color === '#777bb4' ? '119,123,180' : item.color === '#4479a1' ? '68,121,161' : item.color === '#f7df1e' ? '247,223,30' : '56,189,248'},.12)`;
-          const border = `1.5px solid ${item.color}66`;
+          const outerR = ringSizes[0] / 2; // Position on outermost ring
+          const x = cx + outerR * Math.cos(rad);
+          const y = cy + outerR * Math.sin(rad);
+          const bg = `rgba(${item.color === '#61dafb' ? '97,218,251' : item.color === '#ff2d20' ? '255,45,32' : item.color === '#777bb4' ? '119,123,180' : item.color === '#4479a1' ? '68,121,161' : item.color === '#f7df1e' ? '247,223,30' : '56,189,248'},.15)`;
+          const border = `2px solid ${item.color}`;
+          const floatDelay = i * 0.3;
+          
           return (
-            <div key={item.label} className="orbit-badge" style={{ position: 'absolute', left: x, top: y, transform: 'translate(-50%,-50%)', zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: size > 400 ? 5 : 3, animation: 'spin-rev 30s linear infinite' }}>
-              <div style={{ width: size > 400 ? 46 : 34, height: size > 400 ? 46 : 34, borderRadius: '50%', background: bg, border: border, backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 20px ${item.color}55`, animation: 'spin-slow 8s linear infinite', position: 'relative' }}>
-                <img src={item.src} alt={item.label} width={size > 400 ? 26 : 18} height={size > 400 ? 26 : 18} style={{ display: 'block', objectFit: 'contain', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} onError={e => { e.target.style.display = 'none'; }} />
+            <div key={item.label} className="orbit-badge-static" style={{ position: 'absolute', left: x, top: y, transform: 'translate(-50%,-50%)', zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: size > 400 ? 8 : 6, animation: `float-badge 3s ease-in-out ${floatDelay}s infinite` }}>
+              <div style={{ width: size > 400 ? 52 : 38, height: size > 400 ? 52 : 38, borderRadius: '50%', background: bg, border: border, backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 25px ${item.color}60, 0 0 40px ${item.color}30`, position: 'relative', transition: 'transform 0.3s ease' }}>
+                <img src={item.src} alt={item.label} width={size > 400 ? 28 : 22} height={size > 400 ? 28 : 22} style={{ display: 'block', objectFit: 'contain', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} onError={e => { e.target.style.display = 'none'; }} />
               </div>
-              <span style={{ fontSize: size > 400 ? '.63rem' : '.56rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace", color: item.color, background: 'rgba(5,8,22,.9)', border: border, borderRadius: 6, padding: '2px 8px', whiteSpace: 'nowrap', backdropFilter: 'blur(10px)' }}>
+              <span style={{ fontSize: size > 400 ? '.68rem' : '.58rem', fontWeight: 600, fontFamily: "'Inter','system-ui',sans-serif", color: item.color, background: 'rgba(5,8,22,.95)', border: `1px solid ${item.color}40`, borderRadius: 8, padding: '3px 10px', whiteSpace: 'nowrap', backdropFilter: 'blur(12px)', boxShadow: `0 2px 8px rgba(0,0,0,.3)` }}>
                 {item.label}
               </span>
             </div>
           );
         })}
       </div>
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: size > 400 ? 280 : 168, height: size > 400 ? 280 : 168, borderRadius: '50%', zIndex: 5, boxShadow: size > 400 ? '0 0 60px rgba(124,58,237,.35), 0 0 120px rgba(124,58,237,.15)' : '0 0 40px rgba(124,58,237,.4)' }}>
+      
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: avatarSize, height: avatarSize, borderRadius: '50%', zIndex: 5, boxShadow: size > 400 ? '0 0 60px rgba(124,58,237,.35), 0 0 120px rgba(124,58,237,.15)' : '0 0 40px rgba(124,58,237,.4)' }}>
         {avatarUrl
-          ? <img fetchpriority="high" src={avatarUrl} alt={seoName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center 40%', border: '2.5px solid rgba(124,58,237,.5)', display: 'block' }} />
+          ? <img fetchpriority="high" src={avatarUrl} alt={seoName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center center', border: '2.5px solid rgba(124,58,237,.5)', display: 'block' }} />
           : <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size > 400 ? '4.5rem' : '3rem', fontWeight: 900, color: '#fff' }}>SM</div>
         }
       </div>
