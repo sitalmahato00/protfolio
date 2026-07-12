@@ -181,22 +181,18 @@ export function PortfolioHero({
               {profile?.bio?.slice(0, 140) || 'I build scalable web applications and digital experiences that help businesses grow and succeed in the digital world.'}
             </p>
 
-            <div className="hero-ctas" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48, alignItems: 'center', width: '100%' }}>
-              <div className="hero-cta-row1" style={{ display: 'contents' }}>
-                <GlowBtn href={`mailto:${profile?.email || 'sitalmahato077@gmail.com'}`}
-                  style={{ flex: 1, justifyContent: 'center', background: 'linear-gradient(135deg,#e53e3e,#c53030)', borderColor: 'rgba(229,62,62,.4)', boxShadow: '0 0 24px rgba(229,62,62,.3)' }}>
-                  Hire Me
-                </GlowBtn>
-                {resumeUrl && <GlowBtn href={resumeUrl} variant="outline" style={{ flex: 1, justifyContent: 'center' }}>
-                  Download CV
-                </GlowBtn>}
-              </div>
-              <div className="hero-cta-row2" style={{ display: 'contents' }}>
-                <GlowBtn href={`https://wa.me/${(profile?.phone || '9779704191610').replace(/\D/g, '')}`}
-                  style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', borderColor: 'rgba(22,163,74,.4)', boxShadow: '0 0 24px rgba(22,163,74,.3)', justifyContent: 'center', width: '100%' }}>
-                  <IconWA /> WhatsApp
-                </GlowBtn>
-              </div>
+            <div className="hero-ctas" style={{ display: 'flex', gap: 12, marginBottom: 48, maxWidth: 560 }}>
+              <GlowBtn href={`mailto:${profile?.email || 'sitalmahato077@gmail.com'}`}
+                style={{ flex: '1 1 auto', justifyContent: 'center', background: 'linear-gradient(135deg,#e53e3e,#c53030)', borderColor: 'rgba(229,62,62,.4)', boxShadow: '0 0 24px rgba(229,62,62,.3)' }}>
+                Hire Me
+              </GlowBtn>
+              {resumeUrl && <GlowBtn href={resumeUrl} variant="outline" style={{ flex: '1 1 auto', justifyContent: 'center' }}>
+                Download CV
+              </GlowBtn>}
+              <GlowBtn href={`https://wa.me/${(profile?.phone || '9779704191610').replace(/\D/g, '')}`}
+                style={{ flex: '1 1 auto', background: 'linear-gradient(135deg,#16a34a,#15803d)', borderColor: 'rgba(22,163,74,.4)', boxShadow: '0 0 24px rgba(22,163,74,.3)', justifyContent: 'center' }}>
+                <IconWA /> WhatsApp
+              </GlowBtn>
             </div>
 
             <div className="hero-socials" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
