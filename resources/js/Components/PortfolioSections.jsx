@@ -216,7 +216,7 @@ export function PortfolioHero({
           </div>
 
           <div className="hero-avatar-mob" style={{ display: 'none', justifyContent: 'center', alignItems: 'center', marginTop: 8, marginBottom: 8 }}>
-            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={300} ringSizes={[260, 232, 210]} orbitR={138} badges={[
+            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={300} ringSizes={[260, 232, 210]} orbitR={130} badges={[
               { label: 'React', color: '#61dafb', src: 'https://cdn.simpleicons.org/react/61dafb' },
               { label: 'Laravel', color: '#ff2d20', src: 'https://cdn.simpleicons.org/laravel/ff2d20' },
               { label: 'PHP', color: '#777bb4', src: 'https://cdn.simpleicons.org/php/777bb4' },
@@ -227,7 +227,7 @@ export function PortfolioHero({
           </div>
 
           <div className="hero-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
-            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={500} ringSizes={[420, 380, 350]} orbitR={230} badges={[
+            <AvatarOrbit avatarUrl={avatarUrl} seoName={seoName} size={500} ringSizes={[420, 380, 350]} orbitR={210} badges={[
               { label: 'React', color: '#61dafb', src: 'https://cdn.simpleicons.org/react/61dafb' },
               { label: 'Laravel', color: '#ff2d20', src: 'https://cdn.simpleicons.org/laravel/ff2d20' },
               { label: 'PHP', color: '#777bb4', src: 'https://cdn.simpleicons.org/php/777bb4' },
@@ -260,7 +260,7 @@ export function PortfolioHero({
 
 function AvatarOrbit({ avatarUrl, seoName, size, ringSizes, orbitR, badges }) {
   const cx = size / 2;
-  const cy = size / 2;
+  const cy = size / 2 - (size * 0.1); // shift orbit center up 10% to align with avatar face position (objectPosition: 'center 40%')
   return (
     <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,.18) 0%, transparent 65%)', pointerEvents: 'none' }} />
@@ -271,14 +271,17 @@ function AvatarOrbit({ avatarUrl, seoName, size, ringSizes, orbitR, badges }) {
         {badges.map((item, i, arr) => {
           const deg = (360 / arr.length) * i - 90;
           const rad = (deg * Math.PI) / 180;
-          const x = cx + orbitR * Math.cos(rad);
-          const y = cy + orbitR * Math.sin(rad);
+          // Add extra radius for MySQL, JavaScript, and Tailwind
+          const radiusOffset = (item.label === 'MySQL' || item.label === 'JavaScript' || item.label === 'JS' || item.label === 'Tailwind') ? 30 : 0;
+          const adjustedR = orbitR + radiusOffset;
+          const x = cx + adjustedR * Math.cos(rad);
+          const y = cy + adjustedR * Math.sin(rad);
           const bg = `rgba(${item.color === '#61dafb' ? '97,218,251' : item.color === '#ff2d20' ? '255,45,32' : item.color === '#777bb4' ? '119,123,180' : item.color === '#4479a1' ? '68,121,161' : item.color === '#f7df1e' ? '247,223,30' : '56,189,248'},.12)`;
           const border = `1.5px solid ${item.color}66`;
           return (
             <div key={item.label} className="orbit-badge" style={{ position: 'absolute', left: x, top: y, transform: 'translate(-50%,-50%)', zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: size > 400 ? 5 : 3, animation: 'spin-rev 30s linear infinite' }}>
-              <div style={{ width: size > 400 ? 46 : 34, height: size > 400 ? 46 : 34, borderRadius: '50%', background: bg, border: border, backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 20px ${item.color}55`, animation: 'spin-slow 8s linear infinite' }}>
-                <img src={item.src} alt={item.label} width={size > 400 ? 26 : 18} height={size > 400 ? 26 : 18} style={{ display: 'block', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+              <div style={{ width: size > 400 ? 46 : 34, height: size > 400 ? 46 : 34, borderRadius: '50%', background: bg, border: border, backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 20px ${item.color}55`, animation: 'spin-slow 8s linear infinite', position: 'relative' }}>
+                <img src={item.src} alt={item.label} width={size > 400 ? 26 : 18} height={size > 400 ? 26 : 18} style={{ display: 'block', objectFit: 'contain', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} onError={e => { e.target.style.display = 'none'; }} />
               </div>
               <span style={{ fontSize: size > 400 ? '.63rem' : '.56rem', fontWeight: 700, fontFamily: "'JetBrains Mono',monospace", color: item.color, background: 'rgba(5,8,22,.9)', border: border, borderRadius: 6, padding: '2px 8px', whiteSpace: 'nowrap', backdropFilter: 'blur(10px)' }}>
                 {item.label}
@@ -289,7 +292,7 @@ function AvatarOrbit({ avatarUrl, seoName, size, ringSizes, orbitR, badges }) {
       </div>
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: size > 400 ? 280 : 168, height: size > 400 ? 280 : 168, borderRadius: '50%', zIndex: 5, boxShadow: size > 400 ? '0 0 60px rgba(124,58,237,.35), 0 0 120px rgba(124,58,237,.15)' : '0 0 40px rgba(124,58,237,.4)' }}>
         {avatarUrl
-          ? <img fetchpriority="high" src={avatarUrl} alt={seoName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', objectPosition: 'top center', border: '2.5px solid rgba(124,58,237,.5)', display: 'block' }} />
+          ? <img fetchpriority="high" src={avatarUrl} alt={seoName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center 40%', border: '2.5px solid rgba(124,58,237,.5)', display: 'block' }} />
           : <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size > 400 ? '4.5rem' : '3rem', fontWeight: 900, color: '#fff' }}>SM</div>
         }
       </div>
