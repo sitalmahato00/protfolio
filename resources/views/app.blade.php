@@ -19,8 +19,8 @@
             $siteUrl  = 'https://sital.info.np';
             $avatarUrl = $avatar ? $siteUrl . '/' . $avatar : $siteUrl . '/images/image.webp';
             $ogImage   = $avatarUrl;
-            $seoTitle = $name . ' | ' . $title . ' in Nepal — Laravel, React & PHP Expert';
-            $seoDesc  = mb_substr(strip_tags($bio), 0, 158);
+            $seoTitle = $name . ' | Full Stack Developer Nepal — Laravel & React Expert';
+            $seoDesc  = $name . ' — Full Stack Developer in Nepal specializing in Laravel, React & PHP. Explore the portfolio or hire for your next project.';
             $keywords = $name . ', Full Stack Developer Nepal, Laravel Developer Nepal, React Developer Nepal, PHP Developer, Web Developer Nepal, Freelance Developer Nepal, ' . $name . ' portfolio';
         @endphp
 
@@ -33,7 +33,7 @@
         <meta name="revisit-after"         content="7 days">
         <meta name="language"              content="English">
         <meta name="rating"                content="general">
-        <link  rel="canonical"             href="{{ $siteUrl }}">
+        <link  rel="canonical"             href="{{ url()->current() }}">
 
         {{-- Geographic / Local SEO --}}
         <meta name="geo.region"            content="NP-P2">
@@ -112,6 +112,18 @@
             ],
             [
                 '@context' => 'https://schema.org',
+                '@type' => 'Organization',
+                '@id' => $siteUrl . '/#organization',
+                'url' => $siteUrl,
+                'name' => $name,
+                'description' => $seoDesc,
+                'email' => $email,
+                'telephone' => $phone,
+                'address' => ['@type' => 'PostalAddress', 'addressLocality' => $location, 'addressCountry' => 'NP'],
+                'foundingDate' => '2021',
+            ],
+            [
+                '@context' => 'https://schema.org',
                 '@type' => 'WebSite',
                 '@id' => $siteUrl . '/#website',
                 'url' => $siteUrl,
@@ -138,8 +150,9 @@
             ],
             [
                 '@context' => 'https://schema.org',
-                '@type' => 'ProfessionalService',
-                'name' => $name . ' — Web Development Services',
+                '@type' => 'LocalBusiness',
+                '@id' => $siteUrl . '/#business',
+                'name' => $name . ' — Web Development',
                 'url' => $siteUrl,
                 'telephone' => $phone,
                 'email' => $email,
@@ -147,6 +160,18 @@
                 'priceRange' => '$$',
                 'areaServed' => 'Worldwide',
                 'serviceType' => ['Full Stack Development','Laravel Development','React Development','UI/UX Design','API Integration'],
+                'openingHours' => 'Mo-Su 00:00-24:00',
+            ],
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => [
+                    ['@type' => 'Question', 'name' => 'What technologies does Sital Mahato specialise in?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'Sital specialises in Laravel, React, PHP, TypeScript, MySQL, and modern web technologies.']],
+                    ['@type' => 'Question', 'name' => 'Is Sital Mahato available for hire?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'Yes, Sital is available for freelance projects, remote contract work, and full-time opportunities.']],
+                    ['@type' => 'Question', 'name' => 'Where is Sital Mahato based?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'Sital is based in Golbazar, Siraha, Nepal and works with clients worldwide.']],
+                    ['@type' => 'Question', 'name' => 'What kind of projects has Sital built?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'Enterprise college management platforms, ID card generation systems, digital form management, academic portals, and mobile applications.']],
+                    ['@type' => 'Question', 'name' => 'How can I contact Sital Mahato?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => 'Use the contact form, email sitalmahato077@gmail.com, or WhatsApp at +977 9704191610.']],
+                ],
             ],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         @endphp

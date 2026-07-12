@@ -73,6 +73,17 @@ Route::get('/projects', function () {
     ]);
 })->name('projects.index');
 
+Route::get('/sitemap.xml', function () {
+    $projects = Project::orderBy('order')->get();
+    $today = now()->toDateString();
+    return response()->view('sitemap', compact('projects', 'today'), 200)
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+Route::get('/privacy', function () {
+    return Inertia::render('Privacy');
+})->name('privacy');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');

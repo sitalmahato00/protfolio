@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import '../../../css/portfolio.css';
 
 const imgModules = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
 const assetImgMap = {};
@@ -15,34 +15,13 @@ const imgUrl = s => {
 };
 const allProjectImgs = p => (p.images?.length ? p.images : (p.image ? [p.image] : []));
 
-const GLOBAL_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{font-family:'Inter',sans-serif;background:#050816;color:#e2e8f0;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;}
-  ::selection{background:rgba(124,58,237,.4);color:#fff;}
-  ::-webkit-scrollbar{width:3px;}
-  ::-webkit-scrollbar-track{background:#050816;}
-  ::-webkit-scrollbar-thumb{background:linear-gradient(#7c3aed,#3b82f6);border-radius:3px;}
-  a{color:inherit;text-decoration:none;}
-  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    opacity:.4;}
-  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-  .aurora-blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.1;animation:aurora-move 20s ease-in-out infinite alternate;}
-  @keyframes aurora-move{0%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-30px) scale(1.08);}100%{transform:translate(-20px,20px) scale(.96);}}
-  .nav-root{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;width:calc(100% - 48px);max-width:1100px;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(255,255,255,.06);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1);transition:background .35s;}
-  .grad-border{position:relative;background:rgba(5,8,22,.8);border-radius:20px;}
-  .grad-border::before{content:'';position:absolute;inset:0;border-radius:20px;padding:1px;background:linear-gradient(135deg,rgba(124,58,237,.5),rgba(59,130,246,.3),transparent 60%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-  .tag-pill{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#a78bfa;font-size:.73rem;font-weight:600;white-space:nowrap;}
-  .section-label{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;letter-spacing:.15em;color:#7c3aed;text-transform:uppercase;}
-  .section-label::before{content:'';width:24px;height:1px;background:linear-gradient(90deg,#7c3aed,transparent);}
-  .grad-text{background:linear-gradient(135deg,#fff 0%,#a78bfa 50%,#60a5fa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .project-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);transition:transform .3s,border-color .3s,box-shadow .3s;}
+const LOCAL_CSS = `
+  .project-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);transition:transform .3s,border-color .3s,box-shadow .3s;height:100%;display:flex;flex-direction:column;}
   .project-card:hover{transform:translateY(-6px);border-color:rgba(124,58,237,.3);box-shadow:0 20px 60px rgba(124,58,237,.15);}
   .filter-btn{padding:6px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:rgba(148,163,184,.7);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
   .filter-btn.active,.filter-btn:hover{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-color:transparent;color:#fff;}
-  @media(max-width:640px){.nav-root{width:calc(100% - 24px);padding:0 14px;top:10px;}}
+  .fade-up{animation:fadeUp .6s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 `;
 
 export default function ProjectsIndex({ projects, profile }) {
@@ -52,17 +31,30 @@ export default function ProjectsIndex({ projects, profile }) {
 
     return (
         <>
-        <Head title={'All Projects — ' + (profile?.name || 'Sital Mahato')} />
-        <style dangerouslySetInnerHTML={{__html: GLOBAL_CSS}} />
+        <Head title={'All Projects — ' + (profile?.name || 'Sital Mahato') + ' | Full Stack Developer Portfolio Nepal'}>
+          <link rel="canonical" href="https://sital.info.np/projects" />
+          <meta name="description" content={'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal. Featuring Laravel, React & PHP enterprise applications and web projects.'} />
+          <meta property="og:title" content={'All Projects — ' + (profile?.name || 'Sital Mahato') + ' | Full Stack Developer Portfolio Nepal'} />
+          <meta property="og:description" content={'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal. Featuring Laravel, React & PHP enterprise applications and web projects.'} />
+          <meta property="og:url" content="https://sital.info.np/projects" />
+          <meta name="twitter:title" content={'All Projects — ' + (profile?.name || 'Sital Mahato') + ' | Full Stack Developer Portfolio Nepal'} />
+          <meta name="twitter:description" content={'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal. Featuring Laravel, React & PHP enterprise applications and web projects.'} />
+          <script type="application/ld+json">{JSON.stringify([
+            {'@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
+              {'@type':'ListItem','position':1,'name':'Portfolio','item':'https://sital.info.np/'},
+              {'@type':'ListItem','position':2,'name':'Projects','item':'https://sital.info.np/projects'}
+            ]},
+            {'@context':'https://schema.org','@type':'CollectionPage','@id':'https://sital.info.np/projects','url':'https://sital.info.np/projects','name':'All Projects — ' + (profile?.name || 'Sital Mahato'),'description':'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal.'}
+          ])}</script>
+        </Head>
+        <style dangerouslySetInnerHTML={{__html: LOCAL_CSS}} />
 
-        {/* Aurora */}
         <div className="aurora">
             <div className="aurora-blob" style={{width:'700px',height:'700px',background:'#7c3aed',top:'-200px',left:'-200px'}}/>
             <div className="aurora-blob" style={{width:'500px',height:'500px',background:'#4f46e5',top:'30%',right:'-100px',animationDelay:'-7s'}}/>
             <div className="aurora-blob" style={{width:'400px',height:'400px',background:'#3b82f6',bottom:'0',left:'30%',animationDelay:'-14s'}}/>
         </div>
 
-        {/* Nav */}
         <nav className="nav-root">
             <Link href="/" style={{display:'flex',alignItems:'center',gap:10,fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:'1rem',color:'#fff'}}>
                 <div style={{width:34,height:34,borderRadius:9,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.8rem',fontWeight:900,boxShadow:'0 0 20px rgba(124,58,237,.4)'}}>SM</div>
@@ -77,64 +69,58 @@ export default function ProjectsIndex({ projects, profile }) {
         <main style={{position:'relative',zIndex:2,padding:'100px 24px 80px',minHeight:'100vh'}}>
             <div style={{maxWidth:1200,margin:'0 auto'}}>
 
-                {/* Header */}
-                <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.6}} style={{marginBottom:52}}>
-                    <Link href="/" style={{display:'inline-flex',alignItems:'center',gap:6,color:'rgba(148,163,184,.6)',fontSize:'.84rem',fontWeight:600,marginBottom:20,padding:'6px 14px',borderRadius:8,background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.07)'}}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-                        Back to Portfolio
-                    </Link>
+                <div className="fade-up" style={{marginBottom:52}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,fontSize:'.82rem',fontWeight:500,marginBottom:20,color:'rgba(148,163,184,.5)'}}>
+                        <Link href="/" style={{color:'rgba(148,163,184,.5)'}}>Portfolio</Link>
+                        <span style={{color:'rgba(255,255,255,.15)'}}>&#8250;</span>
+                        <span style={{color:'rgba(167,139,250,.8)',fontWeight:600}}>Projects</span>
+                    </div>
                     <div className="section-label" style={{marginBottom:12}}>Portfolio</div>
                     <h1 style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:'clamp(32px,5vw,56px)',fontWeight:800,letterSpacing:'-.02em',marginBottom:12}}>
                         All <span className="grad-text">Projects</span>
                     </h1>
-                    <p style={{color:'rgba(148,163,184,.65)',fontSize:'1rem'}}>
+                    <p style={{color:'rgba(148,163,184,.78)',fontSize:'1rem'}}>
                         Explore my complete collection — <span style={{color:'#a78bfa',fontWeight:600}}>{projects.length} projects</span> and counting.
                     </p>
-                </motion.div>
+                    <p style={{color:'rgba(148,163,184,.7)',fontSize:'.92rem',lineHeight:1.7,marginTop:16,maxWidth:640}}>
+                        A curated portfolio of <strong style={{color:'rgba(226,232,240,.85)'}}>Laravel</strong>, <strong style={{color:'rgba(226,232,240,.85)'}}>React</strong>, and <strong style={{color:'rgba(226,232,240,.85)'}}>PHP</strong> applications built by Sital Mahato, a Full Stack Developer based in Nepal. Each project represents real-world problem-solving — from enterprise management platforms to mobile apps.
+                    </p>
+                </div>
 
-                {/* Filter tabs */}
                 {allTags.length > 0 && (
-                    <motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:.15}}
-                        style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:40}}>
+                    <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:40}}>
                         <button className={`filter-btn${!filter?' active':''}`} onClick={() => setFilter('')}>All</button>
                         {allTags.slice(0,14).map(t => (
                             <button key={t} className={`filter-btn${filter===t?' active':''}`} onClick={() => setFilter(t)}>{t}</button>
                         ))}
-                    </motion.div>
+                    </div>
                 )}
 
-                {/* Grid */}
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:24}}>
-                    <AnimatePresence>
                     {filtered.map((p, i) => {
                         const imgs = allProjectImgs(p);
                         return (
-                            <motion.div key={p.id}
-                                initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.95}}
-                                transition={{delay:i*.06}}>
+                            <div key={p.id} className="fade-up" style={{animationDelay:`${i*.06}s`}}>
                                 <Link href={`/project/${p.id}`} style={{display:'block',height:'100%'}}>
-                                    <div className="project-card" style={{height:'100%',display:'flex',flexDirection:'column'}}>
-                                        {/* Image */}
+                                    <div className="project-card">
                                         <div style={{height:200,overflow:'hidden',flexShrink:0,background:'rgba(124,58,237,.08)'}}>
                                             {imgs.length > 0
-                                                ? <img src={imgUrl(imgs[0])} alt={p.title} style={{width:'100%',height:'100%',objectFit:'cover',display:'block',transition:'transform .4s'}}
+                                                ? <img src={imgUrl(imgs[0])} alt={p.title} loading="lazy" width="400" height="225" style={{width:'100%',height:'100%',objectFit:'cover',display:'block',transition:'transform .4s'}}
                                                     onMouseEnter={e=>e.target.style.transform='scale(1.05)'}
                                                     onMouseLeave={e=>e.target.style.transform='scale(1)'}/>
                                                 : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}}>
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="rgba(124,58,237,.4)" strokeWidth="1.5" width="48" height="48"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
                                                   </div>
                                             }
-                                            {/* gradient overlay */}
                                             <div style={{position:'absolute',bottom:0,left:0,right:0,height:'50%',background:'linear-gradient(to top,rgba(5,8,22,.9),transparent)',pointerEvents:'none'}}/>
                                         </div>
 
-                                        {/* Content */}
                                         <div style={{padding:'20px 22px 22px',flex:1,display:'flex',flexDirection:'column'}}>
                                             <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:10}}>
                                                 {(p.tags||[]).slice(0,4).map(t=><span key={t} className="tag-pill">{t}</span>)}
                                             </div>
                                             <div style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:'1.05rem',color:'#fff',marginBottom:8}}>{p.title}</div>
-                                            <div style={{fontSize:'.84rem',color:'rgba(148,163,184,.65)',lineHeight:1.65,flex:1,display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{p.description}</div>
+                                            <div style={{fontSize:'.84rem',color:'rgba(148,163,184,.78)',lineHeight:1.65,flex:1,display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{p.description}</div>
                                             <div style={{display:'flex',gap:8,marginTop:16,flexWrap:'wrap'}}>
                                                 {p.live_url && p.live_url !== '#' && (
                                                     <span onClick={e=>{e.stopPropagation();e.preventDefault();window.open(p.live_url,'_blank','noreferrer');}}
@@ -154,10 +140,9 @@ export default function ProjectsIndex({ projects, profile }) {
                                         </div>
                                     </div>
                                 </Link>
-                            </motion.div>
+                            </div>
                         );
                     })}
-                    </AnimatePresence>
                 </div>
 
                 {filtered.length === 0 && (
@@ -170,14 +155,13 @@ export default function ProjectsIndex({ projects, profile }) {
             </div>
         </main>
 
-        {/* Footer */}
         <footer style={{position:'relative',zIndex:2,background:'rgba(0,0,0,.4)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,.06)',padding:'48px 24px',textAlign:'center'}}>
             <div style={{maxWidth:700,margin:'0 auto'}}>
                 <div style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:'1.4rem',fontWeight:800,color:'#fff',marginBottom:10}}>
                     <span style={{color:'rgba(167,139,250,.8)'}}>{(profile?.name||'Sital Mahato').split(' ')[0]}</span>{' '}
                     {(profile?.name||'Sital Mahato').split(' ').slice(1).join(' ')}
                 </div>
-                <p style={{color:'rgba(148,163,184,.5)',fontSize:'.85rem',marginBottom:20}}>Crafting digital experiences. Building the future. 🇳🇵</p>
+                <p style={{color:'rgba(148,163,184,.5)',fontSize:'.85rem',marginBottom:20}}>Crafting digital experiences. Building the future.</p>
                 <div style={{display:'flex',justifyContent:'center',gap:6,flexWrap:'wrap',marginBottom:24}}>
                     {['about','skills','projects','services','experience','contact'].map(s=>(
                         <Link key={s} href={`/#${s}`} style={{padding:'5px 14px',borderRadius:8,color:'rgba(148,163,184,.5)',fontSize:'.82rem',fontWeight:500,transition:'color .2s'}}
