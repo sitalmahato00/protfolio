@@ -52,6 +52,8 @@ const NAV = [
           icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
         { label: 'Journey',   routeName: 'admin.experiences', href: '/admin/experiences',
           icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+        { label: 'Certificates', routeName: 'admin.certificates', href: '/admin/certificates',
+          icon: <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg> },
     ]},
     { group: 'Communication', items: [
         { label: 'Messages',  routeName: 'admin.messages',    href: '/admin/messages',

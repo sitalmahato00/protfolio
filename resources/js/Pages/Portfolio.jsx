@@ -10,6 +10,7 @@ const PortfolioSkills = lazy(() => import('../Components/PortfolioSections').the
 const PortfolioProjects = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioProjects })));
 const PortfolioServices = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioServices })));
 const PortfolioExperience = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioExperience })));
+const PortfolioCertificates = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioCertificates })));
 const PortfolioContact = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioContact })));
 const PortfolioFAQ = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioFAQ })));
 const PortfolioFooter = lazy(() => import('../Components/PortfolioSections').then(m => ({ default: m.PortfolioFooter })));
@@ -20,7 +21,7 @@ for (const [p, m] of Object.entries(imgMod)) { aMap[p.split('/').pop()] = m.defa
 
 const imgUrl = s => { if (!s) return null; if (s.startsWith('http')) return s; return aMap[s.replace(/^images\//,'')] || '/'+s; };
 
-export default function Portfolio({ profile=null, skills={}, projects=[], services=[], experiences=[], stats={} }) {
+export default function Portfolio({ profile=null, skills={}, projects=[], services=[], experiences=[], certificates=[], stats={} }) {
   const [stuck, setStuck] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState('home');
@@ -131,7 +132,7 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
     faqSchema,
   ]);
 
-  const navLinks = ['home','about','skills','projects','services','experience','contact'];
+  const navLinks = ['home','about','skills','projects','services','experience','certificates','contact'];
 
   const techStack = [
     { label:'React', src:'https://cdn.simpleicons.org/react/61dafb', color:'#61dafb' },
@@ -213,6 +214,8 @@ export default function Portfolio({ profile=null, skills={}, projects=[], servic
       <Suspense fallback={null}><PortfolioServices services={services} profile={profile} /></Suspense>
 
       <Suspense fallback={null}><PortfolioExperience experiences={experiences} profile={profile} workExp={workExp} eduExp={eduExp} /></Suspense>
+
+      <Suspense fallback={null}><PortfolioCertificates certificates={certificates} /></Suspense>
 
       <Suspense fallback={null}><PortfolioContact profile={profile} contactForm={contactForm} setContactForm={setContactForm}
         cStatus={cStatus} setCStatus={setCStatus} cErrors={cErrors} setCErrors={setCErrors}

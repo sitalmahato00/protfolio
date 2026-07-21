@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ExperienceController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\StatsController;
+use App\Http\Controllers\Api\CertificateController;
 
 Route::get('/profile', [ProfileController::class, 'index']);
 Route::put('/profile', [ProfileController::class, 'update']);
@@ -38,3 +39,9 @@ Route::post('/contact', [ContactController::class, 'store']);
 Route::delete('/contact/{contact}', [ContactController::class, 'destroy']);
 Route::patch('/contact/{contact}/read', [ContactController::class, 'markRead']);
 Route::get('/stats', [StatsController::class, 'index']);
+Route::get('/certificates', [CertificateController::class, 'index']);
+Route::get('/certificates/{certificate}', [CertificateController::class, 'show']);
+Route::post('/certificates', [CertificateController::class, 'store']);
+Route::put('/certificates/{certificate}', [CertificateController::class, 'update']);
+Route::post('/certificates/{certificate}/image', [CertificateController::class, 'uploadImage']);
+Route::delete('/certificates/{certificate}', [CertificateController::class, 'destroy']);

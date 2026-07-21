@@ -705,6 +705,69 @@ export function PortfolioExperience({ experiences, profile, workExp, eduExp }) {
   );
 }
 
+export function PortfolioCertificates({ certificates }) {
+  const imgUrl = s => { if (!s) return null; if (s.startsWith('http')) return s; return '/'+s; };
+  return (
+    <section id="certificates" style={{ padding: '140px 40px', background: 'rgba(0,0,0,.2)', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: -1, left: 0, right: 0, height: 80, background: 'linear-gradient(to bottom right,#050816 49.9%,transparent 50%)', zIndex: 1 }} />
+      <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+        <FadeUp>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 72 }}>
+            <div>
+              <div className="section-label" style={{ marginBottom: 16 }}>Credentials</div>
+              <h2 style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(32px,4vw,52px)', fontWeight: 800, letterSpacing: '-.02em' }}>
+                Certifications &amp; <span className="grad-text">Achievements</span>
+              </h2>
+            </div>
+            <Link href="/certificates" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(167,139,250,.8)', fontWeight: 600, fontSize: '.88rem', border: '1px solid rgba(124,58,237,.25)', padding: '8px 18px', borderRadius: 10, transition: 'all .2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,.1)'; e.currentTarget.style.color = '#c4b5fd'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(167,139,250,.8)'; }}>
+              View All <IconArrow />
+            </Link>
+          </div>
+        </FadeUp>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 24 }}>
+          {(certificates.length > 0 ? certificates : [
+            { id: 1, title: 'Full Stack Web Development', issuer: 'Coursera', issue_date: '2023-12', description: 'Comprehensive training in modern web development technologies including React, Node.js, and databases.' },
+            { id: 2, title: 'Laravel Framework Expert', issuer: 'Laravel Certification', issue_date: '2023-08', description: 'Advanced certification in Laravel framework covering Eloquent, queues, authentication, and API development.' },
+            { id: 3, title: 'React Advanced Concepts', issuer: 'Meta', issue_date: '2023-06', description: 'Deep dive into React hooks, context API, performance optimization, and state management patterns.' },
+          ]).map((cert, i) => (
+            <FadeUp key={cert.id} delay={i * .08}>
+              <div className="grad-border" style={{ padding: 24, borderRadius: 16, background: 'rgba(5,8,22,.8)', display: 'flex', flexDirection: 'column', gap: 16, height: '100%', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                    🎓
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: '1rem', color: '#fff', margin: 0, lineHeight: 1.3 }}>{cert.title}</h3>
+                    <div style={{ fontSize: '.82rem', color: '#a78bfa', fontWeight: 600, marginTop: 2 }}>{cert.issuer}</div>
+                  </div>
+                </div>
+                {cert.image && (
+                  <div style={{ borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,.03)' }}>
+                    <img src={imgUrl(cert.image)} alt={cert.title} loading="lazy" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
+                  </div>
+                )}
+                <p style={{ color: 'rgba(148,163,184,.75)', fontSize: '.85rem', lineHeight: 1.65, margin: 0, flex: 1 }}>{cert.description}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,.06)' }}>
+                  <span style={{ fontSize: '.78rem', color: 'rgba(148,163,184,.6)', fontFamily: "'JetBrains Mono'" }}>
+                    {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </span>
+                  {cert.credential_url && (
+                    <a href={cert.credential_url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#a78bfa', fontSize: '.82rem', fontWeight: 600, textDecoration: 'none' }}>
+                      View Credential <IconExternal />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </FadeUp>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function PortfolioContact({ profile, contactForm, setContactForm, cStatus, setCStatus, cErrors, setCErrors, submitContact }) {
   return (
     <section id="contact" style={{ padding: '100px 40px 80px', background: 'rgba(0,0,0,.25)', position: 'relative' }}>

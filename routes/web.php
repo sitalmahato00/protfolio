@@ -8,6 +8,7 @@ use App\Models\Skill;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\Experience;
+use App\Models\Certificate;
 
 // Temporary: clear compiled views on server — remove after use
 Route::get('/clear-views', function () {
@@ -47,6 +48,7 @@ Route::get('/', function () {
         'projects'         => Project::orderBy('order')->get(),
         'services'         => Service::orderBy('order')->get(),
         'experiences'      => Experience::orderBy('order')->get(),
+        'certificates'     => Certificate::where('is_active', true)->orderBy('order')->get(),
         'stats'            => [
             'projects_delivered' => Project::count() ?: 50,
             'tech_stack'         => Skill::distinct('name')->count() ?: 8,
@@ -73,6 +75,14 @@ Route::get('/projects', function () {
     ]);
 })->name('projects.index');
 
+Route::get('/certificates', function () {
+    $profile = Profile::first();
+    return Inertia::render('Portfolio/CertificatesIndex', [
+        'certificates' => Certificate::where('is_active', true)->orderBy('order')->get(),
+        'profile'      => $profile,
+    ]);
+})->name('certificates.index');
+
 Route::get('/sitemap.xml', function () {
     $projects = Project::orderBy('order')->get();
     $today = now()->toDateString();
@@ -94,6 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/skills', function () { return Inertia::render('Admin/Skills'); })->name('admin.skills');
     Route::get('/admin/services', function () { return Inertia::render('Admin/Services'); })->name('admin.services');
     Route::get('/admin/experiences', function () { return Inertia::render('Admin/Experiences'); })->name('admin.experiences');
+    Route::get('/admin/certificates', function () { return Inertia::render('Admin/Certificates'); })->name('admin.certificates');
     Route::get('/admin/messages', function () { return Inertia::render('Admin/Messages'); })->name('admin.messages');
     Route::get('/admin/profile', function () { return Inertia::render('Admin/ProfileSettings'); })->name('admin.profile');
 });
