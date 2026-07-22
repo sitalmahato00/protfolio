@@ -21,7 +21,108 @@
             $ogImage   = $avatarUrl;
             $seoTitle = $name . ' | Full Stack Developer Nepal — Laravel & React Expert';
             $seoDesc  = $name . ' — Full Stack Developer in Nepal specializing in Laravel, React & PHP. Explore the portfolio or hire for your next project.';
-            $keywords = $name . ', Full Stack Developer Nepal, Laravel Developer Nepal, React Developer Nepal, PHP Developer, Web Developer Nepal, Freelance Developer Nepal, ' . $name . ' portfolio';
+            $keywords = implode(',', [
+                // Core Identity
+                $name, 'sital.info.np', $name . ' Portfolio', 'Professional Portfolio',
+
+                // Laravel - Primary Focus
+                'Laravel Developer', 'Expert Laravel Developer', 'Senior Laravel Developer',
+                'Professional Laravel Developer', 'Freelance Laravel Developer',
+                'Laravel Web Developer', 'Laravel Full Stack Developer',
+                'Laravel Backend Developer', 'Laravel API Developer',
+                'Laravel SaaS Developer', 'Laravel CRM Developer',
+                'Laravel ERP Developer', 'Laravel POS Developer',
+                'Laravel Ecommerce Developer', 'Custom Laravel Development',
+                'Laravel Development Services', 'Laravel Consultant',
+                'Best Laravel Developer', 'Hire Laravel Developer',
+                'Laravel Developer for Hire', 'Remote Laravel Developer',
+                'Dedicated Laravel Developer',
+
+                // Core Developer Roles
+                'Full Stack Developer', 'Software Developer', 'Software Engineer',
+                'Web Developer', 'Backend Developer', 'Frontend Developer',
+
+                // Technologies
+                'PHP Developer', 'React Developer', 'Next.js Developer',
+                'NestJS Developer', 'Node.js Developer',
+                'JavaScript Developer', 'TypeScript Developer',
+                'Flutter Developer', 'Android Developer',
+
+                // Database & Cloud
+                'Supabase Developer', 'Firebase Developer',
+                'REST API Developer', 'GraphQL Developer',
+                'MySQL Developer', 'PostgreSQL Developer', 'MongoDB Developer',
+
+                // Website Services
+                'Website Developer', 'Custom Website Development',
+                'Business Website Developer', 'Corporate Website Developer',
+                'Portfolio Website Developer', 'Landing Page Developer',
+
+                // Development Services
+                'Dashboard Development', 'Admin Panel Development',
+                'API Integration', 'Payment Gateway Integration',
+                'Authentication System', 'Cloud Application Development',
+                'AI Integration', 'Automation Development',
+
+                // Software Development
+                'Software Development', 'Custom Software Development',
+                'Enterprise Software Development', 'Web Application Development',
+                'Mobile Application Development', 'Ecommerce Website Development',
+
+                // Management Systems
+                'CRM Development', 'ERP Development',
+                'School Management System', 'College Management System',
+                'Library Management System', 'Hospital Management System',
+                'Inventory Management System', 'Attendance Management System',
+                'POS System',
+
+                // Nepal - National
+                'Laravel Developer Nepal', 'Best Laravel Developer Nepal',
+                'Hire Laravel Developer Nepal', 'Full Stack Developer Nepal',
+                'Software Developer Nepal', 'Software Engineer Nepal',
+                'Website Developer Nepal', 'Web Developer Nepal',
+                'PHP Developer Nepal', 'React Developer Nepal',
+                'Next.js Developer Nepal', 'NestJS Developer Nepal',
+                'Flutter Developer Nepal', 'Android Developer Nepal',
+                'Custom Software Development Nepal', 'Website Development Nepal',
+                'IT Consultant Nepal', 'Best Software Developer in Nepal',
+                'Best Website Developer in Nepal', 'Best Laravel Developer in Nepal',
+                'Software Developer in Nepal', 'Website Developer in Nepal',
+
+                // Nepal - Cities
+                'Laravel Developer in Kathmandu', 'Laravel Developer in Pokhara',
+                'Laravel Developer in Biratnagar', 'Laravel Developer in Itahari',
+                'Laravel Developer in Dharan', 'Laravel Developer in Janakpur',
+                'Laravel Developer in Siraha', 'Laravel Developer in Lahan',
+                'Laravel Developer in Rajbiraj',
+                'Software Developer in Kathmandu', 'Software Developer in Siraha',
+
+                // Nepal - Provinces
+                'Laravel Developer in Koshi Province', 'Laravel Developer in Madhesh Province',
+
+                // Global - Countries
+                'Laravel Developer USA', 'Laravel Developer UK',
+                'Laravel Developer Canada', 'Laravel Developer Australia',
+                'Laravel Developer Germany', 'Laravel Developer Dubai',
+                'Laravel Developer UAE', 'Laravel Developer Singapore',
+                'Laravel Developer India',
+
+                // Remote & Global
+                'Remote Laravel Developer Worldwide', 'Remote Full Stack Developer',
+                'Remote Software Developer', 'Global Laravel Developer',
+                'International Software Developer', 'Hire Remote Laravel Developer',
+                'Hire Remote Full Stack Developer', 'Remote Website Developer',
+                'Offshore Laravel Developer', 'Dedicated Full Stack Developer',
+
+                // Hiring Keywords
+                'Hire Web Developer', 'Hire Software Developer',
+                'Hire Backend Developer', 'Hire PHP Developer',
+                'Hire React Developer', 'Hire Next.js Developer',
+                'Hire NestJS Developer', 'Freelance Software Engineer',
+
+                // General
+                'Modern Web Development', 'Digital Solutions',
+            ]);
         @endphp
 
         {{-- Primary SEO --}}

@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import '../../../css/portfolio.css';
 
+const SITE      = 'https://sital.info.np';
+const SITE_NAME = 'Sital Mahato';
+
 const imgModules = import.meta.glob('./assets/images/*.{webp,png}', { eager: true });
 const assetImgMap = {};
 for (const [p, m] of Object.entries(imgModules)) {
@@ -14,6 +17,7 @@ const imgUrl = s => {
     return assetImgMap[webp] || '/' + s;
 };
 const allProjectImgs = p => (p.images?.length ? p.images : (p.image ? [p.image] : []));
+const slugify = t => t?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') ?? '';
 
 const LOCAL_CSS = `
   .project-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);transition:transform .3s,border-color .3s,box-shadow .3s;height:100%;display:flex;flex-direction:column;}
@@ -29,23 +33,77 @@ export default function ProjectsIndex({ projects, profile }) {
     const allTags = [...new Set(projects.flatMap(p => p.tags || []))];
     const filtered = filter ? projects.filter(p => (p.tags || []).includes(filter)) : projects;
 
+    const profileName = profile?.name || SITE_NAME;
+    const seoTitle   = `Projects | ${profileName} — Full Stack Developer Portfolio Nepal`;
+    const seoDesc    = `Browse all ${projects.length} projects by ${profileName}, Full Stack Developer in Nepal. Laravel, React, PHP enterprise applications and web projects.`;
+    const keywords   = [
+        'Sital Mahato', 'sital.info.np', 'Full Stack Developer Nepal', 'Best Full Stack Developer Nepal',
+        'Software Developer Nepal', 'Best Software Developer Nepal', 'Laravel Developer Nepal',
+        'Best Laravel Developer Nepal', 'React Developer Nepal', 'Best React Developer Nepal',
+        'PHP Developer Nepal', 'Portfolio Nepal', 'Web Development Projects Nepal',
+        'Software Engineer Nepal', 'Freelancer Nepal', 'JavaScript Developer Nepal',
+        'TypeScript', 'Mobile App Development Nepal', 'Best Website Developer Nepal',
+        'Hire Laravel Developer Nepal', 'Hire React Developer Nepal', 'Website Developer in Siraha',
+        'Software Developer in Koshi Province', 'Custom Software Development Nepal',
+        'Software Development Company Nepal', 'E-commerce Website Developer in Nepal',
+    ].join(', ');
+
+    const jsonLd = [
+        {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            '@id': SITE + '/projects',
+            'url': SITE + '/projects',
+            'name': seoTitle,
+            'description': seoDesc,
+            'isPartOf': { '@id': SITE + '/#website' },
+            'author': { '@id': SITE + '/#person' },
+            'numberOfItems': projects.length,
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                { '@type': 'ListItem', 'position': 1, 'name': 'Home',     'item': SITE },
+                { '@type': 'ListItem', 'position': 2, 'name': 'Projects', 'item': SITE + '/projects' },
+            ],
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            'name': 'Portfolio Projects',
+            'itemListElement': projects.map((p, i) => ({
+                '@type': 'ListItem',
+                'position': i + 1,
+                'name': p.title,
+                'url': SITE + '/projects/' + (p.slug || slugify(p.title)),
+            })),
+        },
+    ];
+
     return (
         <>
-        <Head title={'All Projects — ' + (profile?.name || 'Sital Mahato') + ' | Full Stack Developer Portfolio Nepal'}>
-          <link rel="canonical" href="https://sital.info.np/projects" />
-          <meta name="description" content={'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal. Featuring Laravel, React & PHP enterprise applications and web projects.'} />
-          <meta property="og:title" content={'All Projects — ' + (profile?.name || 'Sital Mahato') + ' | Full Stack Developer Portfolio Nepal'} />
-          <meta property="og:description" content={'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal. Featuring Laravel, React & PHP enterprise applications and web projects.'} />
-          <meta property="og:url" content="https://sital.info.np/projects" />
-          <meta name="twitter:title" content={'All Projects — ' + (profile?.name || 'Sital Mahato') + ' | Full Stack Developer Portfolio Nepal'} />
-          <meta name="twitter:description" content={'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal. Featuring Laravel, React & PHP enterprise applications and web projects.'} />
-          <script type="application/ld+json">{JSON.stringify([
-            {'@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Portfolio','item':'https://sital.info.np/'},
-              {'@type':'ListItem','position':2,'name':'Projects','item':'https://sital.info.np/projects'}
-            ]},
-            {'@context':'https://schema.org','@type':'CollectionPage','@id':'https://sital.info.np/projects','url':'https://sital.info.np/projects','name':'All Projects — ' + (profile?.name || 'Sital Mahato'),'description':'Browse the portfolio of ' + (profile?.name || 'Sital Mahato') + ', a Full Stack Developer in Nepal.'}
-          ])}</script>
+        <Head title={seoTitle}>
+          <link rel="canonical" href={`${SITE}/projects`} />
+          <meta name="description"   content={seoDesc} />
+          <meta name="keywords"      content={keywords} />
+          <meta name="author"        content={profileName} />
+          <meta name="robots"        content="index, follow, max-snippet:-1, max-image-preview:large" />
+
+          <meta property="og:type"        content="website" />
+          <meta property="og:url"         content={`${SITE}/projects`} />
+          <meta property="og:site_name"   content={SITE_NAME} />
+          <meta property="og:title"       content={seoTitle} />
+          <meta property="og:description" content={seoDesc} />
+          <meta property="og:image"       content={`${SITE}/images/image.webp`} />
+
+          <meta name="twitter:card"        content="summary_large_image" />
+          <meta name="twitter:site"        content="@sitalmahato" />
+          <meta name="twitter:title"       content={seoTitle} />
+          <meta name="twitter:description" content={seoDesc} />
+          <meta name="twitter:image"       content={`${SITE}/images/image.webp`} />
+
+          <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         </Head>
         <style dangerouslySetInnerHTML={{__html: LOCAL_CSS}} />
 
@@ -99,13 +157,14 @@ export default function ProjectsIndex({ projects, profile }) {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:24}}>
                     {filtered.map((p, i) => {
                         const imgs = allProjectImgs(p);
+                        const pSlug = p.slug || slugify(p.title);
                         return (
                             <div key={p.id} className="fade-up" style={{animationDelay:`${i*.06}s`}}>
-                                <Link href={`/project/${p.id}`} style={{display:'block',height:'100%'}}>
-                                    <div className="project-card">
+                                <Link href={`/projects/${pSlug}`} style={{display:'block',height:'100%'}}>
+                                    <article className="project-card">
                                         <div style={{height:200,overflow:'hidden',flexShrink:0,background:'rgba(124,58,237,.08)'}}>
                                             {imgs.length > 0
-                                                ? <img src={imgUrl(imgs[0])} alt={p.title} loading="lazy" width="400" height="225" style={{width:'100%',height:'100%',objectFit:'cover',display:'block',transition:'transform .4s'}}
+                                                ? <img src={imgUrl(imgs[0])} alt={`${p.title} — project screenshot`} title={p.title} loading="lazy" width="400" height="225" style={{width:'100%',height:'100%',objectFit:'cover',display:'block',transition:'transform .4s'}}
                                                     onMouseEnter={e=>e.target.style.transform='scale(1.05)'}
                                                     onMouseLeave={e=>e.target.style.transform='scale(1)'}/>
                                                 : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -138,7 +197,7 @@ export default function ProjectsIndex({ projects, profile }) {
                                                 )}
                                             </div>
                                         </div>
-                                    </div>
+                                    </article>
                                 </Link>
                             </div>
                         );

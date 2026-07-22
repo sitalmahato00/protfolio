@@ -435,7 +435,11 @@ export function PortfolioSkills({ skills, skillTab, setSkillTab }) {
               <div key={s.id || i}
                 className="skill-pill"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 999, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', color: 'rgba(226,232,240,.7)', fontSize: '.84rem', fontWeight: 500, cursor: 'default', transition: 'all .2s' }}>
-                {s.icon && <span style={{ fontSize: '1rem' }}>{s.icon}</span>}
+                {s.icon && (
+                  (s.icon.startsWith('http') || s.icon.startsWith('/') || s.icon.startsWith('images/'))
+                    ? <img src={s.icon.startsWith('http') ? s.icon : '/' + s.icon} alt="" style={{ width: '1rem', height: '1rem', objectFit: 'contain' }} />
+                    : <span style={{ fontSize: '1rem' }}>{s.icon}</span>
+                )}
                 {s.name}
               </div>
             ))}
@@ -463,7 +467,14 @@ export function PortfolioSkills({ skills, skillTab, setSkillTab }) {
                 {(skills[skillTab] || []).map((s, i) => (
                   <div key={s.id || i}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: '.85rem', fontWeight: 600, color: 'rgba(226,232,240,.85)' }}>{s.icon} {s.name}</span>
+                      <span style={{ fontSize: '.85rem', fontWeight: 600, color: 'rgba(226,232,240,.85)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {s.icon && (
+                          (s.icon.startsWith('http') || s.icon.startsWith('/') || s.icon.startsWith('images/'))
+                            ? <img src={s.icon.startsWith('http') ? s.icon : '/' + s.icon} alt="" style={{ width: '1.2rem', height: '1.2rem', objectFit: 'contain' }} />
+                            : <span>{s.icon}</span>
+                        )}
+                        {s.name}
+                      </span>
                       <span style={{ fontSize: '.75rem', color: 'rgba(124,58,237,.8)', fontFamily: "'JetBrains Mono'" }}>{s.level || 80}%</span>
                     </div>
                     <div style={{ height: 4, borderRadius: 4, background: 'rgba(255,255,255,.05)', overflow: 'hidden' }}>
@@ -599,6 +610,15 @@ export function PortfolioServices({ services, profile }) {
             return (
               <FadeUp key={s.id} delay={i * .08}>
                 <div className="grad-border service-card" style={{ padding: 32, height: '100%', cursor: 'default', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}>
+                  {s.icon && (
+                    <div style={{ marginBottom: 16 }}>
+                      {(s.icon.startsWith('http') || s.icon.startsWith('/') || s.icon.startsWith('images/')) ? (
+                        <img src={s.icon.startsWith('http') ? s.icon : '/' + s.icon} alt="" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                      ) : (
+                        <span style={{ fontSize: '3rem' }}>{s.icon}</span>
+                      )}
+                    </div>
+                  )}
                   <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: '1.05rem', color: '#fff', marginBottom: 10 }}>{s.title}</h3>
                   <p style={{ color: 'rgba(148,163,184,.78)', fontSize: '.85rem', lineHeight: 1.75, marginBottom: 16 }}>{s.description}</p>
                   {(s.features || []).slice(0, 4).map((f, fi) => (
@@ -733,33 +753,37 @@ export function PortfolioCertificates({ certificates }) {
             { id: 3, title: 'React Advanced Concepts', issuer: 'Meta', issue_date: '2023-06', description: 'Deep dive into React hooks, context API, performance optimization, and state management patterns.' },
           ]).map((cert, i) => (
             <FadeUp key={cert.id} delay={i * .08}>
-              <div className="grad-border" style={{ padding: 24, borderRadius: 16, background: 'rgba(5,8,22,.8)', display: 'flex', flexDirection: 'column', gap: 16, height: '100%', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    🎓
+              <Link href={`/certificate/${cert.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                <div className="grad-border" style={{ padding: 24, borderRadius: 16, background: 'rgba(5,8,22,.8)', display: 'flex', flexDirection: 'column', gap: 16, height: '100%', transition: 'transform 0.3s ease, box-shadow 0.3s ease', cursor: 'pointer' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,58,237,.25)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                      🎓
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: '1rem', color: '#fff', margin: 0, lineHeight: 1.3 }}>{cert.title}</h3>
+                      <div style={{ fontSize: '.82rem', color: '#a78bfa', fontWeight: 600, marginTop: 2 }}>{cert.issuer}</div>
+                    </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: '1rem', color: '#fff', margin: 0, lineHeight: 1.3 }}>{cert.title}</h3>
-                    <div style={{ fontSize: '.82rem', color: '#a78bfa', fontWeight: 600, marginTop: 2 }}>{cert.issuer}</div>
-                  </div>
-                </div>
-                {cert.image && (
-                  <div style={{ borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,.03)' }}>
-                    <img src={imgUrl(cert.image)} alt={cert.title} loading="lazy" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
-                  </div>
-                )}
-                <p style={{ color: 'rgba(148,163,184,.75)', fontSize: '.85rem', lineHeight: 1.65, margin: 0, flex: 1 }}>{cert.description}</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                  <span style={{ fontSize: '.78rem', color: 'rgba(148,163,184,.6)', fontFamily: "'JetBrains Mono'" }}>
-                    {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                  </span>
-                  {cert.credential_url && (
-                    <a href={cert.credential_url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#a78bfa', fontSize: '.82rem', fontWeight: 600, textDecoration: 'none' }}>
-                      View Credential <IconExternal />
-                    </a>
+                  {cert.image && (
+                    <div style={{ borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,.03)' }}>
+                      <img src={imgUrl(cert.image)} alt={cert.title} loading="lazy" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
+                    </div>
                   )}
+                  <p style={{ color: 'rgba(148,163,184,.75)', fontSize: '.85rem', lineHeight: 1.65, margin: 0, flex: 1 }}>{cert.description}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,.06)' }}>
+                    <span style={{ fontSize: '.78rem', color: 'rgba(148,163,184,.6)', fontFamily: "'JetBrains Mono'" }}>
+                      {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </span>
+                    {cert.credential_url && (
+                      <span onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(cert.credential_url, '_blank'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#a78bfa', fontSize: '.82rem', fontWeight: 600, textDecoration: 'none', cursor: 'pointer' }}>
+                        View Credential <IconExternal />
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </Link>
             </FadeUp>
           ))}
         </div>

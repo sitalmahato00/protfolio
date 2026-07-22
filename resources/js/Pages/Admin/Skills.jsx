@@ -1,6 +1,6 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import { useCachedData } from '@/hooks/useCachedData';
 
@@ -43,8 +43,11 @@ function SkillCard({ skill, onEdit, onRemove, t, dark }) {
             }}>
             {/* Top row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
-                    {skill.icon || '💡'}
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0, overflow: 'hidden' }}>
+                    {skill.icon ? (skill.icon.startsWith('http') || skill.icon.startsWith('/') || skill.icon.startsWith('images/') 
+                        ? <img src={skill.icon.startsWith('http') ? skill.icon : '/' + skill.icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : skill.icon
+                    ) : '💡'}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '14px', fontWeight: '700', color: dark ? '#F8FAFC' : '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{skill.name}</div>
@@ -81,8 +84,45 @@ function SkillCard({ skill, onEdit, onRemove, t, dark }) {
     );
 }
 
-function SkillModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
+function SkillModal({ form, setForm, editing, setEditing, onSave, onCancel, t, dark }) {
     const cardBg = dark ? '#1E293B' : '#FFFFFF';
+    const [uploading, setUploading] = useState(false);
+    const [uploadErr, setUploadErr] = useState('');
+    const imgRef = useRef(null);
+    const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
+
+    async function handleIconUpload(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        setUploadErr('');
+        let skillId = editing;
+        if (!skillId) {
+            try {
+                const data = { ...form };
+                const res = await axios.post('/api/skills', data);
+                skillId = res.data.id;
+                setEditing(skillId);
+                setForm(f => ({ ...f, icon: res.data.icon || f.icon }));
+            } catch (err) {
+                const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to create skill';
+                setUploadErr(msg);
+                setUploading(false);
+                return;
+            }
+        }
+        const fd = new FormData();
+        fd.append('icon', file);
+        try {
+            const res = await axios.post(`/api/skills/${skillId}/icon`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            setForm(f => ({ ...f, icon: res.data.icon }));
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Upload failed';
+            setUploadErr(msg);
+        }
+        finally { setUploading(false); if (imgRef.current) imgRef.current.value = ''; }
+    }
+
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
             <div style={{ background: cardBg, border: `1px solid ${t.border}`, borderLeft: `5px solid ${MODULE_COLOR}`, borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 24px 80px rgba(0,0,0,0.55)' }}>
@@ -100,8 +140,24 @@ function SkillModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
                         <input className="adm-input" placeholder="e.g. Frontend, Backend, Database" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} />
                     </div>
                     <div>
-                        <label className="adm-label">Icon Emoji</label>
-                        <input className="adm-input" placeholder="e.g. ⚛️  🐘  🎨" value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} />
+                        <label className="adm-label">Skill Icon</label>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
+                            {form.icon && (form.icon.startsWith('http') || form.icon.startsWith('/') || form.icon.startsWith('images/')) && (
+                                <img src={imgUrl(form.icon)} alt="Icon" style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '10px', border: `1px solid ${t.border}` }} />
+                            )}
+                            {form.icon && !form.icon.startsWith('http') && !form.icon.startsWith('/') && !form.icon.startsWith('images/') && (
+                                <div style={{ width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', borderRadius: '10px', border: `1px solid ${t.border}`, background: `${MODULE_COLOR}15` }}>
+                                    {form.icon}
+                                </div>
+                            )}
+                            <input ref={imgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleIconUpload} />
+                            <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '10px 16px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {uploading ? '⏳ Uploading…' : '📁 Upload Icon'}
+                            </button>
+                        </div>
+                        {uploadErr && (
+                            <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '6px', padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px' }}>{uploadErr}</div>
+                        )}
                     </div>
                     <div style={{ display: 'flex', gap: '10px', marginTop: '8px', justifyContent: 'flex-end' }}>
                         <button className="adm-btn-ghost" onClick={onCancel}>Cancel</button>
@@ -143,7 +199,7 @@ export default function AdminSkills() {
     return (
         <>
             <Head title="Admin – Skills" />
-            {showModal && <SkillModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
+            {showModal && <SkillModal form={form} setForm={setForm} editing={editing} setEditing={setEditing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
 
             {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '22px', flexWrap: 'wrap' }}>

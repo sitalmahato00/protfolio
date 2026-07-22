@@ -25,7 +25,7 @@ Route::get('/site.webmanifest', function () {
     $manifest = [
         'name'             => $name . ' — Full Stack Developer',
         'short_name'       => $name,
-        'description'      => 'Full Stack Developer & UI/UX Designer. Laravel, React, PHP. Based in Nepal.',
+        'description'      => 'Full Stack Developer. Laravel, React, PHP. Based in Nepal.',
         'start_url'        => '/',
         'display'          => 'standalone',
         'background_color' => '#0f172a',
@@ -59,13 +59,24 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/project/{project}', function (Project $project) {
+Route::get('/projects/{project:slug}', function (Project $project) {
     $profile = Profile::first();
     return Inertia::render('Portfolio/ProjectShow', [
-        'project' => $project,
+        'project' => $project->load([]), // Eager load if needed
         'profile' => $profile,
+        'relatedProjects' => Project::where('id', '!=', $project->id)
+            ->when($project->category, fn($q, $cat) => $q->where('category', $cat))
+            ->orderBy('order')
+            ->limit(3)
+            ->get(),
     ]);
 })->name('project.show');
+
+// Legacy redirect: support old /project/{id} URLs
+Route::get('/project/{id}', function ($id) {
+    $project = Project::findOrFail($id);
+    return redirect()->route('project.show', ['project' => $project->slug], 301);
+});
 
 Route::get('/projects', function () {
     $profile = Profile::first();
@@ -83,12 +94,61 @@ Route::get('/certificates', function () {
     ]);
 })->name('certificates.index');
 
+Route::get('/certificate/{certificate}', function (Certificate $certificate) {
+    $profile = Profile::first();
+    return Inertia::render('Portfolio/CertificateShow', [
+        'certificate' => $certificate,
+        'profile'     => $profile,
+        'otherCertificates' => Certificate::where('is_active', true)
+            ->where('id', '!=', $certificate->id)
+            ->orderBy('order')
+            ->limit(3)
+            ->get(),
+    ]);
+})->name('certificate.show');
+
+// ─── Services (slug-based) ─────────────────────────────────────────────────
+Route::get('/services', function () {
+    $profile = Profile::first();
+    return Inertia::render('Portfolio/ServicesIndex', [
+        'services' => Service::orderBy('order')->get(),
+        'profile'  => $profile,
+    ]);
+})->name('services.index');
+
+Route::get('/services/{service:slug}', function (Service $service) {
+    $profile = Profile::first();
+    return Inertia::render('Portfolio/ServiceShow', [
+        'service'         => $service,
+        'profile'         => $profile,
+        'relatedServices' => Service::where('id', '!=', $service->id)
+            ->orderBy('order')
+            ->limit(3)
+            ->get(),
+    ]);
+})->name('service.show');
+
 Route::get('/sitemap.xml', function () {
-    $projects = Project::orderBy('order')->get();
+    $projects     = Project::orderBy('order')->get();
+    $services     = Service::orderBy('order')->get();
+    $certificates = Certificate::where('is_active', true)->orderBy('order')->get();
     $today = now()->toDateString();
-    return response()->view('sitemap', compact('projects', 'today'), 200)
+    return response()->view('sitemap', compact('projects', 'services', 'certificates', 'today'), 200)
         ->header('Content-Type', 'application/xml');
 })->name('sitemap');
+
+Route::get('/robots.txt', function () {
+    return response(
+        "User-agent: *\n" .
+        "Allow: /\n" .
+        "Disallow: /admin/\n" .
+        "Disallow: /dashboard\n" .
+        "Disallow: /profile\n" .
+        "Disallow: /api/\n\n" .
+        "Sitemap: https://sital.info.np/sitemap.xml\n",
+        200
+    )->header('Content-Type', 'text/plain');
+})->name('robots');
 
 Route::get('/privacy', function () {
     return Inertia::render('Privacy');

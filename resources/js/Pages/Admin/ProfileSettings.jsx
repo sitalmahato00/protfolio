@@ -163,9 +163,6 @@ export default function AdminProfileSettings() {
                             </div>
                         </div>
                         <input ref={avatarRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
-                        <Field label="Or enter URL / path">
-                            <input className="adm-input" value={form.avatar || ''} onChange={e => setF('avatar', e.target.value)} placeholder="images/avatar.jpg" />
-                        </Field>
                     </div>
 
                     {/* Resume */}

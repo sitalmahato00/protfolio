@@ -1,11 +1,48 @@
 import AdminLayout, { useTheme } from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import { useCachedData } from '@/hooks/useCachedData';
 
-function ServiceModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
+function ServiceModal({ form, setForm, editing, setEditing, onSave, onCancel, t, dark }) {
     const bg = dark ? '#1E293B' : '#FFFFFF';
+    const [uploading, setUploading] = useState(false);
+    const [uploadErr, setUploadErr] = useState('');
+    const imgRef = useRef(null);
+    const imgUrl = s => s ? (s.startsWith('http') ? s : '/' + s) : null;
+
+    async function handleIconUpload(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        setUploadErr('');
+        let serviceId = editing;
+        if (!serviceId) {
+            try {
+                const data = { ...form };
+                const res = await axios.post('/api/services', data);
+                serviceId = res.data.id;
+                setEditing(serviceId);
+                setForm(f => ({ ...f, icon: res.data.icon || f.icon }));
+            } catch (err) {
+                const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to create service';
+                setUploadErr(msg);
+                setUploading(false);
+                return;
+            }
+        }
+        const fd = new FormData();
+        fd.append('icon', file);
+        try {
+            const res = await axios.post(`/api/services/${serviceId}/icon`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            setForm(f => ({ ...f, icon: res.data.icon }));
+        } catch (err) {
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Upload failed';
+            setUploadErr(msg);
+        }
+        finally { setUploading(false); if (imgRef.current) imgRef.current.value = ''; }
+    }
+
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
             <div style={{ background: bg, border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : '#E5E7EB'}`, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '540px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
@@ -14,15 +51,29 @@ function ServiceModal({ form, setForm, editing, onSave, onCancel, t, dark }) {
                     <button onClick={onCancel} style={{ width: '30px', height: '30px', borderRadius: '8px', background: dark ? 'rgba(255,255,255,0.06)' : '#F3F4F6', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '10px' }}>
-                        <div>
-                            <label className="adm-label">Service Title *</label>
-                            <input className="adm-input" placeholder="e.g. Web Development" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                    <div>
+                        <label className="adm-label">Service Title *</label>
+                        <input className="adm-input" placeholder="e.g. Web Development" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                    </div>
+                    <div>
+                        <label className="adm-label">Service Icon</label>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
+                            {form.icon && (form.icon.startsWith('http') || form.icon.startsWith('/') || form.icon.startsWith('images/')) && (
+                                <img src={imgUrl(form.icon)} alt="Icon" style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '10px', border: `1px solid ${t.border}` }} />
+                            )}
+                            {form.icon && !form.icon.startsWith('http') && !form.icon.startsWith('/') && !form.icon.startsWith('images/') && (
+                                <div style={{ width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.08)' }}>
+                                    {form.icon}
+                                </div>
+                            )}
+                            <input ref={imgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleIconUpload} />
+                            <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '10px 16px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {uploading ? '⏳ Uploading…' : '📁 Upload Icon'}
+                            </button>
                         </div>
-                        <div>
-                            <label className="adm-label">Icon</label>
-                            <input className="adm-input" placeholder="🖥️" value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} style={{ textAlign: 'center', fontSize: '20px' }} />
-                        </div>
+                        {uploadErr && (
+                            <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '6px', padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px' }}>{uploadErr}</div>
+                        )}
                     </div>
                     <div>
                         <label className="adm-label">Description</label>
@@ -75,7 +126,7 @@ export default function AdminServices() {
     return (
         <>
             <Head title="Admin – Services" />
-            {showModal && <ServiceModal form={form} setForm={setForm} editing={editing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
+            {showModal && <ServiceModal form={form} setForm={setForm} editing={editing} setEditing={setEditing} onSave={save} onCancel={closeModal} t={t} dark={dark} />}
 
             {/* Toolbar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -106,8 +157,11 @@ export default function AdminServices() {
                         )}
 
                         {/* Icon */}
-                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: dark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', marginBottom: '14px' }}>
-                            {s.icon || '🛠️'}
+                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: dark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', marginBottom: '14px', overflow: 'hidden' }}>
+                            {s.icon ? (s.icon.startsWith('http') || s.icon.startsWith('/') || s.icon.startsWith('images/') 
+                                ? <img src={s.icon.startsWith('http') ? s.icon : '/' + s.icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                : s.icon
+                            ) : '🛠️'}
                         </div>
 
                         {/* Title & description */}

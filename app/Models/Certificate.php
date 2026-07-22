@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasSeoAttributes;
 
 class Certificate extends Model
 {
+    use HasSeoAttributes;
+
     protected $fillable = [
         'title',
         'issuer',
@@ -23,4 +26,16 @@ class Certificate extends Model
         'expiry_date' => 'date',
         'is_active' => 'boolean',
     ];
+
+    public function getUrlAttribute(): string
+    {
+        return 'https://sital.info.np/certificates/' . $this->id;
+    }
+
+    public function getOgImageAttribute(): ?string
+    {
+        if (!$this->image) return null;
+        if (str_starts_with($this->image, 'http')) return $this->image;
+        return 'https://sital.info.np/' . ltrim($this->image, '/');
+    }
 }

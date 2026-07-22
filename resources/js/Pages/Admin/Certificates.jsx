@@ -89,11 +89,10 @@ function CertificateModal({ form, setForm, editing, setEditing, onSave, onCancel
                     </div>
                     <div>
                         <label className="adm-label">Certificate Image</label>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                            <input className="adm-input" style={{ flex: 1 }} placeholder="images/certificate.png or https://..." value={form.image || ''} onChange={e => setForm({ ...form, image: e.target.value })} />
+                        <div style={{ marginBottom: '8px' }}>
                             <input ref={imgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
                             <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '9px 14px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                {uploading ? '⏳' : '📁'} Upload
+                                {uploading ? '⏳ Uploading…' : '📁 Upload Image'}
                             </button>
                         </div>
                         {uploadErr && (

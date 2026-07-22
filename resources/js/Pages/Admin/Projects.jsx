@@ -97,19 +97,12 @@ function ProjectModal({ form, setForm, editing, setEditing, onSave, onCancel, t,
                         <textarea className="adm-input" rows={3} placeholder="Describe what this project does..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                     </div>
                     <div>
-                        <label className="adm-label">Cover Image</label>
-                        <input className="adm-input" placeholder="images/project.png or https://..." value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} />
-                    </div>
-                    <div>
                         <label className="adm-label">Gallery Images</label>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                            <input className="adm-input" style={{ flex: 1 }} placeholder="images/photo1.png, images/photo2.png" value={(form.images || []).join(', ')} onChange={e => setForm({ ...form, images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} />
-                                <>
-                                    <input ref={imgRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImagesUpload} />
-                                    <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '9px 14px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {uploading ? '⏳' : '📁'} Upload
-                                    </button>
-                                </>
+                        <div style={{ marginBottom: '8px' }}>
+                            <input ref={imgRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImagesUpload} />
+                            <button onClick={() => imgRef.current?.click()} disabled={uploading} style={{ padding: '9px 14px', borderRadius: '10px', border: `1px solid ${t.border}`, background: dark ? 'rgba(255,255,255,0.06)' : '#F8FAFB', color: t.text, cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {uploading ? '⏳ Uploading…' : '📁 Upload Images'}
+                            </button>
                         </div>
                         {uploadErr && (
                             <div style={{ fontSize: '12px', color: '#EF4444', marginBottom: '6px', padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px' }}>{uploadErr}</div>

@@ -130,14 +130,31 @@ export default function CertificatesIndex({ certificates = [], profile = null })
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(340px,1fr))', gap: 24 }}>
                 {filtered.map((cert, i) => (
-                  <div key={cert.id} style={{ 
-                    background: 'rgba(5,8,22,0.8)', 
-                    border: '1px solid rgba(255,255,255,0.08)', 
-                    borderRadius: '20px', 
-                    overflow: 'hidden',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                    animation: `fadeIn 0.5s ease ${i * 0.05}s both`
-                  }}>
+                  <Link 
+                    key={cert.id} 
+                    href={`/certificate/${cert.id}`}
+                    style={{ 
+                      textDecoration: 'none',
+                      display: 'block',
+                      background: 'rgba(5,8,22,0.8)', 
+                      border: '1px solid rgba(255,255,255,0.08)', 
+                      borderRadius: '20px', 
+                      overflow: 'hidden',
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
+                      animation: `fadeIn 0.5s ease ${i * 0.05}s both`,
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={e => { 
+                      e.currentTarget.style.transform = 'translateY(-6px)'; 
+                      e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,58,237,0.25)';
+                      e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)';
+                    }}
+                    onMouseLeave={e => { 
+                      e.currentTarget.style.transform = 'translateY(0)'; 
+                      e.currentTarget.style.boxShadow = 'none';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                    }}
+                  >
                     {cert.image && (
                       <div style={{ height: 200, overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
                         <img 
@@ -151,17 +168,15 @@ export default function CertificatesIndex({ certificates = [], profile = null })
                             display: 'block',
                             transition: 'transform 0.3s ease'
                           }}
-                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                         />
                       </div>
                     )}
                     <div style={{ padding: 24 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                        <div style={{ width: 52, height: 52, borderRadius: '12px', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>
+                        <div style={{ width: 52, height: 52, borderRadius: '12px', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', flexShrink: 0 }}>
                           🎓
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: '1.1rem', color: '#fff', margin: 0, lineHeight: 1.3 }}>{cert.title}</h3>
                           <div style={{ fontSize: '0.9rem', color: '#a78bfa', fontWeight: 600, marginTop: 4 }}>{cert.issuer}</div>
                         </div>
@@ -179,10 +194,8 @@ export default function CertificatesIndex({ certificates = [], profile = null })
                           {cert.expiry_date && ` — Expires: ${new Date(cert.expiry_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`}
                         </span>
                         {cert.credential_url && (
-                          <a 
-                            href={cert.credential_url} 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <span
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(cert.credential_url, '_blank'); }}
                             style={{ 
                               display: 'inline-flex', 
                               alignItems: 'center', 
@@ -195,17 +208,18 @@ export default function CertificatesIndex({ certificates = [], profile = null })
                               borderRadius: '10px',
                               background: 'rgba(167,139,250,0.1)',
                               border: '1px solid rgba(167,139,250,0.2)',
-                              transition: 'all 0.2s'
+                              transition: 'all 0.2s',
+                              cursor: 'pointer'
                             }}
                             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(167,139,250,0.2)'; }}
                             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(167,139,250,0.1)'; }}
                           >
                             View Credential <IconExternal />
-                          </a>
+                          </span>
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
